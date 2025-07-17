@@ -120,7 +120,8 @@
     "esModuleInterop": true,
     "moduleDetection": "force",
     "strict": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
   },
   "include": ["src"]
 }

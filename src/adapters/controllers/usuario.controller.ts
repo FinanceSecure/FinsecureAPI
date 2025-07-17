@@ -56,10 +56,13 @@ export async function loginUsuario(req: Request, res: Response) {
 export async function alterarEmail(req: Request, res: Response) {
   try {
     const { emailAntigo, emailNovo } = req.body;
+
     const usuario = await prisma.usuario.findUnique({ where: { email: emailAntigo } });
     if (!usuario) { return res.status(404).json({ error: "Usuário não encontrado" }); }
+
     const emailExistente = await prisma.usuario.findUnique({ where: { email: emailNovo } });
     if (emailExistente) { return res.status(409).json({ error: "E-mail já cadastrado" }); }
+
     await prisma.usuario.update({
       where: { email: emailAntigo },
       data: { email: emailNovo },
@@ -87,6 +90,23 @@ export async function alterarSenha(req: Request, res: Response) {
     });
 
     res.json({ message: "Senha alterada com sucesso" });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno" });
+  }
+}
+
+export async function removerUsuario(req: Request, res: Response) {
+  try {
+    const usuarioId = req.user?.usuarioId;
+    if (!usuarioId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+
+    await prisma.saldo.deleteMany({ where: { usuario_id: usuarioId } });
+    await prisma.transacao.deleteMany({ where: { usuario_id: usuarioId } });
+    await prisma.usuario.delete({ where: { id: usuarioId } });
+
+    res.json({ message: "Usuário removido com sucesso" });
   } catch (error) {
     res.status(500).json({ error: "Erro interno" });
   }

@@ -33,15 +33,18 @@ Contém o schema do PostgreSQL e as migrations geradas.
 Ponto de entrada de aplicação
 ___
 ├📁 node_modules/ ~> Biblioteca para dependências
-├📁 prisma/ ~> ORM Prisma com PostgreSQL
+├📁 prisma/ ~> Configurações e migrations do Prisma
 ├📁 src/
-│├── 📁 domain/ ~> Destinado a entidades, objetos valor, serviços do domínio
-│├── 📁 application/ ~> Destinado a casos de uso, lógica que coordena operações do domínio
-│├── 📁 adapters/ ~> Feito para implementações concretas
-││   ├── 📁 controllers/ ~> Camada de entradas HTTP
-││   ├── 📁 database/ ~> Destinado a adaptadores banco de dados
-││   ├── 📁 routes/ ~> Destinado a definições de rotas HTTP
-│├── 📁 ports/ ~> Feito para interfaces abstratas
-││   ├── 📁 repositories/ ~> Destinado a interfaces para persistência
-││   ├── 📁 services/ ~> Destinado a interfaces para comunicação externa
-│├── index.ts ~> entrada da aplicação
+  ├── 📁 domain/ ~> Entidades de negócio pura
+  ├── 📁 application/ ~> Casos de uso, lógica que coordena operações do domínio
+  ├── 📁 adapters/ ~> Camada referente a adaptação externa
+  │   ├── 📁 controllers/ ~> Entrada da aplicação
+  │   ├── 📁 database/ ~> Implementação do repositório com Prisma
+  │   ├── 📁 routes/ ~> Rotas HTTP
+  ├── 📁 ports/ ~> Feito para interfaces abstratas
+  │   ├── 📁 repositories/ ~> Destinado a interfaces para persistência
+  │   ├── 📁 services/ ~> Destinado a interfaces para comunicação externa
+  │
+  ├── 📁 middlewares/ ~> Middleware de autenticação JWT
+  ├── 📁 types/ ~> Tipos globais
+  ├── index.ts ~> entrada da aplicação

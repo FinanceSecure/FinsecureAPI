@@ -44,18 +44,3 @@ npx prisma studio
 
 Desta forma rodará em:
 ~> <http://localhost:5555>
-
----
-├📁 node_modules/
-├📁 prisma/
-├📁 src/
-│├── 📁 domain/ -> `Camada de entidades, objetos de valor e lógica do negócio`
-│├── 📁 application/ -> `Para casos de uso que definem as regras`
-│├── 📁 adapters/ -> `Para HTTP e banco`
-││   ├── 📁 controllers/
-││   ├── 📁 database/
-││   ├── 📁 routes/
-│├── 📁 ports/ -> `Interfaces abstaras`
-││   ├── 📁 repositories/
-││   ├── 📁 services/
-│├── index.ts

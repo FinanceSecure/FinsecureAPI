@@ -1,13 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
-dotenv.config();
+import serverRoutes from './adapters/routes/index.js';
 
-import usuarioRoutes from './adapters/routes/usuario.routes.js';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/usuarios', serverRoutes.usuario_routes);
+app.use('/api/transacoes', serverRoutes.transacao_routes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
