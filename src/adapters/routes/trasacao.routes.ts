@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { adicionarTransacao } from '../controllers/transacao.controller';
-import { autenticarTokn } from '../../middlewares/authMiddleware';
+import { criarTransacao, alterarTransacao, cancelarTransacao } from '../controllers/transacao.controller';
+import { validarTransacaoMiddleware } from '../middlewares/validarTransacao.middleware';
+import { autenticarTokn } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.post("/adicionar", autenticarTokn, adicionarTransacao);
+router.post("/adicionar", autenticarTokn, validarTransacaoMiddleware, criarTransacao);
+router.put('/alterar/:id', autenticarTokn, validarTransacaoMiddleware, alterarTransacao);
+router.delete('/cancelar-transacao/:id', autenticarTokn, cancelarTransacao);
 
-export default router;
+export { router as transacao_routes };
