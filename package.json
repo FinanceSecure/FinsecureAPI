@@ -2,12 +2,12 @@
   "name": "finsecure-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "node --import tsx --watch src/index.ts",
+    "start": "node dist/server.js",
+    "dev": "node --import tsx --watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -29,6 +29,7 @@
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "pg": "^8.16.3",
     "pg-pool": "^3.10.1",
     "prisma": "^6.12.0"

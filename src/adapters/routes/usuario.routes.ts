@@ -6,7 +6,7 @@ import {
     alterarSenha,
     removerUsuario
 } from '../controllers/usuario.controller.js';
-import { autenticarTokn } from '../../middlewares/authMiddleware.js';
+import { autenticarTokn } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -17,4 +17,4 @@ router.post('/alterar-senha', alterarSenha);
 
 router.post('/apagar-conta', autenticarTokn, removerUsuario);
 
-export default router;
+export { router as usuario_routes };

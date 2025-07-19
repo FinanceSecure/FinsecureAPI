@@ -22,11 +22,12 @@ model Usuario {
 
 model Transacao {
   id          Int       @id @default(autoincrement())
-  usuario_id  Int
-  tipo        String
+  descricao   String?
   valor       Float
   data        DateTime  @default(now())
-  descricao   String?
+  tipo        String
+  status      String    @default("pendente")
+  usuario_id  Int
 
   usuario     Usuario   @relation(fields: [usuario_id], references: [id])
 
@@ -35,9 +36,9 @@ model Transacao {
 
 model Saldo {
   id          Int       @id @default(autoincrement())
-  usuario_id  Int
   valor       Float     @default(0.0)
   data        DateTime  @default(now())
+  usuario_id  Int
 
   usuario     Usuario   @relation(fields: [usuario_id], references: [id])
 
