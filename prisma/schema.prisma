@@ -26,6 +26,7 @@ model Transacao {
   valor       Float
   data        DateTime  @default(now())
   tipo        String
+  status      String    @default("pendente")
   usuario_id  Int
 
   usuario     Usuario   @relation(fields: [usuario_id], references: [id])

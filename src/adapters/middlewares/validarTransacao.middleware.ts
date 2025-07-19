@@ -33,19 +33,23 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
     }
 
     if (tipo === 'entrada' && valor <= 0) {
-      throw new HttpError("O valor deve ser superior a 0", 422)
+      throw new HttpError("O valor da entrada deve ser superior a 0", 422)
     }
 
     if (tipo === 'saida' && valor >= 0) {
-      throw new HttpError("O valor deve ser inferior a 0", 422)
+      throw new HttpError("O valor da saida deve ser inferior a 0", 422)
     }
+
+    const agora = new Date();
+    const status = parsedDate > agora ? "pendente" : "efetivada";
 
     req.body.validated = {
       descricao,
       valor,
       data: parsedDate,
       tipo,
-      usuarioId
+      usuarioId,
+      status
     };
 
     next();

@@ -1,15 +1,20 @@
 import { Request, Response } from "express";
 import { atualizarSaldoUsuario } from "./saldo.service";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../db";
 
 export async function adicionarTransacao(req: Request, res: Response) {
   try {
-    const { descricao, valor, data, tipo, usuarioId } = req.body.validated;
+    const { descricao, valor, data, tipo, status, usuarioId } = req.body.validated;
 
     const transacao = await prisma.transacao.create({
-      data: { descricao, valor, data, tipo, usuario_id: usuarioId }
+      data: {
+        descricao,
+        valor,
+        data,
+        tipo,
+        status,
+        usuario_id: usuarioId
+      }
     });
 
     const saldo = await atualizarSaldoUsuario(usuarioId)
@@ -75,5 +80,24 @@ export async function excluirTransacao(req: Request, res: Response) {
   }
   catch (err) {
     res.status(500).json({ message: "Falha ao cancelar transacao" });
+  }
+}
+
+export async function liberarTransacoesPendentes() {
+  const hoje = new Date();
+
+  const pendentes = await prisma.transacao.findMany({
+    where: {
+      status: "pendente",
+      data: { lte: hoje }
+    }
+  });
+
+  for (const transacao of pendentes) {
+    await prisma.transacao.update({
+      where: { id: transacao.id },
+      data: { status: "efetivada" }
+    });
+    await atualizarSaldoUsuario(transacao.usuario_id);
   }
 }

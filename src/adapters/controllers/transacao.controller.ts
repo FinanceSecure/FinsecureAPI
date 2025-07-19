@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { adicionarTransacao, atualizarTransacao, excluirTransacao } from '../../ports/services/transacao.service';
-
-const prisma = new PrismaClient();
+import {
+  adicionarTransacao,
+  atualizarTransacao,
+  excluirTransacao
+} from '../../application/services/transacao.service';
 
 export async function criarTransacao(req: Request, res: Response) {
   return adicionarTransacao(req, res)
