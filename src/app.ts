@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import {
   usuario_routes,
   transacao_routes,
-  saldo_routes
+  saldo_routes,
+  investimento_routes
 } from './adapters/routes';
 
 dotenv.config();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use('/api/usuarios', usuario_routes);
 app.use('/api/transacoes', transacao_routes);
-app.use('/api/saldo', saldo_routes)
+app.use('/api/saldo', saldo_routes);
+app.use('/api/investimento', investimento_routes)
 
 export default app;

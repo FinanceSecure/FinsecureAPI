@@ -7,46 +7,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id                Int         @id @default(autoincrement())
-  email             String      @unique
-  senha             String
-  primeiro_nome     String
-  ultimo_nome       String
-  criado_data       DateTime    @default(now())
-  atualizado_data   DateTime    @updatedAt
+enum TipoTransacao {
+  ENTRADA
+  SAIDA
+  INVESTIMENTO
+}
 
-  transacoes        Transacao[]
-  saldo             Saldo[]
+enum StatusTranscao {
+  PENDENTE
+  EFETIVADA
+}
+
+model Usuario {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  senha      String
+  nome       String
+  sobrenome  String
+  criado     DateTime  @default(now())
+  atualizado DateTime? @updatedAt
+
+  transacoes   Transacao[]
+  saldo        Saldo?         @relation("UsuarioSaldo")
+  Investimento Investimento[]
 }
 
 model Transacao {
-  id          Int       @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   descricao   String?
   valor       Float
-  data        DateTime  @default(now())
-  tipo        String
-  status      String    @default("pendente")
-  usuario_id  Int
+  data        DateTime       @default(now())
+  tipo        TipoTransacao
+  status      StatusTranscao @default(PENDENTE)
+  usuarioId   Int
+  categoriaId Int?
 
-  usuario     Usuario   @relation(fields: [usuario_id], references: [id])
-
-  @@index([usuario_id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
 }
 
 model Saldo {
-  id          Int       @id @default(autoincrement())
-  valor       Float     @default(0.0)
-  data        DateTime  @default(now())
-  usuario_id  Int
+  id         Int       @id @default(autoincrement())
+  valor      Float     @default(0.0)
+  data       DateTime  @default(now())
+  atualizado DateTime? @updatedAt
 
-  usuario     Usuario   @relation(fields: [usuario_id], references: [id])
-
-  @@index([usuario_id])
+  usuario   Usuario @relation("UsuarioSaldo", fields: [usuarioId], references: [id])
+  usuarioId Int     @unique
 }
 
-model Categoria {
-  id          Int       @id @default(autoincrement())
-  nome        String    @unique
-  descricao   String?
+model Investimento {
+  id                  Int      @id @default(autoincrement())
+  usuarioId           Int
+  tipoInvestimentoId  Int
+  valorInvestido      Float
+  dataCompra          DateTime
+  rendimentoAcumulado Float
+
+  usuario          Usuario          @relation(fields: [usuarioId], references: [id])
+  tipoInvestimento TipoInvestimento @relation(fields: [tipoInvestimentoId], references: [id])
+}
+
+model TipoInvestimento {
+  id              Int            @id @default(autoincrement())
+  nome            String
+  tipo            String
+  valorPercentual Float
+  investimentos   Investimento[]
 }

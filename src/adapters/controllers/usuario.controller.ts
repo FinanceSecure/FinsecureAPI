@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function cadastrarUsuario(req: Request, res: Response) {
   try {
-    const { email, senha, primeiro_nome, ultimo_nome } = req.body;
+    const { email, senha, nome, sobrenome } = req.body;
 
     const existe = await prisma.usuario.findUnique({ where: { email } });
     if (existe) {
@@ -18,8 +18,10 @@ export async function cadastrarUsuario(req: Request, res: Response) {
 
     const usuario = await prisma.usuario.create({
       data: {
-        email, senha: senhaHash,
-        primeiro_nome, ultimo_nome,
+        email,
+        senha: senhaHash,
+        nome,
+        sobrenome
       },
     });
     res.status(201).json({ id: usuario.id, email: usuario.email });
@@ -41,8 +43,8 @@ export async function loginUsuario(req: Request, res: Response) {
     const token = jwt.sign(
       {
         usuarioId: usuario.id,
-        primeiro_nome: usuario.primeiro_nome,
-        ultimo_nome: usuario.ultimo_nome,
+        nome: usuario.nome,
+        sobrenome: usuario.sobrenome,
       },
       process.env.JWT_SECRET || "segredo",
       { expiresIn: "2h" }
@@ -102,8 +104,8 @@ export async function removerUsuario(req: Request, res: Response) {
       return res.status(401).json({ error: "Usuário não autenticado" });
     }
 
-    await prisma.saldo.deleteMany({ where: { usuario_id: usuarioId } });
-    await prisma.transacao.deleteMany({ where: { usuario_id: usuarioId } });
+    await prisma.saldo.deleteMany({ where: { usuarioId } });
+    await prisma.transacao.deleteMany({ where: { usuarioId } });
     await prisma.usuario.delete({ where: { id: usuarioId } });
 
     res.json({ message: "Usuário removido com sucesso" });

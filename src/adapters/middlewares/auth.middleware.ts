@@ -25,7 +25,6 @@ export function autenticarTokn(req: Request, res: Response, next: NextFunction) 
 
     next();
   } catch (error) {
-    console.error("Erro ao verificar token:", error);
     res.status(403).json({ error: "Token inválido" });
   }
 }
