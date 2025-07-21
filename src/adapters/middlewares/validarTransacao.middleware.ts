@@ -6,7 +6,7 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
     const { descricao, valor, data, tipo } = req.body;
     const usuarioId = req.user?.usuarioId;
     const parsedDate = new Date(data);
-    const tiposValidos = ["entrada", "saida"]
+    const tiposValidos = ["ENTRADA", "SAIDA"]
 
     if (!usuarioId) {
       throw new HttpError("Usuário não autenticado", 401);
@@ -25,23 +25,23 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
     }
 
     if (!tiposValidos.includes(tipo)) {
-      throw new HttpError("Tipo deve ser informado como 'entrada' ou 'saida'");
+      throw new HttpError("Tipo deve ser informado como 'ENTRADA' ou 'SAIDA'");
     }
 
     if (descricao.length > 255) {
       throw new HttpError("Descrição mito longa inforamda, o máximo é de 255 caracteres", 422)
     }
 
-    if (tipo === 'entrada' && valor <= 0) {
-      throw new HttpError("O valor da entrada deve ser superior a 0", 422)
+    if (tipo === 'ENTRADA' && valor <= 0) {
+      throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422)
     }
 
     if (tipo === 'saida' && valor >= 0) {
-      throw new HttpError("O valor da saida deve ser inferior a 0", 422)
+      throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422)
     }
 
     const agora = new Date();
-    const status = parsedDate > agora ? "pendente" : "efetivada";
+    const status = parsedDate > agora ? "PENDENTE" : "EFETIVADA";
 
     req.body.validated = {
       descricao,

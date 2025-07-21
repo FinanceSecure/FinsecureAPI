@@ -4,14 +4,14 @@ export async function atualizarSaldoUsuario(usuarioId: number): Promise<number> 
   const saldoTotal = await prisma.transacao.aggregate({
     _sum: { valor: true },
     where: {
-      usuario_id: usuarioId,
-      status: "efetivada"
+      usuarioId: usuarioId,
+      status: "EFETIVADA"
     }
   });
 
   const saldoAtualizado = saldoTotal._sum.valor || 0;
   const saldoExistente = await prisma.saldo.findFirst({
-    where: { usuario_id: usuarioId }
+    where: { usuarioId }
   })
 
   saldoExistente
@@ -21,7 +21,7 @@ export async function atualizarSaldoUsuario(usuarioId: number): Promise<number> 
     })
     : await prisma.saldo.create({
       data: {
-        usuario_id: usuarioId,
+        usuarioId,
         valor: saldoAtualizado
       }
     });
@@ -33,7 +33,7 @@ export async function visualizarSaldo(usuarioId: number, saldoId: number) {
   const saldo = await prisma.saldo.findFirst({
     where: {
       id: saldoId,
-      usuario_id: usuarioId
+      usuarioId
     }
   });
 

@@ -4,7 +4,14 @@ import prisma from "../../db";
 
 export async function adicionarTransacao(req: Request, res: Response) {
   try {
-    const { descricao, valor, data, tipo, status, usuarioId } = req.body.validated;
+    const {
+      descricao,
+      valor,
+      data,
+      tipo,
+      status,
+      usuarioId
+    } = req.body.validated;
 
     const transacao = await prisma.transacao.create({
       data: {
@@ -13,7 +20,7 @@ export async function adicionarTransacao(req: Request, res: Response) {
         data,
         tipo,
         status,
-        usuario_id: usuarioId
+        usuarioId
       }
     });
 
@@ -30,23 +37,24 @@ export async function atualizarTransacao(req: Request, res: Response) {
     const { descricao, valor, data, tipo, usuarioId } = req.body.validated;
     const id = Number(req.params.id);
 
-    if (!id || isNaN(id)) {
+    if (!id || isNaN(id))
       return res.status(400).json({ error: "ID da transação inválido" })
-    }
 
     const transacaoAntiga = await prisma.transacao.findFirst({
-      where: {
-        id, usuario_id: usuarioId
-      }
+      where: { id, usuarioId }
     });
 
-    if (!transacaoAntiga) {
+    if (!transacaoAntiga)
       return res.status(401).json({ error: "Transação não encontrada ou não pertence a este usuário" })
-    }
 
     const transacaoAtual = await prisma.transacao.update({
       where: { id },
-      data: { descricao, valor, data, tipo }
+      data: {
+        descricao,
+        valor,
+        data,
+        tipo
+      }
     });
 
     return res.status(200).json(transacaoAtual)
@@ -60,20 +68,17 @@ export async function excluirTransacao(req: Request, res: Response) {
     const id = Number(req.params.id);
     const usuarioId = req.user?.usuarioId;
     const transacao = await prisma.transacao.findFirst({
-      where: { id, usuario_id: usuarioId }
+      where: { id, usuarioId }
     });
 
-    if (!id || isNaN(id)) {
+    if (!id || isNaN(id))
       return res.status(400).json({ error: "Id da transação inválido" })
-    }
 
-    if (!usuarioId) {
+    if (!usuarioId)
       return res.status(401).json({ error: "Usuário não authenticado" })
-    }
 
-    if (!transacao) {
+    if (!transacao)
       return res.status(404).json({ error: "Transação não encontrada ou não pertece ao usuário" })
-    }
 
     await prisma.transacao.delete({ where: { id } });
     return res.status(200).json({ message: "Transacao cancelada" });
@@ -88,7 +93,7 @@ export async function liberarTransacoesPendentes() {
 
   const pendentes = await prisma.transacao.findMany({
     where: {
-      status: "pendente",
+      status: "PENDENTE",
       data: { lte: hoje }
     }
   });
@@ -96,8 +101,8 @@ export async function liberarTransacoesPendentes() {
   for (const transacao of pendentes) {
     await prisma.transacao.update({
       where: { id: transacao.id },
-      data: { status: "efetivada" }
+      data: { status: "EFETIVADA" }
     });
-    await atualizarSaldoUsuario(transacao.usuario_id);
+    await atualizarSaldoUsuario(transacao.usuarioId);
   }
 }

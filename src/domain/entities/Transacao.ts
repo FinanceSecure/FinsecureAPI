@@ -1,5 +1,5 @@
-type TipoTransacao = "entrada" | "saida" | "investimento";
-type StatusTransacao = "pendente" | "efetivada";
+type TipoTransacao = "ENTRADA" | "SAIDA" | "INVESTIMENTO";
+type StatusTransacao = "PENDENTE" | "EFETIVADA";
 
 export class Transacao {
   constructor(
@@ -13,13 +13,13 @@ export class Transacao {
   ) { }
 
   isAtiva(): boolean {
-    return this.status === "efetivada"
+    return this.status === "EFETIVADA"
   }
 
   validarValor(): boolean {
-    if (this.tipo === "entrada" && this.valor <= 0) return false;
-    if (this.tipo === "saida" && this.valor >= 0) return false;
-    if (this.tipo === "investimento" && this.valor <= 0) return false;
+    if (this.tipo === "ENTRADA" && this.valor <= 0) return false;
+    if (this.tipo === "SAIDA" && this.valor >= 0) return false;
+    if (this.tipo === "INVESTIMENTO" && this.valor <= 0) return false;
     return true;
   }
 }
