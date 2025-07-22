@@ -36,7 +36,7 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
       throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422)
     }
 
-    if (tipo === 'saida' && valor >= 0) {
+    if (tipo === 'SAIDA' && valor >= 0) {
       throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422)
     }
 

@@ -6,24 +6,26 @@ import {
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
   try {
-    const usuarioId = req.user?.usuarioId;
     const { nome, tipo, valorPercentual } = req.body;
 
     if (!nome)
-      return res.status(404).json({ message: "Nome nao informado" })
+      return res.status(404).json({ message: "Nome nao informado" });
 
     if (!tipo)
-      return res.status(404).json({ message: "Tipo nao informado" })
+      return res.status(404).json({ message: "Tipo nao informado" });
 
     if (!valorPercentual)
-      return res.status(404).json({ message: "Valor percentual nao informado" })
+      return res.status(404).json({ message: "Valor percentual nao informado" });
 
-    if (!usuarioId)
-      throw new Error("Usuário não autenticado");
-
-    await acrescentartipoInvestimento(req, res);
+    const tipoAdicionado = await acrescentartipoInvestimento(
+      nome,
+      tipo,
+      valorPercentual
+    )
+    res.status(201).json(tipoAdicionado);
   } catch (err) {
-    throw new Error("Falha no servidor")
+    console.error(err);
+    res.status(500).json({ message: "Falha no servidor" });
   }
 }
 

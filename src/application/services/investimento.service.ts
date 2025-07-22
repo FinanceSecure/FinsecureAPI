@@ -1,43 +1,51 @@
-import { Request, Response } from "express"
 import prisma from "../../db";
 
-export async function adicionarInvestimento(req: Request, res: Response) {
-  try {
-    const {
+export async function adicionarInvestimento(
+  usuarioId: number,
+  tipoInvestimentoId: number,
+  valorInvestido: number,
+  dataCompra: Date
+) {
+
+  if (!usuarioId)
+    throw new Error("Usuário não autenticado");
+
+  if (!tipoInvestimentoId)
+    throw new Error("Tipo de investimento não informado.");
+
+  if (!valorInvestido)
+    throw new Error("Valor investido não informado.");
+
+  if (!dataCompra)
+    throw new Error("Data de compra não informada.");
+
+  const tipo = await prisma.tipoInvestimento.findUnique({
+    where: { id: tipoInvestimentoId }
+  })
+
+  if (!tipo)
+    throw new Error("Tipo de investimento não encontrado.");
+
+  const investimento = await prisma.investimento.create({
+    data: {
+      usuarioId,
+      tipoInvestimentoId,
       valorInvestido,
       dataCompra,
-      usuarioId = req.user?.usuarioId,
-      tipoInvestimentoId,
-    } = req.body;
-
-    const tipoInvestimento = await prisma.tipoInvestimento.findUnique({
-      where: { id: tipoInvestimentoId }
-    })
-
-    if (!tipoInvestimento) {
-      return res.status(400).json({ message: "Tipo de investimento não encontrado" })
+      rendimentoAcumulado: 0
+    },
+    include: {
+      tipoInvestimento: true
     }
+  });
 
-    const investimento = await prisma.investimento.create({
-      data: {
-        valorInvestido,
-        dataCompra: new Date(dataCompra),
-        tipoInvestimentoId,
-        usuarioId,
-        rendimentoAcumulado: 0,
-      },
-      include: {
-        tipoInvestimento: true,
-      }
-    });
-
-    res.status(201).json(investimento)
-  } catch (err) {
-    res.status(500).json({ message: "Falha no servidor" })
-  }
+  return investimento;
 }
 
-export async function encontrarInvestimento(usuarioId: number, investimentoId: number) {
+export async function encontrarInvestimento(
+  usuarioId: number,
+  investimentoId: number
+) {
   const investimento = await prisma.investimento.findFirst({
     where: {
       id: investimentoId,
@@ -46,7 +54,7 @@ export async function encontrarInvestimento(usuarioId: number, investimentoId: n
   });
 
   if (!investimento)
-    throw new Error("Investimento não encontrado!")
+    throw new Error("Investimento não encontrado!");
 
   return investimento;
 }
@@ -57,7 +65,7 @@ export async function encontrarInvestimentos(usuarioId: number) {
   });
 
   if (!investimentos)
-    throw new Error("Não foi possível encontrar investimentos!")
+    throw new Error("Não foi possível encontrar investimentos!");
 
   return investimentos
 }

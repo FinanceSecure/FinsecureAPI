@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { autenticarTokn } from "../middlewares/auth.middleware";
+import { autenticarToken } from "../middlewares/auth.middleware";
 import { verificarSaldo } from "../controllers/saldo.controller";
 
 const router = Router();
 
-router.get('/verificar/:id', autenticarTokn, verificarSaldo)
+router.get('/verificar/:id', autenticarToken, verificarSaldo)
 
 export { router as saldo_routes };

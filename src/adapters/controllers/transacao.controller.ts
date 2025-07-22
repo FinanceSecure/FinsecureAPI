@@ -6,13 +6,64 @@ import {
 } from '../../application/services/transacao.service';
 
 export async function criarTransacao(req: Request, res: Response) {
-  return adicionarTransacao(req, res)
+  try {
+    const dados = req.body.validated;
+    const resultado = await adicionarTransacao(
+      dados.usuarioId,
+      dados.descricao,
+      dados.valor,
+      dados.data,
+      dados.tipo,
+    );
+    res.status(201).json(resultado)
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Falha no servidor" });
+  }
 }
 
 export async function alterarTransacao(req: Request, res: Response) {
-  return atualizarTransacao(req, res);
+  try {
+    const id = Number(req.params.id);
+    const usuarioId = req.user?.usuarioId;
+
+    if (!id || isNaN(id))
+      return res.status(400).json({ message: "Transação não encontrada" });
+
+    if (!usuarioId)
+      return res.status(401).json({ message: "Usuário não autenticado" });
+
+    const { descricao, valor, data, tipo } = req.body;
+
+    const transacaoAtualizada = await atualizarTransacao(
+      id, usuarioId, descricao, valor, new Date(data), tipo
+    );
+
+    return res.status(200).json(transacaoAtualizada);
+  }
+  catch (err: any) {
+    console.error(err);
+    return res.status(400).json({ message: err.message || "Erro ao atualizar transação." });
+  }
 }
 
 export async function cancelarTransacao(req: Request, res: Response) {
-  return excluirTransacao(req, res);
+  try {
+    const id = Number(req.params.id);
+    const usuarioId = req.user?.usuarioId;
+
+    if (!id || isNaN(id))
+      return res.status(400).json({ message: "Transação não encontrada" });
+
+    if (!usuarioId)
+      return res.status(401).json({ message: "Usuário não autenticado." });
+
+    const transacaoExcluida = await excluirTransacao(id, usuarioId)
+
+    return res.status(200).json(transacaoExcluida);
+  } catch (err: any) {
+    console.error(err);
+    return res.status(400).json({ message: err.message || "Erro ao remover transação." });
+  }
 }

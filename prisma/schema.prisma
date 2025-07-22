@@ -40,7 +40,6 @@ model Transacao {
   tipo        TipoTransacao
   status      StatusTranscao @default(PENDENTE)
   usuarioId   Int
-  categoriaId Int?
 
   usuario Usuario @relation(fields: [usuarioId], references: [id])
 }
