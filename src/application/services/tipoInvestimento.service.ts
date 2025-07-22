@@ -1,13 +1,10 @@
-import { Request, Response } from "express";
 import prisma from "../../db";
 
-export async function acrescentartipoInvestimento(req: Request, res: Response) {
-
-  const {
-    nome,
-    tipo,
-    valorPercentual
-  } = req.body;
+export async function acrescentartipoInvestimento(
+  nome: string,
+  tipo: string,
+  valorPercentual: number
+) {
 
   const tipoInvestimento = await prisma.tipoInvestimento.create({
     data: {
@@ -17,13 +14,13 @@ export async function acrescentartipoInvestimento(req: Request, res: Response) {
     }
   });
 
-  res.status(201).json(tipoInvestimento);
+  return tipoInvestimento;
 }
 
 export async function visualizarTipoInvestimento(id: number) {
   const tipoInvestimento = await prisma.tipoInvestimento.findFirst({
     where: { id }
-  })
+  });
 
-  return tipoInvestimento
+  return tipoInvestimento;
 }

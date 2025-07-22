@@ -9,12 +9,21 @@ import {
 export async function investir(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
+    const { tipoInvestimentoId, valorInvestido, dataCompra } = req.body;
 
-    if (!usuarioId) throw new Error("Usuário não autenticado");
+    if (!usuarioId)
+      return res.status(401).json({ message: "Uusario não autenticado." });
 
-    await adicionarInvestimento(req, res)
-  } catch (err) {
-    res.status(500).json({ message: "Falha no servidor" });
+    const investimento = await adicionarInvestimento(
+      usuarioId,
+      tipoInvestimentoId,
+      valorInvestido,
+      new Date(dataCompra)
+    )
+    res.status(201).json(investimento)
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: err.message || "Erro no servidor" });
   }
 }
 
@@ -24,7 +33,7 @@ export async function buscarInvestimento(req: Request, res: Response) {
     const investimentoId = Number(req.params.id);
 
     if (!usuarioId)
-      return res.status(404).json({ message: "usuario nao encontrado" })
+      return res.status(404).json({ message: "usuario nao encontrado" });
 
     const saldo = await encontrarInvestimento(usuarioId, investimentoId);
 
@@ -55,10 +64,10 @@ export async function resgatar(req: Request, res: Response) {
     const usuarioId = req.user?.usuarioId;
 
     if (!usuarioId)
-      return res.status(401).json({ message: "Uusuário não autenticado." })
+      return res.status(401).json({ message: "Uusuário não autenticado." });
 
     if (!investimentoId || isNaN(investimentoId))
-      return res.status(400).json({ message: "Uusuário não autenticado." })
+      return res.status(400).json({ message: "Uusuário não autenticado." });
 
     const resultado = await resgatarInvestimento(usuarioId, investimentoId);
 

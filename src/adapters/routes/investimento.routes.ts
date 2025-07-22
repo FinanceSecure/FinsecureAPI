@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { autenticarTokn } from "../middlewares/auth.middleware";
+import { autenticarToken } from "../middlewares/auth.middleware";
 import {
   buscarInvestimento,
   buscarInvestimentos,
@@ -13,11 +13,11 @@ import {
 
 const router = Router();
 
-router.post("/adicionar", autenticarTokn, investir);
-router.get("/buscar/:id", autenticarTokn, buscarInvestimento)
-router.get("/buscar/", autenticarTokn, buscarInvestimentos)
-router.delete("/resgatar/:id", autenticarTokn, resgatar)
-router.post("/tipo/adicionar", autenticarTokn, adicionarTipoInvestimento)
-router.get("/tipo/:id", autenticarTokn, verificarTipoInvestimento)
+router.post("/adicionar", autenticarToken, investir);
+router.get("/buscar/:id", autenticarToken, buscarInvestimento)
+router.get("/buscar/", autenticarToken, buscarInvestimentos)
+router.delete("/resgatar/:id", autenticarToken, resgatar)
+router.post("/tipo/adicionar", autenticarToken, adicionarTipoInvestimento)
+router.get("/tipo/:id", autenticarToken, verificarTipoInvestimento)
 
 export { router as investimento_routes };
