@@ -33,13 +33,13 @@ model Usuario {
 }
 
 model Transacao {
-  id          Int            @id @default(autoincrement())
-  descricao   String?
-  valor       Float
-  data        DateTime       @default(now())
-  tipo        TipoTransacao
-  status      StatusTranscao @default(PENDENTE)
-  usuarioId   Int
+  id        Int            @id @default(autoincrement())
+  descricao String?
+  valor     Float
+  data      DateTime       @default(now())
+  tipo      TipoTransacao
+  status    StatusTranscao @default(PENDENTE)
+  usuarioId Int
 
   usuario Usuario @relation(fields: [usuarioId], references: [id])
 }

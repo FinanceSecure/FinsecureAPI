@@ -7,17 +7,17 @@ export class UsuarioPrismaRepository implements IUsuarioRepository {
 
   async encontrarPorEmail(email: string): Promise<Usuario | null> {
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
-    return usuario ? new Usuario( usuario.id, usuario.email, usuario.senha,
-      usuario.primeiro_nome, usuario.ultimo_nome, usuario.criado_data,
-      usuario.atualizado_data) : null;
+    return usuario ? new Usuario(usuario.id, usuario.email, usuario.senha,
+      usuario.nome, usuario.sobrenome, usuario.criado,
+    ) : null;
   }
 
   async encontrarPorId(id: number): Promise<Usuario | null> {
     const usuario = await this.prisma.usuario.findUnique({ where: { id } });
     return usuario ? new Usuario(
       usuario.id, usuario.email, usuario.senha,
-      usuario.primeiro_nome, usuario.ultimo_nome, usuario.criado_data,
-      usuario.atualizado_data) : null;
+      usuario.nome, usuario.sobrenome, usuario.criado,
+    ) : null;
   }
 
   async salvar(usuario: Usuario): Promise<Usuario> {
@@ -25,16 +25,14 @@ export class UsuarioPrismaRepository implements IUsuarioRepository {
       data: {
         email: usuario.email,
         senha: usuario.senhaHash,
-        primeiro_nome: usuario.primeiroNome,
-        ultimo_nome: usuario.ultimoNome,
+        nome: usuario.primeiroNome,
+        sobrenome: usuario.ultimoNome,
       },
     });
 
     return new Usuario(
-      usuarioSalvo.id, usuarioSalvo.email, 
-      usuarioSalvo.senha, usuarioSalvo.primeiro_nome, 
-      usuarioSalvo.ultimo_nome, usuarioSalvo.criado_data,
-      usuarioSalvo.atualizado_data
+      usuarioSalvo.id, usuarioSalvo.email, usuarioSalvo.senha,
+      usuarioSalvo.nome, usuarioSalvo.sobrenome, usuarioSalvo.criado,
     );
   }
 }
