@@ -55,12 +55,12 @@ model Saldo {
 }
 
 model Investimento {
-  id                  Int      @id @default(autoincrement())
-  usuarioId           Int
-  tipoInvestimentoId  Int
-  valorInvestido      Float
-  dataCompra          DateTime
-  rendimentoAcumulado Float
+  id                 Int      @id @default(autoincrement())
+  usuarioId          Int
+  tipoInvestimentoId Int
+  valorInvestido     Float
+  dataCompra         DateTime
+  resgatado          Boolean  @default(false)
 
   usuario          Usuario          @relation(fields: [usuarioId], references: [id])
   tipoInvestimento TipoInvestimento @relation(fields: [tipoInvestimentoId], references: [id])
@@ -68,8 +68,9 @@ model Investimento {
 
 model TipoInvestimento {
   id              Int            @id @default(autoincrement())
-  nome            String
+  nome            String         @unique
   tipo            String
   valorPercentual Float
+  impostoRenda    Boolean        @default(true)
   investimentos   Investimento[]
 }

@@ -3,14 +3,16 @@ import prisma from "../../db";
 export async function acrescentartipoInvestimento(
   nome: string,
   tipo: string,
-  valorPercentual: number
+  valorPercentual: number,
+  impostoRenda: boolean
 ) {
 
   const tipoInvestimento = await prisma.tipoInvestimento.create({
     data: {
       nome,
       tipo,
-      valorPercentual
+      valorPercentual,
+      impostoRenda
     }
   });
 
