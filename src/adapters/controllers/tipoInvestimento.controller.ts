@@ -6,7 +6,7 @@ import {
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
   try {
-    const { nome, tipo, valorPercentual } = req.body;
+    const { nome, tipo, valorPercentual, impostoRenda } = req.body;
 
     if (!nome)
       return res.status(404).json({ message: "Nome nao informado" });
@@ -20,7 +20,8 @@ export async function adicionarTipoInvestimento(req: Request, res: Response) {
     const tipoAdicionado = await acrescentartipoInvestimento(
       nome,
       tipo,
-      valorPercentual
+      valorPercentual,
+      impostoRenda
     )
     res.status(201).json(tipoAdicionado);
   } catch (err) {
