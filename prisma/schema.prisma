@@ -60,6 +60,7 @@ model Investimento {
   tipoInvestimentoId Int
   valorInvestido     Float
   dataCompra         DateTime
+  dataAtualizacao    DateTime?
   resgatado          Boolean  @default(false)
 
   usuario          Usuario          @relation(fields: [usuarioId], references: [id])

@@ -91,7 +91,8 @@ export async function adicionarInvestimento(
   usuarioId: number,
   tipoInvestimentoId: number,
   valorInvestido: number,
-  dataCompra: Date
+  dataCompra: Date,
+  dataAtualizacao?: Date
 ) {
 
   if (!usuarioId)
@@ -100,11 +101,14 @@ export async function adicionarInvestimento(
   if (!tipoInvestimentoId)
     throw new Error("Tipo de investimento não informado.");
 
-  if (!valorInvestido)
+  if (!valorInvestido || valorInvestido <= 0)
     throw new Error("Valor investido não informado.");
 
   if (!dataCompra)
     throw new Error("Data de compra não informada.");
+
+  if (!dataAtualizacao || dataAtualizacao == null)
+    dataAtualizacao = dataCompra;
 
   const tipo = await prisma.tipoInvestimento.findUnique({
     where: { id: tipoInvestimentoId }
@@ -113,19 +117,41 @@ export async function adicionarInvestimento(
   if (!tipo)
     throw new Error("Tipo de investimento não encontrado.");
 
-  const investimento = await prisma.investimento.create({
-    data: {
+  const investimentoExistente = await prisma.investimento.findFirst({
+    where: {
       usuarioId,
-      tipoInvestimentoId,
-      valorInvestido,
-      dataCompra
-    },
-    include: {
-      tipoInvestimento: true
+      tipoInvestimentoId
     }
   });
 
-  return investimento;
+  if (investimentoExistente) {
+    const investimentoAtualizado = await prisma.investimento.update({
+      where: { id: investimentoExistente.id },
+      data: {
+        valorInvestido: investimentoExistente.valorInvestido + valorInvestido,
+        dataAtualizacao: new Date()
+      },
+      include: {
+        tipoInvestimento: true
+      }
+    });
+    return investimentoAtualizado;
+  } else {
+    const investimento = await prisma.investimento.create({
+      data: {
+        usuarioId,
+        tipoInvestimentoId,
+        valorInvestido,
+        dataCompra,
+        dataAtualizacao
+      },
+      include: {
+        tipoInvestimento: true
+      }
+    });
+
+    return investimento;
+  }
 }
 
 export async function resgatarInvestimento(
@@ -247,6 +273,13 @@ export async function resgatarInvestimento(
     sobrouParaResgatar: Number(restanteParaResgatar.toFixed(2)),
     detalhes: detalhesResgate
   };
+}
+
+export async function atualizarInvestimento(
+  usuarioId: number,
+  investimentoId: number
+) {
+
 }
 
 export async function consultarInvestimentosTipo(

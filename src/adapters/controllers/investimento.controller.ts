@@ -58,17 +58,28 @@ export async function consultarPorTipo(req: Request, res: Response) {
 export async function investir(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const { tipoInvestimentoId, valorInvestido, dataCompra } = req.body;
+    const {
+      tipoInvestimentoId,
+      valorInvestido,
+      dataCompra,
+      dataAtualizacao
+    } = req.body;
 
     if (!usuarioId)
       return res.status(401).json({ message: "Uusario não autenticado." });
+
+    const parsedDataCompra = new Date(dataCompra);
+    const parsedDataAtualizacao = dataAtualizacao
+      ? new Date(dataAtualizacao)
+      : undefined;
 
     const investimento = await adicionarInvestimento(
       usuarioId,
       tipoInvestimentoId,
       valorInvestido,
-      new Date(dataCompra)
-    )
+      parsedDataCompra,
+      parsedDataAtualizacao
+    );
     res.status(201).json(investimento)
   } catch (err: any) {
     console.error(err);
