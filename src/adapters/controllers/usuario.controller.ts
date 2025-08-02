@@ -1,115 +1,60 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { AlteracaoSenha, AlterarEmail, Cadastrar, Logar, Remover } from "../../application/services/usuario.service";
 
-const prisma = new PrismaClient();
-
-export async function cadastrarUsuario(req: Request, res: Response) {
+export async function cadastro(req: Request, res: Response) {
   try {
-    const { email, senha, nome, sobrenome } = req.body;
+    const { nome, sobrenome, email, senha } = req.body;
+    const novoUsuario = await Cadastrar(nome, sobrenome, email, senha);
 
-    const existe = await prisma.usuario.findUnique({ where: { email } });
-    if (existe) {
-      return res.status(409).json({ error: "E-mail já cadastrado" });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const usuario = await prisma.usuario.create({
-      data: {
-        email,
-        senha: senhaHash,
-        nome,
-        sobrenome
-      },
-    });
-    res.status(201).json({ id: usuario.id, email: usuario.email });
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    return res.status(200).json(novoUsuario);
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message || "Falha no servidor." });
   }
 }
 
-export async function loginUsuario(req: Request, res: Response) {
+export async function login(req: Request, res: Response) {
   try {
     const { email, senha } = req.body;
+    const login = await Logar(email, senha);
 
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
-    if (!usuario) { return res.status(404).json({ error: "Usuário não encontrado" }); }
-
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) { return res.status(401).json({ error: "Senha incorreta" }); }
-
-    const token = jwt.sign(
-      {
-        usuarioId: usuario.id,
-        nome: usuario.nome,
-        sobrenome: usuario.sobrenome,
-      },
-      process.env.JWT_SECRET || "segredo",
-      { expiresIn: "2h" }
-    );
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    return res.status(200).json(login)
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message || "Erro interno" });
   }
 }
 
 export async function alterarEmail(req: Request, res: Response) {
   try {
     const { emailAntigo, emailNovo } = req.body;
+    const emailAlterado = await AlterarEmail(emailAntigo, emailNovo);
 
-    const usuario = await prisma.usuario.findUnique({ where: { email: emailAntigo } });
-    if (!usuario) { return res.status(404).json({ error: "Usuário não encontrado" }); }
-
-    const emailExistente = await prisma.usuario.findUnique({ where: { email: emailNovo } });
-    if (emailExistente) { return res.status(409).json({ error: "E-mail já cadastrado" }); }
-
-    await prisma.usuario.update({
-      where: { email: emailAntigo },
-      data: { email: emailNovo },
-    });
-    res.json({ message: "E-mail alterado com sucesso" });
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    return res.status(200).json(emailAlterado);
+  } catch (err: any) {
+    return res.status(500).json({ Erro: err.message || "Erro interno" });
   }
 }
 
 export async function alterarSenha(req: Request, res: Response) {
   try {
     const { email, senhaAntiga, senhaNova } = req.body;
+    const senhaAlterada = await AlteracaoSenha(email, senhaAntiga, senhaNova)
 
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
-    if (!usuario) { return res.status(404).json({ error: "Usuário não encontrado" }); }
-
-    const senhaValida = await bcrypt.compare(senhaAntiga, usuario.senha);
-    if (!senhaValida) { return res.status(401).json({ error: "Senha antiga incorreta" }); }
-
-    const senhaHash = await bcrypt.hash(senhaNova, 10);
-    await prisma.usuario.update({
-      where: { email },
-      data: { senha: senhaHash },
-    });
-
-    res.json({ message: "Senha alterada com sucesso" });
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    return res.json({ senhaAlterada });
+  } catch (err: any) {
+    return res.status(500).json({ Erro: err.message || "Erro interno" });
   }
 }
 
 export async function removerUsuario(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    if (!usuarioId) {
+    if (!usuarioId)
       return res.status(401).json({ error: "Usuário não autenticado" });
-    }
 
-    await prisma.saldo.deleteMany({ where: { usuarioId } });
-    await prisma.transacao.deleteMany({ where: { usuarioId } });
-    await prisma.usuario.delete({ where: { id: usuarioId } });
+    const remocao = await Remover(usuarioId)
 
-    res.json({ message: "Usuário removido com sucesso" });
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    return res.status(200).json(remocao);
+  } catch (err: any) {
+    return res.status(500).json({ err: err.message || "Erro interno no servidor" });
   }
 }
