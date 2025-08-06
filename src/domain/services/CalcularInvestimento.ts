@@ -1,5 +1,8 @@
+import { calcularCDIDiario } from "../../application/services/cdi.service";
 import { getIrRate } from "./IrService";
 import { differenceInBusinessDays } from 'date-fns';
+
+const CDI_ANUAL = Number(process.env.CDI_ANUAL || 13.65);
 
 export interface Rendimento {
   diasUteis: number;
@@ -12,13 +15,16 @@ export interface Rendimento {
 
 export function calcularRendimento(
   valorInvestido: number,
-  percentualDiario: number,
+  percentualCDI: number,
   dataCompra: Date,
   aplicaImposto: boolean
 ): Rendimento {
   const hoje = new Date();
-  const diasUteis = differenceInBusinessDays(hoje, dataCompra);
-  const bruto = valorInvestido * (Math.pow(1 + percentualDiario, diasUteis) - 1);
+  const diasUteis = differenceInBusinessDays(hoje, dataCompra)
+  const rendimentoDiarioBase = calcularCDIDiario(CDI_ANUAL);
+  const rendimentoDiario = rendimentoDiarioBase + (percentualCDI / 100);
+  const bruto = valorInvestido * (Math.pow(1 + rendimentoDiario, diasUteis)) - valorInvestido;
+
   let imposto = 0;
   if (aplicaImposto) {
     const aliquota = getIrRate(diasUteis);
@@ -33,5 +39,5 @@ export function calcularRendimento(
     imposto: Number(imposto.toFixed(2)),
     rendimentoLiquido: Number(liquido.toFixed(2)),
     valorTotalLiquido: Number((valorInvestido + liquido).toFixed(2))
-  };
+  }
 }

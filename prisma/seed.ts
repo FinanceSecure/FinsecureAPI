@@ -1,20 +1,23 @@
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+dotenv.config();
+
 const prisma = new PrismaClient();
 
 async function main() {
-  const CDI_DIARIO = 0.0005474; // (≈13,8% a.a.)
+  const CDI_DIARIO = parseFloat(process.env.CDI_DIARIO || "0.000459")
 
   const tipos = [
     {
       nome: "LCI (100% do CDI) - Isento IR",
       tipo: "CDI",
-      valorPercentual: CDI_DIARIO * 1.0,
+      valorPercentual: CDI_DIARIO,
       impostoRenda: false
     },
     {
       nome: "Saldo - Mercado Pago (100% do CDI)",
       tipo: "CDI",
-      valorPercentual: CDI_DIARIO * 1.0,
+      valorPercentual: CDI_DIARIO,
       impostoRenda: true
     },
     {
@@ -36,7 +39,7 @@ async function main() {
       impostoRenda: true
     },
     {
-      nome: "Cofrinho - Mercado Pago Meli+ (120% do CDI)",
+      nome: "Cofrinho - Mercado Pago Meli+",
       tipo: "CDI",
       valorPercentual: CDI_DIARIO * 1.20,
       impostoRenda: true
@@ -68,7 +71,7 @@ async function main() {
     {
       nome: "Tesouro Selic 2029",
       tipo: "SELIC",
-      valorPercentual: 0.000549, // ~13.85% anual
+      valorPercentual: CDI_DIARIO,
       impostoRenda: true
     }
   ];
@@ -81,7 +84,7 @@ async function main() {
     });
   }
 
-  console.log("✔️ Tipos de investimentos cadastrados com êxito!");
+  console.log("✔️ Seed concluído!");
 }
 
 main()

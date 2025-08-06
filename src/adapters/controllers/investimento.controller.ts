@@ -1,59 +1,9 @@
-import { json, Request, Response } from "express";
+import { Request, Response } from "express";
 import {
   adicionarInvestimento,
-  consultarInvestimentosTipo,
-  encontrarInvestimento,
-  listarInvestimentos,
-  resgatarInvestimento
+  encontrarInvestimentoCompleto,
 } from "../../application/services/investimento.service";
-
-export async function buscarInvestimento(req: Request, res: Response) {
-  try {
-    const usuarioId = req.user?.usuarioId;
-    const investimentoId = Number(req.params.id);
-
-    if (!usuarioId)
-      return res.status(404).json({ message: "usuario nao encontrado" });
-
-    const saldo = await encontrarInvestimento(usuarioId, investimentoId);
-
-    return res.status(200).json(saldo)
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message || "Erro interno no servidor" });
-  }
-}
-
-export async function listarInvestimentosController(req: Request, res: Response) {
-  try {
-    const usuarioId = req.user?.usuarioId;
-    if (!usuarioId)
-      return res.status(401).json({ message: "Usuário não autenticado." })
-
-    const lista = await listarInvestimentos(usuarioId);
-    return res.status(200).json(lista);
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message || "Erro interno" })
-  }
-}
-
-export async function consultarPorTipo(req: Request, res: Response) {
-  try {
-    const usuarioId = req.user?.usuarioId;
-    const tipoInvesitmentoId = Number(req.params.tipoInvestimentoId);
-
-    if (!usuarioId) {
-      return res.status(401).json({ message: "Não autenticado." });
-    }
-    if (!tipoInvesitmentoId || isNaN(tipoInvesitmentoId)) {
-      return res.status(400).json({ message: "Tipo investimento inválido." });
-    }
-
-    const resultado = await consultarInvestimentosTipo(usuarioId, tipoInvesitmentoId);
-    return res.status(202).json(resultado);
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message || "Falha no servidor." })
-  }
-}
+import { resgatarInvestimento } from "../../application/use-cases/resgatarInvestimento";
 
 export async function investir(req: Request, res: Response) {
   try {
@@ -87,26 +37,52 @@ export async function investir(req: Request, res: Response) {
   }
 }
 
+export async function extrato(req: Request, res: Response) {
+  try {
+    const usuarioId = req.user?.usuarioId;
+    const investimentoId = Number(req.params.id);
+
+    if (!usuarioId)
+      return res.status(401).json({ message: "Usuário não autenticado" });
+
+    if (!investimentoId || isNaN(investimentoId))
+      return res.status(404).json({ message: "ID invalido." })
+
+    const extrato = await encontrarInvestimentoCompleto(
+      investimentoId,
+      usuarioId
+    );
+
+    return res.status(200).json(extrato);
+  }
+  catch (err: any) {
+    return res.status(500).json({ error: err.message || "Erro interno no sevidor." });
+  }
+}
+
 export async function resgatar(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const { tipoInvestimentoId, valorParaResgatar } = req.body;
+    const tipoInvestimentoId = Number(req.params.id);
+    const valorParaResgatar = Number(req.body.valor);
 
     if (!usuarioId)
-      return res.status(401).json({ message: "Uusuário não autenticado." });
+      return res.status(401).json({ message: "Usuário não autenticado." });
 
-    if (!tipoInvestimentoId || isNaN(tipoInvestimentoId) ||
-      !valorParaResgatar || isNaN(valorParaResgatar)) {
-      return res.status(400).json({ message: "Uusuário não autenticado." });
-    }
-    const resultado = await resgatarInvestimento
-      (usuarioId,
-        Number(tipoInvestimentoId),
-        Number(valorParaResgatar)
-      );
+    if (!tipoInvestimentoId || isNaN(tipoInvestimentoId))
+      return res.status(404).json({ message: "Id invalido" })
+
+    if (!valorParaResgatar || isNaN(valorParaResgatar))
+      return res.status(404).json({ message: "Valor invalido" })
+
+    const resultado = await resgatarInvestimento(
+      usuarioId,
+      tipoInvestimentoId,
+      valorParaResgatar
+    )
 
     return res.status(200).json(resultado);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || "Falha no servidor" })
+    res.status(500).json({ message: err.message || "Erro no servidor." })
   }
 }

@@ -31,16 +31,23 @@ export async function adicionarTipoInvestimento(req: Request, res: Response) {
 }
 
 export async function verificarTipoInvestimento(req: Request, res: Response) {
-  const usuarioId = req.user?.usuarioId;
-  const tipoInvestimentoId = Number(req.params.id);
+  try {
+    const usuarioId = req.user?.usuarioId;
+    const tipoInvestimentoId = Number(req.params.id);
 
-  if (!usuarioId)
-    return res.status(404).json({ message: "usuario nao encontrado" })
+    if (!usuarioId)
+      return res.status(401).json({ message: "Usuário não autenticado." });
 
-  const tipoInvestido = await visualizarTipoInvestimento(tipoInvestimentoId);
+    if (!Number.isInteger(tipoInvestimentoId))
+      return res.status(400).json({ message: "ID de investimento inválido." });
 
-  if (!tipoInvestido)
-    res.status(404).json("Investimento não encontrado.")
+    const tipoInvestido = await visualizarTipoInvestimento(tipoInvestimentoId);
 
-  return res.status(200).json(tipoInvestido)
+    if (!tipoInvestido)
+      return res.status(404).json({ message: "Investimento não encontrado." });
+
+    return res.status(200).json(tipoInvestido)
+  } catch (err: any) {
+    return res.status(500).json({ erro: err.message || "Falha no servidor." });
+  }
 }
