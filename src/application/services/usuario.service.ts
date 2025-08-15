@@ -14,15 +14,15 @@ export async function Cadastrar(
   if (!senha) throw new Error("Nome não informado");
 
   const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
-
   if (usuarioExistente) throw new Error("E-mail já cadastrado");
 
+  const senhaHash = await bcrypt.hash(senha, 10);
   const novoUsuario = await prisma.usuario.create({
     data: {
       nome,
       sobrenome,
       email,
-      senha
+      senha: senhaHash
     }
   });
 
@@ -39,6 +39,9 @@ export async function Logar(
   const usuario = await prisma.usuario.findUnique({ where: { email } });
   if (!usuario) throw new Error("Usuário não encontrado.");
 
+  const senhaValida = await bcrypt.compare(senha, usuario.senha);
+  if (!senhaValida) throw new Error("Senha incorreta.");
+
   const token = jwt.sign(
     {
       usuarioId: usuario.id,
@@ -49,11 +52,14 @@ export async function Logar(
     { expiresIn: "2h" }
   );
 
-  return { token };
+  return {
+    token,
+    mensagem: "Login realizado com sucesso."
+  };
 }
 
 export async function Remover(
-  usuarioId: number
+  usuarioId: string
 ) {
   if (!usuarioId) throw new Error("Nenhum usuário encontrado.");
 

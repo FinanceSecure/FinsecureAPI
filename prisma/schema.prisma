@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DB_URL")
 }
 
 enum TipoTransacao {
@@ -19,7 +19,7 @@ enum StatusTranscao {
 }
 
 model Usuario {
-  id         Int       @id @default(autoincrement())
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
   email      String    @unique
   senha      String
   nome       String
@@ -33,42 +33,42 @@ model Usuario {
 }
 
 model Transacao {
-  id        Int            @id @default(autoincrement())
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
   descricao String?
   valor     Float
   data      DateTime       @default(now())
   tipo      TipoTransacao
   status    StatusTranscao @default(PENDENTE)
-  usuarioId Int
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId String  @db.ObjectId
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
 }
 
 model Saldo {
-  id         Int       @id @default(autoincrement())
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
   valor      Float     @default(0.0)
   data       DateTime  @default(now())
   atualizado DateTime? @updatedAt
 
+  usuarioId String  @unique @db.ObjectId
   usuario   Usuario @relation("UsuarioSaldo", fields: [usuarioId], references: [id])
-  usuarioId Int     @unique
 }
 
 model Investimento {
-  id                 Int       @id @default(autoincrement())
-  usuarioId          Int
-  tipoInvestimentoId Int
-  dataCompra         DateTime
-  dataAtualizacao    DateTime?
-  resgatado          Boolean   @default(false)
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  dataCompra      DateTime
+  dataAtualizacao DateTime?
+  resgatado       Boolean   @default(false)
 
-  usuario          Usuario                 @relation(fields: [usuarioId], references: [id])
-  tipoInvestimento TipoInvestimento        @relation(fields: [tipoInvestimentoId], references: [id])
-  aplicacoes       AplicacaoInvestimento[]
+  usuarioId          String                  @db.ObjectId
+  tipoInvestimentoId String                  @db.ObjectId
+  usuario            Usuario                 @relation(fields: [usuarioId], references: [id])
+  tipoInvestimento   TipoInvestimento        @relation(fields: [tipoInvestimentoId], references: [id])
+  aplicacoes         AplicacaoInvestimento[]
 }
 
 model TipoInvestimento {
-  id              Int            @id @default(autoincrement())
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
   nome            String         @unique
   tipo            String
   valorPercentual Float
@@ -77,11 +77,11 @@ model TipoInvestimento {
 }
 
 model AplicacaoInvestimento {
-  id             Int      @id @default(autoincrement())
-  investimentoId Int
-  tipo           String
-  valor          Float
-  data           DateTime
+  id    String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipo  String
+  valor Float
+  data  DateTime
 
-  investimento Investimento @relation(fields: [investimentoId], references: [id])
+  investimentoId String       @db.ObjectId
+  investimento   Investimento @relation(fields: [investimentoId], references: [id])
 }
