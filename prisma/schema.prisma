@@ -23,7 +23,6 @@ model Usuario {
   email      String    @unique
   senha      String
   nome       String
-  sobrenome  String
   criado     DateTime  @default(now())
   atualizado DateTime? @updatedAt
 

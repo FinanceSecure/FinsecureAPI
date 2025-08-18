@@ -8,7 +8,7 @@ interface ResultadoAdicionarTransacao {
 }
 
 export async function adicionarTransacao(
-  usuarioId: number,
+  usuarioId: string,
   descricao: string,
   valor: number,
   data: Date,
@@ -21,7 +21,6 @@ export async function adicionarTransacao(
   dataTransacao.setHours(0, 0, 0, 0);
 
   const status = dataTransacao <= hoje ? "EFETIVADA" : "PENDENTE";
-
   const transacao = await prisma.transacao.create({
     data: {
       usuarioId,
@@ -39,15 +38,15 @@ export async function adicionarTransacao(
 }
 
 export async function atualizarTransacao(
-  id: number,
-  usuarioId: number,
+  id: string,
+  usuarioId: string,
   descricao: string,
   valor: number,
   data: Date,
   tipo: TipoTransacao,
 ) {
 
-  if (!id || isNaN(id))
+  if (!id)
     throw new Error("ID da transação inválido");
 
   if (!usuarioId)
@@ -75,14 +74,14 @@ export async function atualizarTransacao(
 
 
 export async function excluirTransacao(
-  id: number,
-  usuarioId: number,
+  id: string,
+  usuarioId: string,
 ) {
   const transacao = await prisma.transacao.findFirst({
     where: { id, usuarioId }
   });
 
-  if (!id || isNaN(id))
+  if (!id)
     throw new Error("Id da transação inválido");
 
   if (!usuarioId)
