@@ -19,7 +19,7 @@ export async function acrescentartipoInvestimento(
   return tipoInvestimento;
 }
 
-export async function visualizarTipoInvestimento(id: number) {
+export async function visualizarTipoInvestimento(id: string) {
   const tipoInvestimento = await prisma.tipoInvestimento.findFirst({
     where: { id }
   });

@@ -1,6 +1,6 @@
 import prisma from "../../db";
 
-export async function atualizarSaldoUsuario(usuarioId: number): Promise<number> {
+export async function atualizarSaldoUsuario(usuarioId: string): Promise<number> {
   const saldoTotal = await prisma.transacao.aggregate({
     _sum: { valor: true },
     where: {
@@ -29,7 +29,7 @@ export async function atualizarSaldoUsuario(usuarioId: number): Promise<number> 
   return saldoAtualizado;
 }
 
-export async function visualizarSaldo(usuarioId: number, saldoId: number) {
+export async function visualizarSaldo(usuarioId: string, saldoId: string) {
   const saldo = await prisma.saldo.findFirst({
     where: {
       id: saldoId,

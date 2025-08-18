@@ -3,8 +3,8 @@ import { calcularRendimento } from "../../domain/services/CalcularInvestimento";
 import { calcularResgateParcial } from "../../domain/services/calcularResgateParcial";
 
 export async function resgatarInvestimento(
-  usuarioId: number,
-  tipoInvestimentoId: number,
+  usuarioId: string,
+  tipoInvestimentoId: string,
   valorParaResgatar: number
 ) {
   const investimentos = await prisma.investimento.findMany({

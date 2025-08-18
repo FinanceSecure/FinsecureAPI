@@ -7,16 +7,25 @@ export class UsuarioPrismaRepository implements IUsuarioRepository {
 
   async encontrarPorEmail(email: string): Promise<Usuario | null> {
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
-    return usuario ? new Usuario(usuario.id, usuario.email, usuario.senha,
-      usuario.nome, usuario.sobrenome, usuario.criado,
+    return usuario ? new Usuario(
+      usuario.id,
+      usuario.email,
+      usuario.senha,
+      usuario.nome,
+      usuario.criado,
     ) : null;
   }
 
-  async encontrarPorId(id: number): Promise<Usuario | null> {
-    const usuario = await this.prisma.usuario.findUnique({ where: { id } });
+  async encontrarPorId(id: string): Promise<Usuario | null> {
+    const usuario = await this.prisma.usuario.findUnique(
+      { where: { id } 
+    });
     return usuario ? new Usuario(
-      usuario.id, usuario.email, usuario.senha,
-      usuario.nome, usuario.sobrenome, usuario.criado,
+      usuario.id,
+      usuario.email,
+      usuario.senha,
+      usuario.nome,
+      usuario.criado,
     ) : null;
   }
 
@@ -25,14 +34,16 @@ export class UsuarioPrismaRepository implements IUsuarioRepository {
       data: {
         email: usuario.email,
         senha: usuario.senhaHash,
-        nome: usuario.primeiroNome,
-        sobrenome: usuario.ultimoNome,
+        nome: usuario.nome,
       },
     });
 
     return new Usuario(
-      usuarioSalvo.id, usuarioSalvo.email, usuarioSalvo.senha,
-      usuarioSalvo.nome, usuarioSalvo.sobrenome, usuarioSalvo.criado,
+      usuarioSalvo.id,
+      usuarioSalvo.email,
+      usuarioSalvo.senha,
+      usuarioSalvo.nome,
+      usuarioSalvo.criado,
     );
   }
 }

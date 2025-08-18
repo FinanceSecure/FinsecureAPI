@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import { AlteracaoSenha, AlterarEmail, Cadastrar, Logar, Remover } from "../../application/services/usuario.service";
 
+const errorHandler = (err: unknown) => {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return "Erro interno";
+};
+
 export async function cadastro(req: Request, res: Response) {
   try {
-    const { nome, sobrenome, email, senha } = req.body;
-    const novoUsuario = await Cadastrar(nome, sobrenome, email, senha);
+    const { nome, email, senha } = req.body;
+    const novoUsuario = await Cadastrar(nome, email, senha);
 
     return res.status(200).json(novoUsuario);
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message || "Falha no servidor." });
+  } catch (err) {
+    return res.status(500).json(errorHandler(err));
   }
 }
 
@@ -19,7 +26,7 @@ export async function login(req: Request, res: Response) {
 
     return res.status(200).json(login)
   } catch (err: any) {
-    return res.status(500).json({ message: err.message || "Erro interno" });
+    return res.status(500).json(errorHandler(err));
   }
 }
 
@@ -30,7 +37,7 @@ export async function alterarEmail(req: Request, res: Response) {
 
     return res.status(200).json(emailAlterado);
   } catch (err: any) {
-    return res.status(500).json({ Erro: err.message || "Erro interno" });
+    return res.status(500).json(errorHandler(err));
   }
 }
 
@@ -41,7 +48,7 @@ export async function alterarSenha(req: Request, res: Response) {
 
     return res.json({ senhaAlterada });
   } catch (err: any) {
-    return res.status(500).json({ Erro: err.message || "Erro interno" });
+    return res.status(500).json(errorHandler(err));
   }
 }
 
@@ -51,10 +58,10 @@ export async function removerUsuario(req: Request, res: Response) {
     if (!usuarioId)
       return res.status(401).json({ error: "Usuário não autenticado" });
 
-    const remocao = await Remover(usuarioId)
+    const remocao = await Remover(String(usuarioId))
 
     return res.status(200).json(remocao);
   } catch (err: any) {
-    return res.status(500).json({ err: err.message || "Erro interno no servidor" });
+    return res.status(500).json(errorHandler(err));
   }
 }

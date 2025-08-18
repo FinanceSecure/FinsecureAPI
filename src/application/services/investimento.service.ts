@@ -1,104 +1,9 @@
-import prisma from "../../db";
-import { calcularRendimento, Rendimento } from "../../domain/services/CalcularInvestimento";
-
-export interface InvestimentoDetalhado {
-  id: number;
-  usuarioId: number;
-  tipoInvestimentoId: number;
-  valorInvestido: number;
-  dataCompra: Date;
-  diasUteis: number;
-  rendimentoBruto: number;
-  imposto: number;
-  rendimentoLiquido: number;
-  valorTotalLiquido: number;
-
-  tipoInvesitmento: {
-    id: number;
-    nome: string;
-    tipo: string;
-    valorPercentual: number;
-  };
-}
-
-export async function encontrarInvestimentoCompleto(
-  investimentoId: number,
-  usuarioId: number
-) {
-  const investimento = await prisma.investimento.findFirst({
-    where: { id: investimentoId, usuarioId },
-    include: {
-      tipoInvestimento: true,
-      aplicacoes: true
-    }
-  });
-
-  if (!investimento) throw new Error("Investimento não encontrado.");
-
-  const percentualCDI = investimento.tipoInvestimento.valorPercentual;
-  const aplicaIR = investimento.tipoInvestimento.impostoRenda;
-
-  const aplicacoes = investimento.aplicacoes.filter(a => a.tipo === "aplicacao");
-  const resgates = investimento.aplicacoes
-    .filter(a => a.tipo === "resgate")
-    .sort((a, b) => a.data.getTime() - b.data.getTime());
-
-  let valorTotalInvestido = 0;
-  let rendimentoBruto = 0;
-  let impostoTotal = 0;
-  let rendimentoLiquido = 0;
-  let valorTotalLiquido = 0;
-
-  const aplicacoesDetalhadas = [];
-
-  for (const aplic of aplicacoes) {
-    const rendimento = calcularRendimento(
-      aplic.valor,
-      percentualCDI,
-      aplic.data,
-      aplicaIR
-    );
-
-    aplicacoesDetalhadas.push({
-      data: aplic.data,
-      valor: aplic.valor,
-      diasUteis: rendimento.diasUteis,
-      rendimentoBruto: rendimento.rendimentoBruto,
-      imposto: rendimento.imposto,
-      rendimentoLiquido: rendimento.rendimentoLiquido,
-      valorTotalLiquido: rendimento.valorTotalLiquido
-    });
-
-    valorTotalInvestido += aplic.valor;
-    rendimentoBruto += rendimento.rendimentoBruto;
-    impostoTotal += rendimento.imposto;
-    rendimentoLiquido += rendimento.rendimentoLiquido;
-    valorTotalLiquido += rendimento.valorTotalLiquido;
-  }
-
-  let resgatado = 0;
-  for (const resgate of resgates) {
-    resgatado += resgate.valor;
-    valorTotalLiquido -= resgate.valor;
-  }
-
-  return {
-    investimentoId: investimento.id,
-    tipoInvestimentoId: investimento.tipoInvestimentoId,
-    nome: investimento.tipoInvestimento.nome,
-    valorTotalInvestido: Number(valorTotalInvestido.toFixed(2)),
-    rendimentoBruto: Number(rendimentoBruto.toFixed(2)),
-    imposto: Number(impostoTotal.toFixed(2)),
-    rendimentoLiquido: Number(rendimentoLiquido.toFixed(2)),
-    valorResgatado: Number(resgatado.toFixed(2)),
-    valorTotalLiquido: Number(valorTotalLiquido.toFixed(2)),
-    aplicacoes: aplicacoesDetalhadas
-  };
-}
+import { InvestimentoRepository } from "../../infraestructure/repositories/investimentoRepository";
+import { calcularRendimento } from "../../domain/services/CalcularInvestimento";
 
 export async function adicionarInvestimento(
-  usuarioId: number,
-  tipoInvestimentoId: number,
+  usuarioId: string,
+  tipoInvestimentoId: string,
   valorInvestido: number,
   dataCompra: Date,
   dataAtualizacao?: Date
@@ -106,78 +11,35 @@ export async function adicionarInvestimento(
   if (!usuarioId) throw new Error("Usuário não autenticado.");
   if (!tipoInvestimentoId) throw new Error("Tipo de investimento não informado.");
   if (!valorInvestido || valorInvestido <= 0) throw new Error("Valor inválido.");
-  if (!dataCompra) throw new Error("Data de compra não infomrada.");
+  if (!dataCompra) throw new Error("Data de compra não informada.");
 
-  const tipo = await prisma.tipoInvestimento.findUnique({
-    where: { id: tipoInvestimentoId }
-  });
+  const { investimento, aplicacao } = await InvestimentoRepository.adicionarInvestimento(
+    usuarioId,
+    tipoInvestimentoId,
+    valorInvestido,
+    dataCompra,
+    dataAtualizacao
+  );
 
-  if (!tipo) throw new Error("Tipo de investimento não encontrado.");
-
-  let investimento = await prisma.investimento.findFirst({
-    where: { usuarioId, tipoInvestimentoId }
-  });
-
-  if (!investimento) {
-    investimento = await prisma.investimento.create({
-      data: {
-        usuarioId,
-        tipoInvestimentoId,
-        dataCompra,
-        dataAtualizacao: dataAtualizacao ?? dataCompra
-      }
-    });
-  }
-
-  const aplicacao = await prisma.aplicacaoInvestimento.create({
-    data: {
-      investimentoId: investimento.id,
-      tipo: "aplicacao",
-      valor: valorInvestido,
-      data: dataCompra
-    }
-  });
-
-  return {
-    investimento,
-    aplicacao
-  };
+  return { investimento, aplicacao };
 }
 
 export async function resgatarInvestimento(
-  usuarioId: number,
-  tipoInvestimentoId: number,
+  usuarioId: string,
+  tipoInvestimentoId: string,
   valorParaResgatar: number
 ) {
-  const investimentos = await prisma.investimento.findMany({
-    where: {
-      usuarioId,
-      tipoInvestimentoId,
-      resgatado: false
-    },
-    include: {
-      tipoInvestimento: true,
-      aplicacoes: true
-    },
-    orderBy: {
-      dataCompra: "asc"
-    }
-  });
-
-  if (!investimentos.length) throw new Error("Nenhum investimento encontrado com este tipo.")
+  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(usuarioId, tipoInvestimentoId);
+  if (!investimentos.length) throw new Error("Nenhum investimento encontrado");
 
   let totalLiquidoDisponivel = 0;
   const rendimentoCalculados = [];
 
   for (const inv of investimentos) {
-    const valorInvestido = inv.aplicacoes
-      ?.filter(a => a.tipo === "aplicacao")
-      .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
-
-    const valorResgatado = inv.aplicacoes
-      ?.filter(a => a.tipo === "resgate")
-      .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
-
+    const valorInvestido = inv.aplicacoes?.filter(
+      a => a.tipo === "aplicacao").reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
+    const valorResgatado = inv.aplicacoes?.filter(
+      a => a.tipo === "resgate").reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
     const valorLiquidoInvestido = valorInvestido - valorResgatado;
     const rend = calcularRendimento(
       valorInvestido,
@@ -197,8 +59,7 @@ export async function resgatarInvestimento(
     });
   }
 
-  if (totalLiquidoDisponivel < valorParaResgatar)
-    throw new Error("Nao foi possivel realizar o resgate pelo valor inforamdo.")
+  if (totalLiquidoDisponivel < valorParaResgatar) throw new Error("Valor para resgatar superior ao disponível.");
 
   let restanteParaResgatar = valorParaResgatar;
   let totalResgatado = 0;
@@ -216,19 +77,11 @@ export async function resgatarInvestimento(
     if (restanteParaResgatar <= 0) break;
 
     if (valorTotalLiquido <= restanteParaResgatar) {
-      await prisma.investimento.update({
-        where: { id: investimento.id },
-        data: { resgatado: true }
-      });
-
-      await prisma.aplicacaoInvestimento.create({
-        data: {
-          investimentoId: investimento.id,
-          tipo: "resgate",
-          valor: valorLiquidoInvestido,
-          data: new Date()
-        }
-      });
+      await InvestimentoRepository.marcarInvestimentoComoResgatado(investimento.id);
+      await InvestimentoRepository.criarAplicacaoResgate(
+        investimento.id,
+        valorLiquidoInvestido
+      );
 
       restanteParaResgatar -= valorTotalLiquido;
       totalResgatado += valorTotalLiquido;
@@ -245,14 +98,10 @@ export async function resgatarInvestimento(
       const percentual = restanteParaResgatar / valorTotalLiquido;
       const valorParcialInvestido = valorLiquidoInvestido * percentual;
 
-      await prisma.aplicacaoInvestimento.create({
-        data: {
-          investimentoId: investimento.id,
-          tipo: "resgate",
-          valor: valorParcialInvestido,
-          data: new Date()
-        }
-      });
+      await InvestimentoRepository.criarAplicacaoResgate(
+        investimento.id,
+        valorParcialInvestido
+      );
 
       totalResgatado += restanteParaResgatar;
 
@@ -269,18 +118,10 @@ export async function resgatarInvestimento(
     }
   }
 
-  const saldo = await prisma.saldo.findUnique({ where: { usuarioId } });
-
-  if (saldo) {
-    await prisma.saldo.update({
-      where: { usuarioId },
-      data: { valor: { increment: totalResgatado } }
-    });
-  } else {
-    await prisma.saldo.create({
-      data: { usuarioId, valor: totalResgatado }
-    });
-  }
+  await InvestimentoRepository.atualizarSaldo(
+    usuarioId,
+    totalResgatado
+  );
 
   return {
     message: "Resgate efetuado com sucesso!",
@@ -291,24 +132,13 @@ export async function resgatarInvestimento(
 }
 
 export async function consultarInvestimentosTipo(
-  usuarioId: number,
-  tipoInvestimentoId: number
+  usuarioId: string,
+  tipoInvestimentoId: string
 ) {
-  const investimentos = await prisma.investimento.findMany({
-    where: {
-      usuarioId,
-      tipoInvestimentoId,
-      resgatado: false
-    },
-    include: {
-      tipoInvestimento: true,
-      aplicacoes: true
-    },
-    orderBy: {
-      dataCompra: "asc"
-    }
-  });
-
+  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
+    usuarioId,
+    tipoInvestimentoId
+  );
   if (!investimentos.length)
     throw new Error("Nenhum investimento ativo deste tipo encontrado");
 

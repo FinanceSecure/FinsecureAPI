@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
   adicionarInvestimento,
-  encontrarInvestimentoCompleto,
+  consultarInvestimentosTipo
 } from "../../application/services/investimento.service";
 import { resgatarInvestimento } from "../../application/use-cases/resgatarInvestimento";
 
@@ -40,18 +40,14 @@ export async function investir(req: Request, res: Response) {
 export async function extrato(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const investimentoId = Number(req.params.id);
+    const investimentoId = req.params.id;
 
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado" });
-
-    if (!investimentoId || isNaN(investimentoId))
+    if (!investimentoId)
       return res.status(404).json({ message: "ID invalido." })
 
-    const extrato = await encontrarInvestimentoCompleto(
-      investimentoId,
-      usuarioId
-    );
+    const extrato = await consultarInvestimentosTipo(investimentoId, usuarioId);
 
     return res.status(200).json(extrato);
   }
@@ -63,13 +59,13 @@ export async function extrato(req: Request, res: Response) {
 export async function resgatar(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const tipoInvestimentoId = Number(req.params.id);
+    const tipoInvestimentoId = req.params.id;
     const valorParaResgatar = Number(req.body.valor);
 
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado." });
 
-    if (!tipoInvestimentoId || isNaN(tipoInvestimentoId))
+    if (!tipoInvestimentoId)
       return res.status(404).json({ message: "Id invalido" })
 
     if (!valorParaResgatar || isNaN(valorParaResgatar))

@@ -1,10 +1,9 @@
 export class Usuario {
   constructor(
-    public id: number | null,
+    public id: string,
     public email: string,
     public senhaHash: string,
-    public primeiroNome: string,
-    public ultimoNome: string,
+    public nome: string,
     public criadoData?: Date,
     public atualizadoData?: Date,
   ) { }

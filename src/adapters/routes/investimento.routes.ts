@@ -16,7 +16,6 @@ router.get("/extrato/:id", autenticarToken, extrato);
 router.post("/adicionar", autenticarToken, investir);
 router.post("/resgatar/:id", autenticarToken, resgatar);
 
-//Por tipo
 router.post("/tipo/adicionar", autenticarToken, adicionarTipoInvestimento)
 router.get("/tipo/:id", autenticarToken, verificarTipoInvestimento)
 
