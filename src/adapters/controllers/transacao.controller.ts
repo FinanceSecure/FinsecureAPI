@@ -25,10 +25,10 @@ export async function criarTransacao(req: Request, res: Response) {
 
 export async function alterarTransacao(req: Request, res: Response) {
   try {
-    const id = Number(req.params.id);
+    const id = (req.params.id);
     const usuarioId = req.user?.usuarioId;
 
-    if (!id || isNaN(id))
+    if (!id)
       return res.status(400).json({ message: "Transação não encontrada" });
 
     if (!usuarioId)
@@ -50,10 +50,10 @@ export async function alterarTransacao(req: Request, res: Response) {
 
 export async function cancelarTransacao(req: Request, res: Response) {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const usuarioId = req.user?.usuarioId;
 
-    if (!id || isNaN(id))
+    if (!id)
       return res.status(400).json({ message: "Transação não encontrada" });
 
     if (!usuarioId)

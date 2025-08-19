@@ -33,7 +33,7 @@ export async function adicionarTipoInvestimento(req: Request, res: Response) {
 export async function verificarTipoInvestimento(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const tipoInvestimentoId = Number(req.params.id);
+    const tipoInvestimentoId = req.params.id;
 
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado." });
