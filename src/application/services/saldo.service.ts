@@ -1,6 +1,8 @@
+import { ObjectId } from "mongodb";
 import prisma from "../../db";
 
-export async function atualizarSaldoUsuario(usuarioId: string): Promise<number> {
+
+export async function atualizarSaldoUsuario(usuarioId: string) {
   const saldoTotal = await prisma.transacao.aggregate({
     _sum: { valor: true },
     where: {
@@ -29,7 +31,10 @@ export async function atualizarSaldoUsuario(usuarioId: string): Promise<number> 
   return saldoAtualizado;
 }
 
+
 export async function visualizarSaldo(usuarioId: string, saldoId: string) {
+  if (!ObjectId.isValid(usuarioId)) throw new Error("ID Invalido");
+
   const saldo = await prisma.saldo.findFirst({
     where: {
       id: saldoId,
@@ -37,8 +42,7 @@ export async function visualizarSaldo(usuarioId: string, saldoId: string) {
     }
   });
 
-  if (!saldo)
-    throw new Error("Saldo não encontrado")
+  if (!saldo) throw new Error("Saldo nao encontrado.");
 
   return saldo;
 }
