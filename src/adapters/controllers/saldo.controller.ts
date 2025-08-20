@@ -4,12 +4,11 @@ import { visualizarSaldo } from "../../application/services/saldo.service";
 export async function verificarSaldo(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-    const saldoId = req.params.id;
 
     if (!usuarioId)
       return res.status(404).json({ message: "usuario nao encontrado" });
 
-    const saldo = await visualizarSaldo(usuarioId, saldoId);
+    const saldo = await visualizarSaldo(usuarioId);
 
     return res.status(200).json(saldo)
   } catch (error) {

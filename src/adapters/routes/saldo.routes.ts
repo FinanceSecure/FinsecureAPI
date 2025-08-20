@@ -5,6 +5,6 @@ import { verificarSaldo } from "../controllers/saldo.controller";
 
 const router = Router();
 
-router.get('/verificar/:id', autenticarToken, verificarSaldo)
+router.get('/verificar', autenticarToken, verificarSaldo)
 
 export { router as saldo_routes };
