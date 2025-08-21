@@ -3,8 +3,8 @@ type StatusTransacao = "PENDENTE" | "EFETIVADA";
 
 export class Transacao {
   constructor(
-    public id: number | null,
-    public usuarioId: number,
+    public id: string | null,
+    public usuarioId: string,
     public tipo: TipoTransacao,
     public valor: number,
     public status: StatusTransacao,

@@ -1,7 +1,7 @@
 export class Saldo {
   constructor(
-    public int: number | null,
-    public usuarioId: number,
+    public id: string | null,
+    public usuarioId: string,
     public valor: number,
     public dataAtualizacao: Date,
   ) { }

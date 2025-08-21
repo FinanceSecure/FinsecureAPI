@@ -1,5 +1,5 @@
 import { Usuario } from "@prisma/client";
-import prisma from "../../db";
+import prisma from "../../adapters/database/db";
 
 interface UsuarioCriacao {
   nome: string,
