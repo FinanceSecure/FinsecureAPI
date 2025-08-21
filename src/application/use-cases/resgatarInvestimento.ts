@@ -1,4 +1,4 @@
-import prisma from "../../db";
+import prisma from "../../adapters/database/db";
 import { calcularRendimento } from "../../domain/services/CalcularInvestimento";
 import { calcularResgateParcial } from "../../domain/services/calcularResgateParcial";
 

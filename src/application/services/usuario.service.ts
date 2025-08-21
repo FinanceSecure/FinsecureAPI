@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import prisma from "../../db";
+import prisma from "../../adapters/database/db";
 import jwt from "jsonwebtoken";
 import { validarCamposCadastro, validarCamposLogin } from "../../domain/validators/usuarioValidator";
 import { ErrosUsuario } from "../../domain/erros/validation";
