@@ -1,16 +1,27 @@
 import bcrypt from "bcrypt";
 import prisma from "../../adapters/database/db";
 import jwt from "jsonwebtoken";
-import { validarCamposCadastro, validarCamposLogin } from "../../domain/validators/usuarioValidator";
+import { 
+  validarCamposCadastro, 
+  validarCamposLogin 
+} from "../../domain/validators/usuarioValidator";
 import { ErrosUsuario } from "../../domain/erros/validation";
-import { usuarioRepository } from "../../infraestructure/repositories/usuarioRepository";
+import { usuarioRepository } from "../../adapters/database/repositories/usuarioRepository";
+import { 
+  BadRequestError, 
+  NotFoundError 
+} from "../../utils/HttpError";
 
 export async function Cadastrar(
   nome: string,
   email: string,
   senha: string
 ) {
-  validarCamposCadastro({ nome, email, senha });
+  validarCamposCadastro({ 
+    nome, 
+    email, 
+    senha 
+  });
 
   const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
   if (usuarioExistente) throw new Error("E-mail já cadastrado");
@@ -32,10 +43,11 @@ export async function Logar(
   validarCamposLogin({ email, senha });
 
   const usuario = await usuarioRepository.buscarPorEmail(email);
-  if (!usuario) throw new Error(ErrosUsuario.naoEncontrado);
+  if (!usuario) throw new NotFoundError(ErrosUsuario.naoEncontrado);
 
+  // TODO: Ajustar validação de senha com a comparação do Hash salvo
   const senhaValida = await bcrypt.compare(senha, usuario.senha);
-  if (!senhaValida) throw new Error(ErrosUsuario.senhaIncorreta);
+  if (!senhaValida) throw new BadRequestError(ErrosUsuario.senhaIncorreta);
 
   const token = jwt.sign(
     {
@@ -82,15 +94,15 @@ export async function AlteracaoSenha(
   senhaAntiga: string,
   senhaNova: string
 ) {
-  if (!email) throw new Error("E-mail não informado.");
-  if (!senhaAntiga) throw new Error("Senha anterior não informada.");
-  if (!senhaNova) throw new Error("Senha nova não informada.");
+  if (!email) throw new BadRequestError("E-mail não informado.");
+  if (!senhaAntiga) throw new BadRequestError("Senha anterior não informada.");
+  if (!senhaNova) throw new BadRequestError("Senha nova não informada.");
 
   const usuario = await usuarioRepository.buscarPorEmail(email);
-  if (!usuario) throw new Error("Usuário não encontrado.");
+  if (!usuario) throw new NotFoundError("Usuário não encontrado.");
 
   const senhaValida = await bcrypt.compare(senhaAntiga, usuario.senha);
-  if (!senhaValida) throw new Error("Senha antiga incorreta");
+  if (!senhaValida) throw new BadRequestError("Senha antiga incorreta");
 
   const senhaHash = await bcrypt.hash(senhaNova, 10);
   await usuarioRepository.atualizarSenha(email, senhaHash)

@@ -5,8 +5,8 @@ import {
     alterarEmail,
     alterarSenha,
     removerUsuario
-} from '../controllers/usuario.controller.js';
-import { autenticarToken } from '../middlewares/auth.middleware.js';
+} from '../controllers/usuarioController.js';
+import { autenticarToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 

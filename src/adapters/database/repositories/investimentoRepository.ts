@@ -1,4 +1,4 @@
-import prisma from "../../adapters/database/db";
+import prisma from "../db";
 
 interface Investimento {
   usuarioId: string;

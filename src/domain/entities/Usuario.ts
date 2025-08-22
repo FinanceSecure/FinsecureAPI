@@ -1,14 +1,14 @@
 export class Usuario {
   constructor(
-    public id: string,
-    public email: string,
-    public senhaHash: string,
+    public id: string | null,
     public nome: string,
+    public email: string,
+    public senha: string,
     public criadoData?: Date,
     public atualizadoData?: Date,
   ) { }
 
-  alterarSenha(novoHash: string) {
-    this.senhaHash = novoHash;
+  alterarSenha(novaSenha: string) {
+    this.senha = novaSenha;
   }
 }

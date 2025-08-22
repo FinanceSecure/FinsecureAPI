@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import {
   acrescentartipoInvestimento,
   visualizarTipoInvestimento
-} from "../../application/services/tipoInvestimento.service";
+} from "../../application/services/tipoInvestimentoService";
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
   try {
@@ -25,7 +25,6 @@ export async function adicionarTipoInvestimento(req: Request, res: Response) {
     )
     res.status(201).json(tipoAdicionado);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Falha no servidor" });
   }
 }
