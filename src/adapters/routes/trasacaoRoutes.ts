@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { criarTransacao, alterarTransacao, cancelarTransacao } from '../controllers/transacao.controller';
-import { validarTransacaoMiddleware } from '../middlewares/validarTransacao.middleware';
-import { autenticarToken } from '../middlewares/auth.middleware';
+import { criarTransacao, alterarTransacao, cancelarTransacao } from '../controllers/transacaoController';
+import { validarTransacaoMiddleware } from '../middlewares/validarTransacaoMiddleware';
+import { autenticarToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 

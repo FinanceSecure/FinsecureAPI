@@ -1,5 +1,5 @@
-import { InvestimentoRepository } from "../../infraestructure/repositories/investimentoRepository";
-import { calcularRendimento } from "../../domain/services/CalcularInvestimento";
+import { InvestimentoRepository } from "../../adapters/database/repositories/investimentoRepository";
+import { calcularRendimento } from "./calcInvestimentoService";
 
 export async function adicionarInvestimento(
   usuarioId: string,
@@ -29,7 +29,10 @@ export async function resgatarInvestimento(
   tipoInvestimentoId: string,
   valorParaResgatar: number
 ) {
-  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(usuarioId, tipoInvestimentoId);
+  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
+    usuarioId, 
+    tipoInvestimentoId
+  );
   if (!investimentos.length) throw new Error("Nenhum investimento encontrado");
 
   let totalLiquidoDisponivel = 0;

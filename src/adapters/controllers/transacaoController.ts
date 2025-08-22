@@ -3,7 +3,7 @@ import {
   adicionarTransacao,
   atualizarTransacao,
   excluirTransacao
-} from '../../application/services/transacao.service';
+} from '../../application/services/transacaoService';
 
 export async function criarTransacao(req: Request, res: Response) {
   try {
@@ -18,7 +18,6 @@ export async function criarTransacao(req: Request, res: Response) {
     res.status(201).json(resultado)
   }
   catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Falha no servidor" });
   }
 }
@@ -43,7 +42,6 @@ export async function alterarTransacao(req: Request, res: Response) {
     return res.status(200).json(transacaoAtualizada);
   }
   catch (err: any) {
-    console.error(err);
     return res.status(400).json({ message: err.message || "Erro ao atualizar transação." });
   }
 }
@@ -63,7 +61,6 @@ export async function cancelarTransacao(req: Request, res: Response) {
 
     return res.status(200).json(transacaoExcluida);
   } catch (err: any) {
-    console.error(err);
     return res.status(400).json({ message: err.message || "Erro ao remover transação." });
   }
 }

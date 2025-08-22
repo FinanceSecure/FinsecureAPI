@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import { autenticarToken } from "../middlewares/auth.middleware";
-import { verificarSaldo } from "../controllers/saldo.controller";
+import { autenticarToken } from "../middlewares/authMiddleware";
+import { verificarSaldo } from "../controllers/saldoController";
 
 const router = Router();
 

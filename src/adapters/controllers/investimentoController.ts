@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   adicionarInvestimento,
   consultarInvestimentosTipo
-} from "../../application/services/investimento.service";
+} from "../../application/services/investimentoService";
 import { resgatarInvestimento } from "../../application/use-cases/resgatarInvestimento";
 
 export async function investir(req: Request, res: Response) {
@@ -32,7 +32,6 @@ export async function investir(req: Request, res: Response) {
     );
     res.status(201).json(investimento)
   } catch (err: any) {
-    console.error(err);
     res.status(500).json({ message: err.message || "Erro no servidor" });
   }
 }

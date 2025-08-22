@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { AlteracaoSenha, AlterarEmail, Cadastrar, Logar, Remover } from "../../application/services/usuario.service";
+import {
+  AlteracaoSenha,
+  AlterarEmail,
+  Cadastrar,
+  Logar,
+  Remover
+} from "../../application/services/usuarioService";
 
 const errorHandler = (err: unknown) => {
   if (err instanceof Error) {
@@ -26,7 +32,7 @@ export async function login(req: Request, res: Response) {
 
     return res.status(200).json(login)
   } catch (err: any) {
-    return res.status(500).json(errorHandler(err));
+    return res.status(err.status).json(errorHandler(err));
   }
 }
 

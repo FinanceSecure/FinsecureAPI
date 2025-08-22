@@ -1,5 +1,5 @@
-import prisma from "./db";
-import { ISaldoRepository } from "../../ports/repositories/ISaldoRepository";
+import prisma from "../db";
+import { ISaldoRepository } from "../../../ports/repositories/ISaldoRepository";
 import { Saldo } from "@prisma/client";
 
 export class SaldoRepository implements ISaldoRepository {

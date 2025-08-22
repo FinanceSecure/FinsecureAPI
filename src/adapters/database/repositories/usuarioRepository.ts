@@ -1,5 +1,5 @@
-import { Usuario } from "@prisma/client";
-import prisma from "../../adapters/database/db";
+import { Usuario } from "../../../domain/entities/Usuario";
+import prisma from "../db";
 
 interface UsuarioCriacao {
   nome: string,
@@ -9,11 +9,20 @@ interface UsuarioCriacao {
 
 export const usuarioRepository = {
   async buscarPorEmail(email: string): Promise<Usuario | null> {
-    return await prisma.usuario.findUnique({ where: { email } })
+    const usuario = await prisma.usuario.findUnique({ where: { email } })
+    if (!usuario) return null;
+
+    return new Usuario( 
+      usuario.id, 
+      usuario.nome, 
+      usuario.email, 
+      usuario.senha
+    );
   },
 
   async criarUsuario(data: UsuarioCriacao): Promise<Usuario> {
-    return await prisma.usuario.create({ data });
+    const novoUsuario = await prisma.usuario.create({ data });
+    return Object(novoUsuario);
   },
 
   async atualizarEmail(emailAntigo: string, emailNovo: string) {

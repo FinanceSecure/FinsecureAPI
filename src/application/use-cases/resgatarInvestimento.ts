@@ -1,6 +1,6 @@
 import prisma from "../../adapters/database/db";
-import { calcularRendimento } from "../../domain/services/CalcularInvestimento";
-import { calcularResgateParcial } from "../../domain/services/calcularResgateParcial";
+import { calcularRendimento } from "../services/calcInvestimentoService";
+import { calcularResgateParcial } from "../services/calcResgateParcialService";
 
 export async function resgatarInvestimento(
   usuarioId: string,

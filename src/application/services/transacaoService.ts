@@ -1,4 +1,4 @@
-import { atualizarSaldoUsuario } from "./saldo.service";
+import { atualizarSaldoUsuario } from "./saldoService";
 import prisma from "../../adapters/database/db";
 import { TipoTransacao, Transacao } from "@prisma/client";
 
