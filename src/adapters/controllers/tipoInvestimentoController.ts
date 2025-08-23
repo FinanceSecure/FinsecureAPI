@@ -37,7 +37,7 @@ export async function verificarTipoInvestimento(req: Request, res: Response) {
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado." });
 
-    if (!Number.isInteger(tipoInvestimentoId))
+    if (!tipoInvestimentoId)
       return res.status(400).json({ message: "ID de investimento inválido." });
 
     const tipoInvestido = await visualizarTipoInvestimento(tipoInvestimentoId);
