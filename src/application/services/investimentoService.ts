@@ -134,7 +134,7 @@ export async function resgatarInvestimento(
   };
 }
 
-export async function consultarInvestimentosTipo(
+export async function consultarInvestimentosPorTipo(
   usuarioId: string,
   tipoInvestimentoId: string
 ) {

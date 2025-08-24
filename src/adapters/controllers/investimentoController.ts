@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
   adicionarInvestimento,
-  consultarInvestimentosTipo
+  consultarInvestimentosPorTipo
 } from "../../application/services/investimentoService";
 import { resgatarInvestimento } from "../../application/use-cases/resgatarInvestimento";
 
@@ -44,9 +44,12 @@ export async function extrato(req: Request, res: Response) {
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado" });
     if (!investimentoId)
-      return res.status(404).json({ message: "ID invalido." })
+      return res.status(404).json({ message: "ID invalido." });
 
-    const extrato = await consultarInvestimentosTipo(investimentoId, usuarioId);
+    const extrato = await consultarInvestimentosPorTipo(
+      usuarioId,
+      investimentoId
+    );
 
     return res.status(200).json(extrato);
   }
