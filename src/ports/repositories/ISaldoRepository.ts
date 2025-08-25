@@ -1,4 +1,4 @@
-import { Saldo } from "@prisma/client";
+import { Saldo } from "@/domain/entities/Saldo";
 
 export interface ISaldoRepository {
   obterSaldoPorUsuario(usuarioId: string): Promise<Saldo | null>;

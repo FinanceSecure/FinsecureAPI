@@ -3,7 +3,7 @@ import {
   adicionarTransacao,
   atualizarTransacao,
   excluirTransacao
-} from '../../application/services/transacaoService';
+} from '@/application/services/transacaoService';
 
 export async function criarTransacao(req: Request, res: Response) {
   try {

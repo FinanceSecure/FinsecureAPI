@@ -4,9 +4,11 @@ export class Usuario {
     public nome: string,
     public email: string,
     public senha: string,
-    public criadoData?: Date,
-    public atualizadoData?: Date,
-  ) { }
+    public criado?: Date,
+    public atualizado?: Date,
+  ) {
+    if (!email.includes("@")) throw new Error("Email inválido.");
+  }
 
   alterarSenha(novaSenha: string) {
     this.senha = novaSenha;

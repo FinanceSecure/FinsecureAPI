@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import {
   adicionarInvestimento,
   consultarInvestimentosPorTipo
-} from "../../application/services/investimentoService";
-import { resgatarInvestimento } from "../../application/use-cases/resgatarInvestimento";
+} from "@/application/services/investimentoService";
+import { resgatarInvestimento } from "@/application/use-cases/resgatarInvestimento";
 
 export async function investir(req: Request, res: Response) {
   try {

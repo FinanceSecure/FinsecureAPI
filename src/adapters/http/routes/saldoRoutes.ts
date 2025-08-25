@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import { autenticarToken } from "../middlewares/authMiddleware";
 import { verificarSaldo } from "../controllers/saldoController";
 

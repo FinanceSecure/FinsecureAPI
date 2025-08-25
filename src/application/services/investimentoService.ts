@@ -1,5 +1,7 @@
-import { InvestimentoRepository } from "../../adapters/database/repositories/investimentoRepository";
+import { InvestimentoRepository } from "@/adapters/repositories/investimentoRepository";
 import { calcularRendimento } from "./calcInvestimentoService";
+
+const investimentoRepository = new InvestimentoRepository();
 
 export async function adicionarInvestimento(
   usuarioId: string,
@@ -13,7 +15,10 @@ export async function adicionarInvestimento(
   if (!valorInvestido || valorInvestido <= 0) throw new Error("Valor inválido.");
   if (!dataCompra) throw new Error("Data de compra não informada.");
 
-  const { investimento, aplicacao } = await InvestimentoRepository.adicionarInvestimento(
+  const {
+    investimento,
+    aplicacao
+  } = await investimentoRepository.adicionarInvestimento(
     usuarioId,
     tipoInvestimentoId,
     valorInvestido,
@@ -29,8 +34,8 @@ export async function resgatarInvestimento(
   tipoInvestimentoId: string,
   valorParaResgatar: number
 ) {
-  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
-    usuarioId, 
+  const investimentos = await investimentoRepository.encontrarInvestimentosComAplicacoes(
+    usuarioId,
     tipoInvestimentoId
   );
   if (!investimentos.length) throw new Error("Nenhum investimento encontrado");
@@ -80,8 +85,8 @@ export async function resgatarInvestimento(
     if (restanteParaResgatar <= 0) break;
 
     if (valorTotalLiquido <= restanteParaResgatar) {
-      await InvestimentoRepository.marcarInvestimentoComoResgatado(investimento.id);
-      await InvestimentoRepository.criarAplicacaoResgate(
+      await investimentoRepository.marcarInvestimentoComoResgatado(investimento.id);
+      await investimentoRepository.criarAplicacaoResgate(
         investimento.id,
         valorLiquidoInvestido
       );
@@ -101,7 +106,7 @@ export async function resgatarInvestimento(
       const percentual = restanteParaResgatar / valorTotalLiquido;
       const valorParcialInvestido = valorLiquidoInvestido * percentual;
 
-      await InvestimentoRepository.criarAplicacaoResgate(
+      await investimentoRepository.criarAplicacaoResgate(
         investimento.id,
         valorParcialInvestido
       );
@@ -121,7 +126,7 @@ export async function resgatarInvestimento(
     }
   }
 
-  await InvestimentoRepository.atualizarSaldo(
+  await investimentoRepository.atualizarSaldo(
     usuarioId,
     totalResgatado
   );
@@ -138,7 +143,7 @@ export async function consultarInvestimentosPorTipo(
   usuarioId: string,
   tipoInvestimentoId: string
 ) {
-  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
+  const investimentos = await investimentoRepository.encontrarInvestimentosComAplicacoes(
     usuarioId,
     tipoInvestimentoId
   );
@@ -184,7 +189,7 @@ export async function consultarInvestimentosPorTipo(
 
   return {
     tipoInvestimentoId,
-    nome: investimentos[0].tipoInvestimento.nome,
+    nome: investimentos[0].tipoInvestimento?.nome,
     valorTotalInvestido: Number(valorTotalInvestido.toFixed(2)),
     valorTotalRendimentoBruto: Number(valorTotalRendimentoBruto.toFixed(2)),
     valorTotalImposto: Number(valorTotalImposto.toFixed(2)),

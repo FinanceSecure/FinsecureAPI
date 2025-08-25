@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import {
   acrescentartipoInvestimento,
   visualizarTipoInvestimento
-} from "../../application/services/tipoInvestimentoService";
+} from "@/application/services/tipoInvestimentoService";
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
   try {

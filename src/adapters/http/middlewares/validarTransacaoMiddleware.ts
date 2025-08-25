@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../../utils/HttpError";
+import { HttpError } from "@/adapters/errors/HttpError";
 
 export function validarTransacaoMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
