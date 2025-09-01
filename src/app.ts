@@ -5,7 +5,7 @@ import {
   transacao_routes,
   saldo_routes,
   investimento_routes
-} from './adapters/routes';
+} from './adapters/http/routes';
 
 dotenv.config();
 

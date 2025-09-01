@@ -1,5 +1,5 @@
 import { atualizarSaldoUsuario } from "./saldoService";
-import prisma from "../../adapters/database/db";
+import prisma from "@/adapters/database/db";
 import { TipoTransacao, Transacao } from "@prisma/client";
 
 interface ResultadoAdicionarTransacao {

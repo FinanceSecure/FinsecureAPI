@@ -1,16 +1,16 @@
 import bcrypt from "bcrypt";
-import prisma from "../../adapters/database/db";
+import prisma from "@/adapters/database/db";
 import jwt from "jsonwebtoken";
 import { 
   validarCamposCadastro, 
   validarCamposLogin 
-} from "../../domain/validators/usuarioValidator";
-import { ErrosUsuario } from "../../domain/erros/validation";
-import { usuarioRepository } from "../../adapters/database/repositories/usuarioRepository";
+} from "../validators/usuarioValidator";
+import { ErrosUsuario } from "../erros/validation";
+import { usuarioRepository } from "@/adapters/database/repositories/usuarioRepository";
 import { 
   BadRequestError, 
   NotFoundError 
-} from "../../utils/HttpError";
+} from "@/infraestructure/utils/HttpError";
 
 export async function Cadastrar(
   nome: string,
@@ -45,7 +45,6 @@ export async function Logar(
   const usuario = await usuarioRepository.buscarPorEmail(email);
   if (!usuario) throw new NotFoundError(ErrosUsuario.naoEncontrado);
 
-  // TODO: Ajustar validação de senha com a comparação do Hash salvo
   const senhaValida = await bcrypt.compare(senha, usuario.senha);
   if (!senhaValida) throw new BadRequestError(ErrosUsuario.senhaIncorreta);
 
