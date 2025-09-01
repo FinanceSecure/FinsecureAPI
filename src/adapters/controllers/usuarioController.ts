@@ -5,7 +5,7 @@ import {
   Cadastrar,
   Logar,
   Remover
-} from "../../application/services/usuarioService";
+} from "@/domain/services/usuarioService";
 
 const errorHandler = (err: unknown) => {
   if (err instanceof Error) {

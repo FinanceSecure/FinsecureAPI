@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import prisma from "../../adapters/database/db";
+import prisma from "@/adapters/database/db";
 
 export async function atualizarSaldoUsuario(usuarioId: string) {
   const saldoTotal = await prisma.transacao.aggregate({

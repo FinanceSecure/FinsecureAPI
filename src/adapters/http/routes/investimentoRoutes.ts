@@ -1,21 +1,19 @@
 import { Router } from "express";
-import { autenticarToken } from "../middlewares/authMiddleware";
+import { autenticarToken } from "@/adapters/http/middlewares/authMiddleware";
 import {
   extrato,
   investir,
   resgatar
-} from "../controllers/investimentoController";
+} from "@/adapters/controllers/investimentoController"
 import {
   adicionarTipoInvestimento,
   verificarTipoInvestimento
-} from "../controllers/tipoInvestimentoController";
+} from "@/adapters/controllers/tipoInvestimentoController";
 
 const router = Router();
-
 router.get("/extrato/:id", autenticarToken, extrato);
 router.post("/adicionar", autenticarToken, investir);
 router.post("/resgatar/:id", autenticarToken, resgatar);
-
 router.post("/tipo/adicionar", autenticarToken, adicionarTipoInvestimento)
 router.get("/tipo/:id", autenticarToken, verificarTipoInvestimento)
 

@@ -1,4 +1,4 @@
-import { InvestimentoRepository } from "../../adapters/database/repositories/investimentoRepository";
+import { InvestimentoRepository } from "@/adapters/database/repositories/investimentoRepository";
 import { calcularRendimento } from "./calcInvestimentoService";
 
 export async function adicionarInvestimento(

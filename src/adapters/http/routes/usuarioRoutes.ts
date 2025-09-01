@@ -5,11 +5,10 @@ import {
     alterarEmail,
     alterarSenha,
     removerUsuario
-} from '../controllers/usuarioController.js';
-import { autenticarToken } from '../middlewares/authMiddleware.js';
+} from '@/adapters/controllers/usuarioController';
+import { autenticarToken } from '../middlewares/authMiddleware';
 
 const router = express.Router();
-
 router.post('/cadastrar', cadastro);
 router.post('/login', login);
 router.post('/alterar-email', alterarEmail);
