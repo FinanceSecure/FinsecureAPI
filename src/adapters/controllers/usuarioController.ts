@@ -15,14 +15,19 @@ const errorHandler = (err: unknown) => {
 };
 
 export async function cadastro(req: Request, res: Response) {
-  try {
-    const { nome, email, senha } = req.body;
-    const novoUsuario = await Cadastrar(nome, email, senha);
+  // try {
+  //   const { nome, email, senha } = req.body;
+  //   const novoUsuario = await Cadastrar(nome, email, senha);
 
-    return res.status(200).json(novoUsuario);
-  } catch (err) {
-    return res.status(500).json(errorHandler(err));
-  }
+  //   return res.status(200).json(novoUsuario);
+  // } catch (err: any) {
+  //   if (err = "E-mail já cadastrado.")
+  //     return res.status(400).json(err);
+  //   return res.status(500).json(errorHandler(err));
+  // }
+  const { nome, email, senha } = req.body;
+  const novoUsuario = await Cadastrar(nome, email, senha);
+  return res.status (200).json(novoUsuario);
 }
 
 export async function login(req: Request, res: Response) {
