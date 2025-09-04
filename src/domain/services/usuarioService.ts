@@ -1,15 +1,14 @@
 import bcrypt from "bcrypt";
-import prisma from "@/adapters/database/db";
 import jwt from "jsonwebtoken";
-import { 
-  validarCamposCadastro, 
-  validarCamposLogin 
+import {
+  validarCamposCadastro,
+  validarCamposLogin
 } from "../validators/usuarioValidator";
 import { ErrosUsuario } from "../erros/validation";
 import { usuarioRepository } from "@/adapters/database/repositories/usuarioRepository";
-import { 
-  BadRequestError, 
-  NotFoundError 
+import {
+  BadRequestError,
+  NotFoundError
 } from "@/infraestructure/utils/HttpError";
 
 export async function Cadastrar(
@@ -17,14 +16,14 @@ export async function Cadastrar(
   email: string,
   senha: string
 ) {
-  validarCamposCadastro({ 
-    nome, 
-    email, 
-    senha 
+  validarCamposCadastro({
+    nome,
+    email,
+    senha
   });
 
-  const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
-  if (usuarioExistente) throw new Error("E-mail já cadastrado");
+  const usuarioExistente = await usuarioRepository.buscarPorEmail(email);
+  if (usuarioExistente) throw new BadRequestError(ErrosUsuario.jaCadastrado);
 
   const senhaHash = await bcrypt.hash(senha, 10);
   const novoUsuario = await usuarioRepository.criarUsuario({
