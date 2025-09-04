@@ -13,5 +13,5 @@ export function erroMiddleware(
   if (err instanceof Error)
     return res.status(500).json({ error: err.message });
 
-  return res.status(500).json({ error: "Erro interno inesperado. "});
+  return res.status(500).json({ error: "Erro interno inesperado. " });
 }
