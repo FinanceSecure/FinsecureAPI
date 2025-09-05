@@ -1,4 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import {
+  Request,
+  Response,
+  NextFunction
+} from "express";
 import { HttpError } from "@/infraestructure/utils/HttpError";
 
 export function validarTransacaoMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -16,7 +20,7 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
       throw new HttpError("Dados incompletos ou invalidos", 400)
     }
 
-    if (typeof descricao !== 'string' || typeof valor !== 'number' || typeof tipo !== 'string') {
+    if (typeof descricao !== "string" || typeof valor !== "number" || typeof tipo !== "string") {
       throw new HttpError("Formato de dados inválidos", 422);
     }
 
@@ -25,18 +29,18 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
     }
 
     if (!tiposValidos.includes(tipo)) {
-      throw new HttpError("Tipo deve ser informado como 'ENTRADA' ou 'SAIDA'");
+      throw new HttpError("Tipo deve ser informado como ENTRADA ou SAIDA");
     }
 
     if (descricao.length > 255) {
       throw new HttpError("Descrição mito longa inforamda, o máximo é de 255 caracteres", 422)
     }
 
-    if (tipo === 'ENTRADA' && valor <= 0) {
+    if (tipo === "ENTRADA" && valor <= 0) {
       throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422)
     }
 
-    if (tipo === 'SAIDA' && valor >= 0) {
+    if (tipo === "SAIDA" && valor >= 0) {
       throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422)
     }
 
