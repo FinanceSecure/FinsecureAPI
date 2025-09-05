@@ -1,14 +1,10 @@
-import { Request, Response } from 'express';
-import {
-  adicionarTransacao,
-  atualizarTransacao,
-  excluirTransacao
-} from '@/domain/services/transacaoService';
+import { Request, Response } from "express";
+import * as transacaoService from "@/domain/services/transacaoService";
 
 export async function criarTransacao(req: Request, res: Response) {
   try {
     const dados = req.body.validated;
-    const resultado = await adicionarTransacao(
+    const resultado = await transacaoService.adicionarTransacao(
       dados.usuarioId,
       dados.descricao,
       dados.valor,
@@ -35,7 +31,7 @@ export async function alterarTransacao(req: Request, res: Response) {
 
     const { descricao, valor, data, tipo } = req.body;
 
-    const transacaoAtualizada = await atualizarTransacao(
+    const transacaoAtualizada = await transacaoService.atualizarTransacao(
       id, usuarioId, descricao, valor, new Date(data), tipo
     );
 
@@ -57,7 +53,7 @@ export async function cancelarTransacao(req: Request, res: Response) {
     if (!usuarioId)
       return res.status(401).json({ message: "Usuário não autenticado." });
 
-    const transacaoExcluida = await excluirTransacao(id, usuarioId)
+    const transacaoExcluida = await transacaoService.excluirTransacao(id, usuarioId)
 
     return res.status(200).json(transacaoExcluida);
   } catch (err: any) {

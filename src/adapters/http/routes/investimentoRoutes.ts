@@ -1,20 +1,14 @@
-import { Router } from "express";
 import { autenticarToken } from "@/adapters/http/middlewares/authMiddleware";
-import {
-  extrato,
-  investir,
-  resgatar
-} from "@/adapters/controllers/investimentoController"
-import {
-  adicionarTipoInvestimento,
-  verificarTipoInvestimento
-} from "@/adapters/controllers/tipoInvestimentoController";
+import { Router } from "express";
+import * as invCtrll from "@/adapters/controllers/investimentoController"
+import * as tipoInvCtrll from "@/adapters/controllers/tipoInvestimentoController";
 
 const router = Router();
-router.get("/extrato/:id", autenticarToken, extrato);
-router.post("/adicionar", autenticarToken, investir);
-router.post("/resgatar/:id", autenticarToken, resgatar);
-router.post("/tipo/adicionar", autenticarToken, adicionarTipoInvestimento)
-router.get("/tipo/:id", autenticarToken, verificarTipoInvestimento)
+
+router.get("/extrato/:id", autenticarToken, invCtrll.extrato);
+router.post("/adicionar", autenticarToken, invCtrll.investir);
+router.post("/resgatar/:id", autenticarToken, invCtrll.resgatar);
+router.post("/tipo/adicionar", autenticarToken, tipoInvCtrll.adicionarTipoInvestimento);
+router.get("/tipo/:id", autenticarToken, tipoInvCtrll.verificarTipoInvestimento);
 
 export { router as investimento_routes };

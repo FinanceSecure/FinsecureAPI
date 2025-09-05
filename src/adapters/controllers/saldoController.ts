@@ -13,10 +13,10 @@ export async function verificarSaldo(req: Request, res: Response) {
     return res.status(200).json(saldo)
   } catch (error) {
     if (
-      typeof error === 'object' &&
+      typeof error === "object" &&
       error !== null &&
       "message" in error &&
-      typeof (error as any).message === 'string'
+      typeof (error as any).message === "string"
     ) {
       const errorMessage = (error as any).message;
       if (errorMessage === "Saldo não encontrado") {
