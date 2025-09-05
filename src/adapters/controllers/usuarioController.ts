@@ -1,43 +1,38 @@
 import { Request, Response } from "express";
-import {
-  AlteracaoSenha,
-  AlterarEmail,
-  Cadastrar,
-  Logar,
-  Remover
-} from "@/domain/services/usuarioService";
+import * as usuarioService from "@/domain/services/usuarioService"
+import { AuthRequest } from "../http/middlewares/authMiddleware";
 
 export async function cadastro(req: Request, res: Response) {
   const { nome, email, senha } = req.body;
-  const novoUsuario = await Cadastrar(nome, email, senha);
+  const novoUsuario = await usuarioService.Cadastrar(nome, email, senha);
 
   return res.status(200).json(novoUsuario);
 }
 
 export async function login(req: Request, res: Response) {
   const { email, senha } = req.body;
-  const login = await Logar(email, senha);
+  const login = await usuarioService.Logar(email, senha);
 
   return res.status(200).json(login);
 }
 
 export async function alterarEmail(req: Request, res: Response) {
   const { emailAntigo, emailNovo } = req.body;
-  const emailAlterado = await AlterarEmail(emailAntigo, emailNovo);
+  const emailAlterado = await usuarioService.AlterarEmail(emailAntigo, emailNovo);
 
   return res.status(200).json(emailAlterado);
 }
 
 export async function alterarSenha(req: Request, res: Response) {
   const { email, senhaAntiga, senhaNova } = req.body;
-  const senhaAlterada = await AlteracaoSenha(email, senhaAntiga, senhaNova);
+  const senhaAlterada = await usuarioService.AlteracaoSenha(email, senhaAntiga, senhaNova);
 
   return res.status(200).json(senhaAlterada);
 }
 
-export async function removerUsuario(req: Request, res: Response) {
+export async function removerUsuario(req: AuthRequest, res: Response) {
   const usuarioId = req.user?.usuarioId;
-  const remocao = await Remover(String(usuarioId));
+  const remocao = await usuarioService.Remover(String(usuarioId));
 
   return res.status(200).json(remocao);
 }

@@ -1,4 +1,5 @@
 import { Usuario } from "@/domain/entities/Usuario";
+import { ObjectId } from "bson";
 import prisma from "../db";
 
 interface UsuarioCriacao {
@@ -12,10 +13,10 @@ export const usuarioRepository = {
     const usuario = await prisma.usuario.findUnique({ where: { email } })
     if (!usuario) return null;
 
-    return new Usuario( 
-      usuario.id, 
-      usuario.nome, 
-      usuario.email, 
+    return new Usuario(
+      usuario.id,
+      usuario.nome,
+      usuario.email,
       usuario.senha
     );
   },
@@ -40,10 +41,13 @@ export const usuarioRepository = {
   },
 
   async deletarUsuario(usuarioId: string) {
-    await prisma.saldo.deleteMany({ where: { usuarioId } });
-    await prisma.transacao.deleteMany({ where: { usuarioId } });
-    await prisma.investimento.deleteMany({ where: { usuarioId } });
-    await prisma.usuario.delete({ where: { id: usuarioId } });
+    const objectId = new ObjectId(usuarioId)
+
+    await prisma.saldo.deleteMany({ where: { usuarioId: objectId.toString() } });
+    await prisma.transacao.deleteMany({ where: { usuarioId: objectId.toString() } });
+    await prisma.investimento.deleteMany({ where: { usuarioId: objectId.toString() } });
+    await prisma.usuario.delete({ where: { id: objectId.toString() } });
+
     return;
   }
 };
