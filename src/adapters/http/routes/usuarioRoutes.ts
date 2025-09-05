@@ -1,18 +1,13 @@
-import express from 'express';
-import {
-    cadastro,
-    login,
-    alterarEmail,
-    alterarSenha,
-    removerUsuario
-} from '@/adapters/controllers/usuarioController';
-import { autenticarToken } from '../middlewares/authMiddleware';
+import { autenticarToken } from "../middlewares/authMiddleware";
+import express from "express";
+import * as usuarioController from "@/adapters/controllers/usuarioController";
 
 const router = express.Router();
-router.post('/cadastrar', cadastro);
-router.post('/login', login);
-router.post('/alterar-email', alterarEmail);
-router.post('/alterar-senha', alterarSenha);
-router.delete('/apagar-conta', autenticarToken, removerUsuario);
+
+router.post("/cadastrar", usuarioController.cadastro);
+router.post("/login", usuarioController.login);
+router.post("/alterar-email", autenticarToken, usuarioController.alterarEmail);
+router.post("/alterar-senha", autenticarToken, usuarioController.alterarSenha);
+router.delete("/apagar-conta", autenticarToken, usuarioController.removerUsuario);
 
 export { router as usuario_routes };

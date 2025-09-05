@@ -65,7 +65,8 @@ export async function Logar(
 export async function Remover(
   usuarioId: string
 ) {
-  if (!usuarioId) throw new Error(ErrosUsuario.naoEncontrado);
+  if (!usuarioId)
+    throw new NotFoundError(ErrosUsuario.naoEncontrado);
 
   usuarioRepository.deletarUsuario(usuarioId);
 
