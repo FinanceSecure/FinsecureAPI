@@ -1,6 +1,6 @@
 export class Saldo {
   constructor(
-    public id: string | null,
+    public _id: string | null,
     public usuarioId: string,
     public valor: number,
     public dataAtualizacao: Date,

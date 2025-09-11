@@ -1,6 +1,6 @@
-import { autenticarToken } from "../middlewares/authMiddleware";
+import { autenticarToken } from "../../../domain/middlewares/authMiddleware";
 import { Router } from "express";
-import { validarTransacaoMiddleware } from "../middlewares/validarTransacaoMiddleware";
+import { validarTransacaoMiddleware } from "../../../domain/middlewares/validarTransacaoMiddleware";
 import * as transacaoCtrll from "@/adapters/controllers/transacaoController";
 
 const router = Router();

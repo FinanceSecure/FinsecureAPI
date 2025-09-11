@@ -49,7 +49,7 @@ export async function Logar(
 
   const token = jwt.sign(
     {
-      usuarioId: usuario.id,
+      usuarioId: usuario._id,
       nome: usuario.nome,
     },
     process.env.JWT_SECRET || "segredo",

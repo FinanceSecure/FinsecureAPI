@@ -1,4 +1,4 @@
-import { autenticarToken } from "@/adapters/http/middlewares/authMiddleware";
+import { autenticarToken } from "@/domain/middlewares/authMiddleware";
 import { Router } from "express";
 import * as invCtrll from "@/adapters/controllers/investimentoController"
 import * as tipoInvCtrll from "@/adapters/controllers/tipoInvestimentoController";

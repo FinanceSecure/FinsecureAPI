@@ -1,7 +1,7 @@
 
 export class Investimentos {
   constructor(
-    public id: string | null,
+    public _id: string | null,
     public usuarioId: string,
     public tipoInvestimentoId: string,
     public valorInvestido: number,

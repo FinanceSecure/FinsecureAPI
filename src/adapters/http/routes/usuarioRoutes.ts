@@ -1,4 +1,4 @@
-import { autenticarToken } from "../middlewares/authMiddleware";
+import { autenticarToken } from "../../../domain/middlewares/authMiddleware";
 import express from "express";
 import * as usuarioCtrll from "@/adapters/controllers/usuarioController";
 

@@ -1,4 +1,4 @@
-import { autenticarToken } from "../middlewares/authMiddleware";
+import { autenticarToken } from "../../../domain/middlewares/authMiddleware";
 import { Router } from "express";
 import { verificarSaldo } from "@/adapters/controllers/saldoController";
 

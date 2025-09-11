@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { visualizarSaldo } from "@/domain/services/saldoService";
+import { visualizarSaldoComDespesas } from "@/domain/services/saldoService";
 
 export async function verificarSaldo(req: Request, res: Response) {
   try {
@@ -8,7 +8,7 @@ export async function verificarSaldo(req: Request, res: Response) {
     if (!usuarioId)
       return res.status(404).json({ message: "usuario nao encontrado" });
 
-    const saldo = await visualizarSaldo(usuarioId);
+    const saldo = await visualizarSaldoComDespesas(usuarioId);
 
     return res.status(200).json(saldo)
   } catch (error) {
