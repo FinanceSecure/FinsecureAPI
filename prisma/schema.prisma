@@ -65,8 +65,9 @@ model RendaFixa {
 }
 
 model RendaVariavel {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  valor Float  @default(0.0)
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  valor     Float  @default(0.0)
+  descricao String
 
   usuarioId String  @unique @db.ObjectId
   usuario   Usuario @relation("RendaVariavel", fields: [usuarioId], references: [id])
@@ -74,9 +75,10 @@ model RendaVariavel {
 
 model Despesas {
   id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  categoria       String
   valor           Float     @default(0.0)
   descricao       String
-  dataVencimento  DateTime  @default(now())
+  dataVencimento  DateTime?  @default(now())
   dataAgendamento DateTime?
 
   usuarioId String  @db.ObjectId

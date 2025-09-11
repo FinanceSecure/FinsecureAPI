@@ -1,17 +1,17 @@
 type Aplicacao = {
-    valor: number;
+  valor: number;
 };
 
 type Investimento = {
-    aplicacoes: Aplicacao[];
+  aplicacoes: Aplicacao[];
 };
 
 export function calcularValorTotalInvestido(
-    investimentosEfetuados: Investimento[]
+  investimentosEfetuados: Investimento[]
 ): number {
-    return investimentosEfetuados.reduce((total, invesimento) => {
-        const totalAplicacoes = invesimento.aplicacoes.reduce(
-            (soma, aplicacao) => soma + aplicacao.valor, 0);
-        return total + totalAplicacoes
-    }, 0);
+  return investimentosEfetuados.reduce((total, invesimento) => {
+    const totalAplicacoes = invesimento.aplicacoes.reduce(
+      (soma, aplicacao) => soma + aplicacao.valor, 0);
+    return total + totalAplicacoes
+  }, 0);
 }

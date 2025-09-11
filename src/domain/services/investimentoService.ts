@@ -30,7 +30,7 @@ export async function resgatarInvestimento(
   valorParaResgatar: number
 ) {
   const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
-    usuarioId, 
+    usuarioId,
     tipoInvestimentoId
   );
   if (!investimentos.length) throw new Error("Nenhum investimento encontrado");
@@ -192,4 +192,11 @@ export async function consultarInvestimentosPorTipo(
     valorTotalLiquido: Number(valorTotalLiquido.toFixed(2)),
     ultimasAplicacoes: extrato
   };
+}
+
+export async function totalInvestido(usuarioId: string) {
+  if (!usuarioId) throw new Error("Usuário não autenticado.");
+
+  const total = await InvestimentoRepository.calcularTotalInvestido(usuarioId);
+  return { totalInvestido: Number(total.toFixed(2)) };
 }

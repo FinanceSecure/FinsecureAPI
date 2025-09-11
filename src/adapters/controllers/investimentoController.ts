@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import {
   adicionarInvestimento,
-  consultarInvestimentosPorTipo
+  consultarInvestimentosPorTipo,
+  totalInvestido
 } from "@/domain/services/investimentoService";
 import { resgatarInvestimento } from "@/application/use-cases/resgatarInvestimento";
 
@@ -80,6 +81,21 @@ export async function resgatar(req: Request, res: Response) {
     )
 
     return res.status(200).json(resultado);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || "Erro no servidor." })
+  }
+}
+
+export async function valorInvestimentos(req: Request, res: Response) {
+  try {
+    const usuarioId = req.user?.usuarioId;
+
+    if (!usuarioId)
+      return res.status(401).json({ message: "Usuário não autenticado." });
+
+    const investimentos = await totalInvestido(usuarioId);
+
+    return res.status(200).json(investimentos);
   } catch (err: any) {
     res.status(500).json({ message: err.message || "Erro no servidor." })
   }

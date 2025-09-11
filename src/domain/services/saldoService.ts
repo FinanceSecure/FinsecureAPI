@@ -53,7 +53,6 @@ export async function visualizarSaldoComDespesas(usuarioId: string) {
   if (!saldo) throw new Error("Saldo não encontrado.");
 
   const despesas = await prisma.despesas.findMany({ where: { usuarioId } });
-
   const totalDespesas = despesas.reduce(
     (total, despesas) => total + despesas.valor, 0
   );

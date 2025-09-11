@@ -135,5 +135,15 @@ export const InvestimentoRepository = {
         data: { usuarioId, valor: valorResgatado }
       });
     }
+  },
+
+  async calcularTotalInvestido(usuarioId: string) {
+    const result = await prisma.aplicacaoInvestimento.aggregate({
+      where: { investimento: { usuarioId } },
+      _sum: {
+        valor: true
+      }
+    });
+    return result._sum.valor || 0;
   }
 };
