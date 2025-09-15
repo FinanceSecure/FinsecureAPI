@@ -1,28 +1,28 @@
-import { Request, Response } from "express"
 import {
   acrescentartipoInvestimento,
-  visualizarTipoInvestimento
+  visualizarTipoInvestimento,
 } from "@/domain/services/tipoInvestimentoService";
+import { Request, Response } from "express";
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
   try {
     const { nome, tipo, valorPercentual, impostoRenda } = req.body;
 
-    if (!nome)
-      return res.status(404).json({ message: "Nome nao informado" });
+    if (!nome) return res.status(404).json({ message: "Nome nao informado" });
 
-    if (!tipo)
-      return res.status(404).json({ message: "Tipo nao informado" });
+    if (!tipo) return res.status(404).json({ message: "Tipo nao informado" });
 
     if (!valorPercentual)
-      return res.status(404).json({ message: "Valor percentual nao informado" });
+      return res
+        .status(404)
+        .json({ message: "Valor percentual nao informado" });
 
     const tipoAdicionado = await acrescentartipoInvestimento(
       nome,
       tipo,
       valorPercentual,
       impostoRenda
-    )
+    );
     res.status(201).json(tipoAdicionado);
   } catch (err) {
     res.status(500).json({ message: "Falha no servidor" });
@@ -45,7 +45,7 @@ export async function verificarTipoInvestimento(req: Request, res: Response) {
     if (!tipoInvestido)
       return res.status(404).json({ message: "Investimento não encontrado." });
 
-    return res.status(200).json(tipoInvestido)
+    return res.status(200).json(tipoInvestido);
   } catch (err: any) {
     return res.status(500).json({ erro: err.message || "Falha no servidor." });
   }

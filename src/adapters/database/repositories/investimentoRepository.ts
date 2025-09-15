@@ -24,8 +24,8 @@ export const InvestimentoRepository = {
   async encontrarTipoInvestimento(tipoInvestimentoId: string) {
     return prisma.tipoInvestimento.findUnique({
       where: {
-        id: tipoInvestimentoId
-      }
+        id: tipoInvestimentoId,
+      },
     });
   },
 
@@ -33,8 +33,8 @@ export const InvestimentoRepository = {
     return prisma.investimento.findFirst({
       where: {
         usuarioId,
-        tipoInvestimentoId
-      }
+        tipoInvestimentoId,
+      },
     });
   },
 
@@ -48,8 +48,8 @@ export const InvestimentoRepository = {
         investimentoId,
         tipo: "aplicacao",
         valor: valorInvestido,
-        data: dataCompra
-      }
+        data: dataCompra,
+      },
     });
   },
 
@@ -63,15 +63,18 @@ export const InvestimentoRepository = {
     const tipo = await this.encontrarTipoInvestimento(tipoInvestimentoId);
     if (!tipo) throw new Error("Tipo de investimento não encontrado");
 
-    let investimento = await this.encontrarInvestimento(usuarioId, tipoInvestimentoId);
+    let investimento = await this.encontrarInvestimento(
+      usuarioId,
+      tipoInvestimentoId
+    );
     if (!investimento) {
       investimento = await prisma.investimento.create({
         data: {
           usuarioId,
           tipoInvestimentoId,
           dataCompra,
-          dataAtualizacao: dataAtualizacao ?? dataCompra
-        }
+          dataAtualizacao: dataAtualizacao ?? dataCompra,
+        },
       });
     }
 
@@ -84,27 +87,30 @@ export const InvestimentoRepository = {
     return { investimento, aplicacao };
   },
 
-  async encontrarInvestimentosComAplicacoes(usuarioId: string, tipoInvestimentoId: string) {
+  async encontrarInvestimentosComAplicacoes(
+    usuarioId: string,
+    tipoInvestimentoId: string
+  ) {
     return prisma.investimento.findMany({
       where: {
         usuarioId,
         tipoInvestimentoId,
-        resgatado: false
+        resgatado: false,
       },
       include: {
         tipoInvestimento: true,
-        aplicacoes: true
+        aplicacoes: true,
       },
       orderBy: {
-        dataCompra: "asc"
-      }
+        dataCompra: "asc",
+      },
     });
   },
 
   async marcarInvestimentoComoResgatado(investimentoId: string) {
     return prisma.investimento.update({
       where: { id: investimentoId },
-      data: { resgatado: true }
+      data: { resgatado: true },
     });
   },
 
@@ -114,8 +120,8 @@ export const InvestimentoRepository = {
         investimentoId,
         tipo: "resgate",
         valor: valorResgatado,
-        data: new Date()
-      }
+        data: new Date(),
+      },
     });
   },
 
@@ -126,14 +132,14 @@ export const InvestimentoRepository = {
         where: { usuarioId },
         data: {
           valor: {
-            increment: valorResgatado
-          }
-        }
+            increment: valorResgatado,
+          },
+        },
       });
     } else {
       await prisma.saldo.create({
-        data: { usuarioId, valor: valorResgatado }
+        data: { usuarioId, valor: valorResgatado },
       });
     }
-  }
+  },
 };

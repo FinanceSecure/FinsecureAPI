@@ -15,8 +15,8 @@ export function calcularResgateParcial(
       tipo: "total",
       percentual: 1,
       novoValorInvestido: 0,
-      valorResgatado: valorTotalLiquido
-    }
+      valorResgatado: valorTotalLiquido,
+    };
   }
 
   const percentual = valorParaResgatar / valorTotalLiquido;
@@ -26,6 +26,6 @@ export function calcularResgateParcial(
     tipo: "parcial",
     percentual,
     novoValorInvestido,
-    valorResgatado: valorParaResgatar
-  }
+    valorResgatado: valorParaResgatar,
+  };
 }

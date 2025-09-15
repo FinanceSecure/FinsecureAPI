@@ -1,26 +1,30 @@
-import {
-  Request,
-  Response,
-  NextFunction
-} from "express";
+import { Request, Response, NextFunction } from "express";
 import { HttpError } from "@/infraestructure/utils/HttpError";
 
-export function validarTransacaoMiddleware(req: Request, res: Response, next: NextFunction) {
+export function validarTransacaoMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { descricao, valor, data, tipo } = req.body;
     const usuarioId = req.user?.usuarioId;
     const parsedDate = new Date(data);
-    const tiposValidos = ["ENTRADA", "SAIDA"]
+    const tiposValidos = ["ENTRADA", "SAIDA"];
 
     if (!usuarioId) {
       throw new HttpError("Usuário não autenticado", 401);
     }
 
     if (!descricao || valor === undefined || !data || !tipo) {
-      throw new HttpError("Dados incompletos ou invalidos", 400)
+      throw new HttpError("Dados incompletos ou invalidos", 400);
     }
 
-    if (typeof descricao !== "string" || typeof valor !== "number" || typeof tipo !== "string") {
+    if (
+      typeof descricao !== "string" ||
+      typeof valor !== "number" ||
+      typeof tipo !== "string"
+    ) {
       throw new HttpError("Formato de dados inválidos", 422);
     }
 
@@ -33,15 +37,18 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
     }
 
     if (descricao.length > 255) {
-      throw new HttpError("Descrição mito longa inforamda, o máximo é de 255 caracteres", 422)
+      throw new HttpError(
+        "Descrição mito longa inforamda, o máximo é de 255 caracteres",
+        422
+      );
     }
 
     if (tipo === "ENTRADA" && valor <= 0) {
-      throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422)
+      throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422);
     }
 
     if (tipo === "SAIDA" && valor >= 0) {
-      throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422)
+      throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422);
     }
 
     const agora = new Date();
@@ -53,7 +60,7 @@ export function validarTransacaoMiddleware(req: Request, res: Response, next: Ne
       data: parsedDate,
       tipo,
       usuarioId,
-      status
+      status,
     };
 
     next();

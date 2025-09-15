@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import * as usuarioService from "@/domain/services/usuarioService"
 import { AuthRequest } from "../http/middlewares/authMiddleware";
+import { Request, Response } from "express";
+import * as usuarioService from "@/domain/services/usuarioService";
 
 export async function cadastro(req: Request, res: Response) {
   const { nome, email, senha } = req.body;
@@ -18,14 +18,21 @@ export async function login(req: Request, res: Response) {
 
 export async function alterarEmail(req: Request, res: Response) {
   const { emailAntigo, emailNovo } = req.body;
-  const emailAlterado = await usuarioService.AlterarEmail(emailAntigo, emailNovo);
+  const emailAlterado = await usuarioService.AlterarEmail(
+    emailAntigo,
+    emailNovo
+  );
 
   return res.status(200).json(emailAlterado);
 }
 
 export async function alterarSenha(req: Request, res: Response) {
   const { email, senhaAntiga, senhaNova } = req.body;
-  const senhaAlterada = await usuarioService.AlteracaoSenha(email, senhaAntiga, senhaNova);
+  const senhaAlterada = await usuarioService.AlteracaoSenha(
+    email,
+    senhaAntiga,
+    senhaNova
+  );
 
   return res.status(200).json(senhaAlterada);
 }

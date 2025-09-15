@@ -3,6 +3,6 @@ export class TipoInvestimento {
     public id: string | null,
     public nome: string,
     public tipo: string,
-    public valorPercentual: number,
-  ) { }
+    public valorPercentual: number
+  ) {}
 }

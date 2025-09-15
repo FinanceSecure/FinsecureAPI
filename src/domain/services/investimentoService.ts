@@ -1,5 +1,5 @@
-import { InvestimentoRepository } from "@/adapters/database/repositories/investimentoRepository";
 import { calcularRendimento } from "./calcInvestimentoService";
+import { InvestimentoRepository } from "@/adapters/database/repositories/investimentoRepository";
 
 export async function adicionarInvestimento(
   usuarioId: string,
@@ -9,17 +9,20 @@ export async function adicionarInvestimento(
   dataAtualizacao?: Date
 ) {
   if (!usuarioId) throw new Error("Usuário não autenticado.");
-  if (!tipoInvestimentoId) throw new Error("Tipo de investimento não informado.");
-  if (!valorInvestido || valorInvestido <= 0) throw new Error("Valor inválido.");
+  if (!tipoInvestimentoId)
+    throw new Error("Tipo de investimento não informado.");
+  if (!valorInvestido || valorInvestido <= 0)
+    throw new Error("Valor inválido.");
   if (!dataCompra) throw new Error("Data de compra não informada.");
 
-  const { investimento, aplicacao } = await InvestimentoRepository.adicionarInvestimento(
-    usuarioId,
-    tipoInvestimentoId,
-    valorInvestido,
-    dataCompra,
-    dataAtualizacao
-  );
+  const { investimento, aplicacao } =
+    await InvestimentoRepository.adicionarInvestimento(
+      usuarioId,
+      tipoInvestimentoId,
+      valorInvestido,
+      dataCompra,
+      dataAtualizacao
+    );
 
   return { investimento, aplicacao };
 }
@@ -29,20 +32,25 @@ export async function resgatarInvestimento(
   tipoInvestimentoId: string,
   valorParaResgatar: number
 ) {
-  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
-    usuarioId, 
-    tipoInvestimentoId
-  );
+  const investimentos =
+    await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
+      usuarioId,
+      tipoInvestimentoId
+    );
   if (!investimentos.length) throw new Error("Nenhum investimento encontrado");
 
   let totalLiquidoDisponivel = 0;
   const rendimentoCalculados = [];
 
   for (const inv of investimentos) {
-    const valorInvestido = inv.aplicacoes?.filter(
-      a => a.tipo === "aplicacao").reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
-    const valorResgatado = inv.aplicacoes?.filter(
-      a => a.tipo === "resgate").reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
+    const valorInvestido =
+      inv.aplicacoes
+        ?.filter((a) => a.tipo === "aplicacao")
+        .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
+    const valorResgatado =
+      inv.aplicacoes
+        ?.filter((a) => a.tipo === "resgate")
+        .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
     const valorLiquidoInvestido = valorInvestido - valorResgatado;
     const rend = calcularRendimento(
       valorInvestido,
@@ -58,11 +66,12 @@ export async function resgatarInvestimento(
       investimento: inv,
       ...rend,
       valorLiquidoInvestido,
-      valorTotalLiquido
+      valorTotalLiquido,
     });
   }
 
-  if (totalLiquidoDisponivel < valorParaResgatar) throw new Error("Valor para resgatar superior ao disponível.");
+  if (totalLiquidoDisponivel < valorParaResgatar)
+    throw new Error("Valor para resgatar superior ao disponível.");
 
   let restanteParaResgatar = valorParaResgatar;
   let totalResgatado = 0;
@@ -74,13 +83,15 @@ export async function resgatarInvestimento(
       rendimentoLiquido,
       imposto,
       valorLiquidoInvestido,
-      valorTotalLiquido
+      valorTotalLiquido,
     } = rendInfo;
 
     if (restanteParaResgatar <= 0) break;
 
     if (valorTotalLiquido <= restanteParaResgatar) {
-      await InvestimentoRepository.marcarInvestimentoComoResgatado(investimento.id);
+      await InvestimentoRepository.marcarInvestimentoComoResgatado(
+        investimento.id
+      );
       await InvestimentoRepository.criarAplicacaoResgate(
         investimento.id,
         valorLiquidoInvestido
@@ -95,7 +106,7 @@ export async function resgatarInvestimento(
         valorResgatado: valorTotalLiquido,
         dataCompra: investimento.dataCompra,
         rendimentoLiquido,
-        imposto
+        imposto,
       });
     } else {
       const percentual = restanteParaResgatar / valorTotalLiquido;
@@ -114,23 +125,20 @@ export async function resgatarInvestimento(
         valorResgatado: restanteParaResgatar,
         dataCompra: investimento.dataCompra,
         rendimentoLiquido: rendimentoLiquido * percentual,
-        imposto: imposto * percentual
+        imposto: imposto * percentual,
       });
 
       restanteParaResgatar = 0;
     }
   }
 
-  await InvestimentoRepository.atualizarSaldo(
-    usuarioId,
-    totalResgatado
-  );
+  await InvestimentoRepository.atualizarSaldo(usuarioId, totalResgatado);
 
   return {
     message: "Resgate efetuado com sucesso!",
     valorTotalResgatado: Number(totalResgatado.toFixed(2)),
     sobrouParaResgatar: Number(restanteParaResgatar.toFixed(2)),
-    detalhes: detalhesResgate
+    detalhes: detalhesResgate,
   };
 }
 
@@ -138,10 +146,11 @@ export async function consultarInvestimentosPorTipo(
   usuarioId: string,
   tipoInvestimentoId: string
 ) {
-  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
-    usuarioId,
-    tipoInvestimentoId
-  );
+  const investimentos =
+    await InvestimentoRepository.encontrarInvestimentosComAplicacoes(
+      usuarioId,
+      tipoInvestimentoId
+    );
   if (!investimentos.length)
     throw new Error("Nenhum investimento ativo deste tipo encontrado");
 
@@ -152,9 +161,10 @@ export async function consultarInvestimentosPorTipo(
   let valorTotalLiquido = 0;
 
   const extrato = investimentos.map((inv) => {
-    const valorInvestido = inv.aplicacoes
-      ?.filter(a => a.tipo === "aplicacao")
-      .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
+    const valorInvestido =
+      inv.aplicacoes
+        ?.filter((a) => a.tipo === "aplicacao")
+        .reduce((acc, cur) => acc + cur.valor, 0) ?? 0;
 
     const rendimento = calcularRendimento(
       valorInvestido,
@@ -190,6 +200,6 @@ export async function consultarInvestimentosPorTipo(
     valorTotalImposto: Number(valorTotalImposto.toFixed(2)),
     valorTotalRendimentoLiquido: Number(valorTotalRendimentoLiquido.toFixed(2)),
     valorTotalLiquido: Number(valorTotalLiquido.toFixed(2)),
-    ultimasAplicacoes: extrato
+    ultimasAplicacoes: extrato,
   };
 }

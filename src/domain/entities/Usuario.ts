@@ -5,8 +5,8 @@ export class Usuario {
     public email: string,
     public senha: string,
     public criadoData?: Date,
-    public atualizadoData?: Date,
-  ) { }
+    public atualizadoData?: Date
+  ) {}
 
   alterarSenha(novaSenha: string) {
     this.senha = novaSenha;

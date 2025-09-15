@@ -1,6 +1,6 @@
-import prisma from "@/adapters/database/db";
 import { calcularRendimento } from "@/domain/services/calcInvestimentoService";
 import { calcularResgateParcial } from "@/domain/services/calcResgateParcialService";
+import prisma from "@/adapters/database/db";
 
 export async function resgatarInvestimento(
   usuarioId: string,
@@ -11,15 +11,15 @@ export async function resgatarInvestimento(
     where: {
       usuarioId,
       tipoInvestimentoId,
-      resgatado: false
+      resgatado: false,
     },
     include: {
       tipoInvestimento: true,
-      aplicacoes: true
+      aplicacoes: true,
     },
     orderBy: {
-      dataCompra: "asc"
-    }
+      dataCompra: "asc",
+    },
   });
 
   if (!investimentos.length) throw new Error("Nenhum investimento encontrado.");
@@ -29,7 +29,7 @@ export async function resgatarInvestimento(
 
   for (const investimento of investimentos) {
     const valorAplicado = investimento.aplicacoes
-      .filter(a => a.tipo === "aplicacao")
+      .filter((a) => a.tipo === "aplicacao")
       .reduce((soma, a) => soma + a.valor, 0);
 
     const rendimento = calcularRendimento(
@@ -47,7 +47,7 @@ export async function resgatarInvestimento(
       investimento,
       valorAplicado,
       rendimento,
-      valorTotalLiquido
+      valorTotalLiquido,
     });
   }
 
@@ -62,18 +62,17 @@ export async function resgatarInvestimento(
   for (const item of calculados) {
     if (restante <= 0) break;
 
-    const {
-      investimento,
-      valorAplicado,
-      valorTotalLiquido,
-      rendimento
-    } = item;
+    const { investimento, valorAplicado, valorTotalLiquido, rendimento } = item;
 
-    const resgate = calcularResgateParcial(valorTotalLiquido, valorAplicado, restante);
+    const resgate = calcularResgateParcial(
+      valorTotalLiquido,
+      valorAplicado,
+      restante
+    );
 
     await prisma.investimento.update({
       where: { id: investimento.id },
-      data: { resgatado: resgate.tipo === "total" }
+      data: { resgatado: resgate.tipo === "total" },
     });
 
     restante -= resgate.valorResgatado;
@@ -83,21 +82,23 @@ export async function resgatarInvestimento(
       id: investimento.id,
       tipo: resgate.tipo,
       valorResgatado: Number(resgate.valorResgatado.toFixed(2)),
-      rendimentoLiquido: Number((rendimento.rendimentoLiquido * resgate.percentual).toFixed(2)),
-      imposto: Number((rendimento.imposto * resgate.percentual).toFixed(2))
+      rendimentoLiquido: Number(
+        (rendimento.rendimentoLiquido * resgate.percentual).toFixed(2)
+      ),
+      imposto: Number((rendimento.imposto * resgate.percentual).toFixed(2)),
     });
   }
 
   await prisma.saldo.upsert({
     where: { usuarioId },
     update: { valor: { increment: totalResgatado } },
-    create: { usuarioId, valor: totalResgatado }
+    create: { usuarioId, valor: totalResgatado },
   });
 
   return {
     message: "Resgate efetuado com sucesso.",
     valorTotalResgatado: Number(totalResgatado.toFixed(2)),
     sobrouParaResgatar: Number(restante.toFixed(2)),
-    detalhes: detalhesResgate
+    detalhes: detalhesResgate,
   };
 }

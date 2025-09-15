@@ -6,14 +6,13 @@ export async function acrescentartipoInvestimento(
   valorPercentual: number,
   impostoRenda: boolean
 ) {
-
   const tipoInvestimento = await prisma.tipoInvestimento.create({
     data: {
       nome,
       tipo,
       valorPercentual,
-      impostoRenda
-    }
+      impostoRenda,
+    },
   });
 
   return tipoInvestimento;
@@ -21,7 +20,7 @@ export async function acrescentartipoInvestimento(
 
 export async function visualizarTipoInvestimento(id: string) {
   const tipoInvestimento = await prisma.tipoInvestimento.findFirst({
-    where: { id }
+    where: { id },
   });
 
   return tipoInvestimento;

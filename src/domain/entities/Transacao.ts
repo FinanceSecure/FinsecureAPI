@@ -1,5 +1,5 @@
-type TipoTransacao = "ENTRADA" | "SAIDA" | "INVESTIMENTO";
 type StatusTransacao = "PENDENTE" | "EFETIVADA";
+type TipoTransacao = "ENTRADA" | "SAIDA" | "INVESTIMENTO";
 
 export class Transacao {
   constructor(
@@ -9,11 +9,11 @@ export class Transacao {
     public valor: number,
     public status: StatusTransacao,
     public descricao?: string,
-    public data?: Date,
-  ) { }
+    public data?: Date
+  ) {}
 
   isAtiva(): boolean {
-    return this.status === "EFETIVADA"
+    return this.status === "EFETIVADA";
   }
 
   validarValor(): boolean {

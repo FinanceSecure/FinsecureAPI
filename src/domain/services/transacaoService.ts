@@ -1,6 +1,6 @@
 import { atualizarSaldoUsuario } from "./saldoService";
-import prisma from "@/adapters/database/db";
 import { TipoTransacao, Transacao } from "@prisma/client";
+import prisma from "@/adapters/database/db";
 
 interface ResultadoAdicionarTransacao {
   transacao: Transacao;
@@ -17,7 +17,7 @@ export async function adicionarTransacao(
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  const dataTransacao = new Date(data)
+  const dataTransacao = new Date(data);
   dataTransacao.setHours(0, 0, 0, 0);
 
   const status = dataTransacao <= hoje ? "EFETIVADA" : "PENDENTE";
@@ -28,13 +28,13 @@ export async function adicionarTransacao(
       valor,
       data,
       tipo,
-      status
-    }
+      status,
+    },
   });
 
-  const saldo = await atualizarSaldoUsuario(usuarioId)
+  const saldo = await atualizarSaldoUsuario(usuarioId);
 
-  return ({ transacao, saldoAtual: saldo });
+  return { transacao, saldoAtual: saldo };
 }
 
 export async function atualizarTransacao(
@@ -43,17 +43,14 @@ export async function atualizarTransacao(
   descricao: string,
   valor: number,
   data: Date,
-  tipo: TipoTransacao,
+  tipo: TipoTransacao
 ) {
+  if (!id) throw new Error("ID da transação inválido");
 
-  if (!id)
-    throw new Error("ID da transação inválido");
-
-  if (!usuarioId)
-    throw new Error("Usuário não autenticado");
+  if (!usuarioId) throw new Error("Usuário não autenticado");
 
   const transacao = await prisma.transacao.findFirst({
-    where: { id, usuarioId }
+    where: { id, usuarioId },
   });
 
   if (!transacao)
@@ -65,27 +62,21 @@ export async function atualizarTransacao(
       descricao,
       valor,
       data,
-      tipo
-    }
+      tipo,
+    },
   });
 
   return transacaoAtual;
 }
 
-
-export async function excluirTransacao(
-  id: string,
-  usuarioId: string,
-) {
+export async function excluirTransacao(id: string, usuarioId: string) {
   const transacao = await prisma.transacao.findFirst({
-    where: { id, usuarioId }
+    where: { id, usuarioId },
   });
 
-  if (!id)
-    throw new Error("Id da transação inválido");
+  if (!id) throw new Error("Id da transação inválido");
 
-  if (!usuarioId)
-    throw new Error("Usuário não authenticado");
+  if (!usuarioId) throw new Error("Usuário não authenticado");
 
   if (!transacao)
     throw new Error("Transação não encontrada ou não pertece ao usuário");
@@ -102,14 +93,14 @@ export async function liberarTransacoesPendentes() {
   const pendentes = await prisma.transacao.findMany({
     where: {
       status: "PENDENTE",
-      data: { lte: hoje }
-    }
+      data: { lte: hoje },
+    },
   });
 
   for (const transacao of pendentes) {
     await prisma.transacao.update({
       where: { id: transacao.id },
-      data: { status: "EFETIVADA" }
+      data: { status: "EFETIVADA" },
     });
     await atualizarSaldoUsuario(transacao.usuarioId);
   }

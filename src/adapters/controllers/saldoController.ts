@@ -10,7 +10,7 @@ export async function verificarSaldo(req: Request, res: Response) {
 
     const saldo = await visualizarSaldo(usuarioId);
 
-    return res.status(200).json(saldo)
+    return res.status(200).json(saldo);
   } catch (error) {
     if (
       typeof error === "object" &&
@@ -20,12 +20,11 @@ export async function verificarSaldo(req: Request, res: Response) {
     ) {
       const errorMessage = (error as any).message;
       if (errorMessage === "Saldo não encontrado") {
-        return res.status(404).json({ message: errorMessage })
+        return res.status(404).json({ message: errorMessage });
       }
-      console.error("Erro ao buscar salldo: ", errorMessage)
-    }
-    else {
-      console.error("Erro ao buscar salldo: ", error)
+      console.error("Erro ao buscar salldo: ", errorMessage);
+    } else {
+      console.error("Erro ao buscar salldo: ", error);
     }
     return res.status(500).json({ message: "Erro interno no servidor" });
   }

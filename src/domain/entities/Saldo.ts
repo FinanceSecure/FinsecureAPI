@@ -3,8 +3,8 @@ export class Saldo {
     public id: string | null,
     public usuarioId: string,
     public valor: number,
-    public dataAtualizacao: Date,
-  ) { }
+    public dataAtualizacao: Date
+  ) {}
 
   atualizarSaldo(novoValor: number) {
     this.valor = novoValor;

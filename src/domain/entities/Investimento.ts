@@ -1,4 +1,3 @@
-
 export class Investimentos {
   constructor(
     public id: string | null,
@@ -8,7 +7,7 @@ export class Investimentos {
     public dataCompra: Date,
     public dataAtualizacao: Date,
     public rendimentoAcumulado: number = 0
-  ) { }
+  ) {}
 
   atualizarRendimento(valor: number) {
     this.rendimentoAcumulado = valor;

@@ -1,6 +1,6 @@
-import prisma from "../db";
 import { ISaldoRepository } from "@/domain/ports/repositories/ISaldoRepository";
 import { Saldo } from "@prisma/client";
+import prisma from "../db";
 
 export class SaldoRepository implements ISaldoRepository {
   async obterSaldoPorUsuario(usuarioId: string): Promise<Saldo | null> {

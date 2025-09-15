@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
 import { HttpError } from "@/infraestructure/utils/HttpError";
+import { NextFunction, Request, Response } from "express";
 
 export function erroMiddleware(
   err: unknown,
@@ -10,8 +10,7 @@ export function erroMiddleware(
   if (err instanceof HttpError)
     return res.status(err.status).json({ error: err.message });
 
-  if (err instanceof Error)
-    return res.status(500).json({ error: err.message });
+  if (err instanceof Error) return res.status(500).json({ error: err.message });
 
   return res.status(500).json({ error: "Erro interno inesperado. " });
 }

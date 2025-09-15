@@ -20,10 +20,11 @@ export function calcularRendimento(
   aplicaImposto: boolean
 ): Rendimento {
   const hoje = new Date();
-  const diasUteis = differenceInBusinessDays(hoje, dataCompra)
+  const diasUteis = differenceInBusinessDays(hoje, dataCompra);
   const rendimentoDiarioBase = calcularCDIDiario(CDI_ANUAL);
-  const rendimentoDiario = rendimentoDiarioBase + (percentualCDI / 100);
-  const bruto = valorInvestido * (Math.pow(1 + rendimentoDiario, diasUteis)) - valorInvestido;
+  const rendimentoDiario = rendimentoDiarioBase + percentualCDI / 100;
+  const bruto =
+    valorInvestido * Math.pow(1 + rendimentoDiario, diasUteis) - valorInvestido;
 
   let imposto = 0;
   if (aplicaImposto) {
@@ -38,6 +39,6 @@ export function calcularRendimento(
     valorTotalBruto: Number((valorInvestido + bruto).toFixed(2)),
     imposto: Number(imposto.toFixed(2)),
     rendimentoLiquido: Number(liquido.toFixed(2)),
-    valorTotalLiquido: Number((valorInvestido + liquido).toFixed(2))
-  }
+    valorTotalLiquido: Number((valorInvestido + liquido).toFixed(2)),
+  };
 }
