@@ -1,7 +1,4 @@
-import {
-  acrescentartipoInvestimento,
-  visualizarTipoInvestimento,
-} from "@/domain/services/tipoInvestimentoService";
+import { acrescentartipoInvestimento, visualizarTipoInvestimento } from "@/domain/services/tipoInvestimentoService";
 import { Request, Response } from "express";
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {
@@ -9,13 +6,8 @@ export async function adicionarTipoInvestimento(req: Request, res: Response) {
     const { nome, tipo, valorPercentual, impostoRenda } = req.body;
 
     if (!nome) return res.status(404).json({ message: "Nome nao informado" });
-
     if (!tipo) return res.status(404).json({ message: "Tipo nao informado" });
-
-    if (!valorPercentual)
-      return res
-        .status(404)
-        .json({ message: "Valor percentual nao informado" });
+    if (!valorPercentual) return res.status(404).json({ message: "Valor percentual nao informado" });
 
     const tipoAdicionado = await acrescentartipoInvestimento(
       nome,

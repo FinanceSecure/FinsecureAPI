@@ -4,7 +4,7 @@ export class Saldo {
     public usuarioId: string,
     public valor: number,
     public dataAtualizacao: Date
-  ) {}
+  ) { }
 
   atualizarSaldo(novoValor: number) {
     this.valor = novoValor;

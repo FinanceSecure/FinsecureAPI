@@ -1,7 +1,4 @@
-import {
-  adicionarInvestimento,
-  consultarInvestimentosPorTipo,
-} from "@/domain/services/investimentoService";
+import { adicionarInvestimento, consultarInvestimentosPorTipo } from "@/domain/services/investimentoService";
 import { Request, Response } from "express";
 import { resgatarInvestimento } from "@/application/use-cases/resgatarInvestimento";
 

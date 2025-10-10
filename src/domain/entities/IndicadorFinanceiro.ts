@@ -4,5 +4,5 @@ export class IndicadorFinanceiro {
     public nome: string,
     public valorPercentual: number,
     public dataReferencia: Date
-  ) {}
+  ) { }
 }

@@ -4,5 +4,5 @@ export class TipoInvestimento {
     public nome: string,
     public tipo: string,
     public valorPercentual: number
-  ) {}
+  ) { }
 }

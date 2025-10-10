@@ -10,7 +10,7 @@ export class Transacao {
     public status: StatusTransacao,
     public descricao?: string,
     public data?: Date
-  ) {}
+  ) { }
 
   isAtiva(): boolean {
     return this.status === "EFETIVADA";
