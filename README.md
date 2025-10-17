@@ -11,7 +11,7 @@ Tendo **bcrypt** biblioteca destinada a autenticação segura, transformando sen
 - TypeScript
 - Express
 - Prisma ORM
-- PostgreSQL
+- MongoDB
 - bcrypt
 - dotenv
 

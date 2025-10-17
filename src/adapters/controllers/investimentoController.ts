@@ -4,17 +4,20 @@ import { resgatarInvestimento } from "@/application/use-cases/resgatarInvestimen
 
 export async function investir(req: Request, res: Response) {
   try {
+    const {
+      tipoInvestimentoId,
+      valorInvestido,
+      dataCompra,
+      dataAtualizacao
+    } = req.body;
     const usuarioId = req.user?.usuarioId;
-    const { tipoInvestimentoId, valorInvestido, dataCompra, dataAtualizacao } =
-      req.body;
-
-    if (!usuarioId)
-      return res.status(401).json({ message: "Uusario não autenticado." });
-
     const parsedDataCompra = new Date(dataCompra);
     const parsedDataAtualizacao = dataAtualizacao
       ? new Date(dataAtualizacao)
       : undefined;
+
+    if (!usuarioId)
+      return res.status(401).json({ message: "Uusario não autenticado." });
 
     const investimento = await adicionarInvestimento(
       usuarioId,
