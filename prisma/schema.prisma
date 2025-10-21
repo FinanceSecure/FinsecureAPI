@@ -26,9 +26,12 @@ model Usuario {
   criado     DateTime  @default(now())
   atualizado DateTime? @updatedAt
 
-  transacoes   Transacao[]
-  saldo        Saldo?         @relation("UsuarioSaldo")
-  Investimento Investimento[]
+  transacoes    Transacao[]
+  saldo         Saldo?         @relation("UsuarioSaldo")
+  Investimento  Investimento[]
+  Despesas      Despesas[]     @relation("UsuarioDespesas")
+  RendaFixa     RendaFixa?     @relation("UsuarioRendaFixa")
+  RendaVariavel RendaVariavel? @relation("RendaVariavel")
 }
 
 model Transacao {
@@ -51,6 +54,35 @@ model Saldo {
 
   usuarioId String  @unique @db.ObjectId
   usuario   Usuario @relation("UsuarioSaldo", fields: [usuarioId], references: [id])
+}
+
+model RendaFixa {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  valor Float  @default(0.0)
+
+  usuarioId String  @unique @db.ObjectId
+  usuario   Usuario @relation("UsuarioRendaFixa", fields: [usuarioId], references: [id])
+}
+
+model RendaVariavel {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  valor     Float  @default(0.0)
+  descricao String
+
+  usuarioId String  @unique @db.ObjectId
+  usuario   Usuario @relation("RendaVariavel", fields: [usuarioId], references: [id])
+}
+
+model Despesas {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  categoria       String
+  valor           Float     @default(0.0)
+  descricao       String
+  dataVencimento  DateTime?  @default(now())
+  dataAgendamento DateTime?
+
+  usuarioId String  @db.ObjectId
+  usuario   Usuario @relation("UsuarioDespesas", fields: [usuarioId], references: [id])
 }
 
 model Investimento {

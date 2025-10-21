@@ -89,13 +89,13 @@ export const InvestimentoRepository = {
 
   async encontrarInvestimentosComAplicacoes(
     usuarioId: string,
-    tipoInvestimentoId: string
+    tipoInvestimentoId?: string
   ) {
     return prisma.investimento.findMany({
       where: {
         usuarioId,
-        tipoInvestimentoId,
         resgatado: false,
+        ...(tipoInvestimentoId && { tipoInvestimentoId }),
       },
       include: {
         tipoInvestimento: true,
@@ -142,4 +142,14 @@ export const InvestimentoRepository = {
       });
     }
   },
+
+  async calcularTotalInvestido(usuarioId: string) {
+    const result = await prisma.aplicacaoInvestimento.aggregate({
+      where: { investimento: { usuarioId } },
+      _sum: {
+        valor: true
+      }
+    });
+    return result._sum.valor || 0;
+  }
 };

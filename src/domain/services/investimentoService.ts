@@ -1,3 +1,4 @@
+import { calcularValorTotalInvestido } from "@/infraestructure/utils/calcInvestimentos";
 import { calcularRendimento } from "./calcInvestimentoService";
 import { InvestimentoRepository } from "@/adapters/database/repositories/investimentoRepository";
 
@@ -201,5 +202,26 @@ export async function consultarInvestimentosPorTipo(
     valorTotalRendimentoLiquido: Number(valorTotalRendimentoLiquido.toFixed(2)),
     valorTotalLiquido: Number(valorTotalLiquido.toFixed(2)),
     ultimasAplicacoes: extrato,
+  };
+}
+
+export async function totalInvestido(usuarioId: string) {
+  if (!usuarioId) throw new Error("Usuário não autenticado.");
+
+  const total = await InvestimentoRepository.calcularTotalInvestido(usuarioId);
+  return {
+    totalInvestido: Number(total.toFixed(2))
+  };
+}
+
+export async function investimentosEfetuados(usuarioId: string) {
+  if (!usuarioId) throw new Error("Usuário não autenticado.");
+
+  const investimentos = await InvestimentoRepository.encontrarInvestimentosComAplicacoes(usuarioId, undefined);
+  const valorTotalInvestido = await InvestimentoRepository.calcularTotalInvestido(usuarioId);
+
+  return {
+    valorTotalInvestido,
+    investimentos
   };
 }
