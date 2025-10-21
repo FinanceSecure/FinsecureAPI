@@ -4,22 +4,22 @@ import { validarTransacaoMiddleware } from "../middlewares/validarTransacaoMiddl
 import * as transacaoCtrll from "@/adapters/controllers/transacaoController";
 
 const router = Router();
-const authToken = [autenticarToken];
+const AT = [autenticarToken];
 const validarTransacao = [validarTransacaoMiddleware];
 
 router.post(
   "/adicionar",
-  [...authToken, ...validarTransacao],
+  [...AT, ...validarTransacao],
   transacaoCtrll.criarTransacao
 );
 router.put(
   "/alterar/:id",
-  [...authToken, ...validarTransacao],
+  [...AT, ...validarTransacao],
   transacaoCtrll.alterarTransacao
 );
 router.delete(
   "/cancelar-transacao/:id",
-  authToken,
+  AT,
   transacaoCtrll.cancelarTransacao
 );
 

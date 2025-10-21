@@ -12,6 +12,8 @@ app.use("/api/usuarios", routes.usuario_routes);
 app.use("/api/transacoes", routes.transacao_routes);
 app.use("/api/saldo", routes.saldo_routes);
 app.use("/api/investimento", routes.investimento_routes);
+app.use("/api/despesa", routes.despesa_routes);
+app.use("/api/receita", routes.receita_routes);
 app.use(erroMiddleware);
 
 export default app;

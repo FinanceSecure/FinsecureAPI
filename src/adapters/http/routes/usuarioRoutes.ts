@@ -3,11 +3,12 @@ import express from "express";
 import * as usuarioCtrll from "@/adapters/controllers/usuarioController";
 
 const router = express.Router();
+const AT = [autenticarToken];
 
 router.post("/cadastrar", usuarioCtrll.cadastro);
 router.post("/login", usuarioCtrll.login);
-router.post("/alterar-email", autenticarToken, usuarioCtrll.alterarEmail);
-router.post("/alterar-senha", autenticarToken, usuarioCtrll.alterarSenha);
-router.delete("/apagar-conta", autenticarToken, usuarioCtrll.removerUsuario);
+router.post("/alterar-email", AT, usuarioCtrll.alterarEmail);
+router.post("/alterar-senha", AT, usuarioCtrll.alterarSenha);
+router.delete("/apagar-conta", AT, usuarioCtrll.removerUsuario);
 
 export { router as usuario_routes };
