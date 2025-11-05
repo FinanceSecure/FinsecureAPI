@@ -39,7 +39,7 @@ export async function verificarTotalDespesas(usuarioId: string) {
   const totalDespesas = calcularTotalDespesas(despesas);
 
   return {
-    valorTotal: totalDespesas,
+    totalDespesas: totalDespesas,
     detalhes: { despesas }
   };
 }

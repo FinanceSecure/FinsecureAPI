@@ -8,19 +8,11 @@ export async function verificarReceitas(usuarioId: string) {
   const rendaVariavel = await prisma.rendaVariavel.findMany({
     where: { usuarioId }
   });
-  const investimentos = await prisma.investimento.findMany({
-    where: { usuarioId },
-    include: {
-      aplicacoes: true,
-      tipoInvestimento: true,
-    }
-  });
   const totalRendaFixa = rendaFixa.reduce(
     (total, renda) => total + renda.valor, 0
   );
-  const valorTotalInvestido = calcularValorTotalInvestido(investimentos);
   const totalRendaVariavel = rendaVariavel.reduce(
-    (total, renda) => total + renda.valor, 0 + valorTotalInvestido
+    (total, renda) => total + renda.valor, 0
   );
   const totalReceitas = totalRendaFixa + totalRendaVariavel;
 
@@ -31,7 +23,6 @@ export async function verificarReceitas(usuarioId: string) {
     detalhes: {
       rendaFixa,
       outros: rendaVariavel,
-      investimentos
     }
   };
 };
