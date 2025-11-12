@@ -22,7 +22,8 @@ export async function resgatarInvestimento(
     },
   });
 
-  if (!investimentos.length) throw new Error("Nenhum investimento encontrado.");
+  if (!investimentos.length)
+    throw new Error("Nenhum investimento encontrado.");
 
   let totalDisponivel = 0;
   const calculados = [];
@@ -51,9 +52,8 @@ export async function resgatarInvestimento(
     });
   }
 
-  if (valorParaResgatar > totalDisponivel) {
+  if (valorParaResgatar > totalDisponivel)
     throw new Error("Valor solicitado excede o disponível.");
-  }
 
   let restante = valorParaResgatar;
   const detalhesResgate = [];
@@ -62,7 +62,12 @@ export async function resgatarInvestimento(
   for (const item of calculados) {
     if (restante <= 0) break;
 
-    const { investimento, valorAplicado, valorTotalLiquido, rendimento } = item;
+    const {
+      investimento,
+      valorAplicado,
+      valorTotalLiquido,
+      rendimento
+    } = item;
 
     const resgate = calcularResgateParcial(
       valorTotalLiquido,
@@ -72,7 +77,16 @@ export async function resgatarInvestimento(
 
     await prisma.investimento.update({
       where: { id: investimento.id },
-      data: { resgatado: resgate.tipo === "total" },
+      data: { resgatado: resgate.tipo == "total" },
+    });
+
+    await prisma.aplicacaoInvestimento.create({
+      data: {
+        tipo: "resgate",
+        valor: -resgate.valorResgatado,
+        data: new Date(),
+        investimentoId: investimento.id,
+      }
     });
 
     restante -= resgate.valorResgatado;
