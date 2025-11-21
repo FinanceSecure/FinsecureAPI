@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import { Usuario } from "@/domain/entities/Usuario";
+import { Usuario } from "@domain/entities/Usuario";
 import prisma from "../db";
 
 interface UsuarioCriacao {

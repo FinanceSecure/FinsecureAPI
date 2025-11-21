@@ -103,7 +103,6 @@
 //     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
 //   }
 // }
-
 {
   "compilerOptions": {
     "target": "ES2020",
@@ -119,7 +118,18 @@
     ],
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": [
+        "*"
+      ],
+      "@adapters/*": [
+        "adapters/*"
+      ],
+      "@application/*": [
+        "application/*"
+      ],
+      "@domain/*": [
+        "domain/*"
+      ]
     }
   },
   "include": [

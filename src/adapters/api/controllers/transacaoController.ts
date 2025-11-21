@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as transacaoService from "@/domain/services/transacaoService";
+import * as transacaoService from "@domain/services/transacaoService";
 
 export async function criarTransacao(req: Request, res: Response) {
   try {

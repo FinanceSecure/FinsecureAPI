@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { visualizarSaldo } from "@/domain/services/saldoService";
+import { visualizarSaldo } from "@domain/services/saldoService";
 
 export async function verificarSaldo(req: Request, res: Response) {
   try {

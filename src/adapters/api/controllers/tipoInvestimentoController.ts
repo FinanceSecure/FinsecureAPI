@@ -1,7 +1,7 @@
-import { 
-  acrescentartipoInvestimento, 
+import {
+  acrescentartipoInvestimento,
   visualizarTipoInvestimento
-} from "@/domain/services/tipoInvestimentoService";
+} from "@domain/services/tipoInvestimentoService";
 import { Request, Response } from "express";
 
 export async function adicionarTipoInvestimento(req: Request, res: Response) {

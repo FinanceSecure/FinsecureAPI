@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { resgatarInvestimento } from "@/application/use-cases/resgatarInvestimento";
-import * as InvService from "@/domain/services/investimentoService";
+import { resgatarInvestimento } from "@application/use-cases/resgatarInvestimento";
+import * as InvService from "@domain/services/investimentoService";
 
-export async function extrato (req: Request, res: Response) {
+export async function extrato(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
     const investimentos = await InvService.investimentosEfetuados(usuarioId!);

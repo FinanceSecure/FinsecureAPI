@@ -1,6 +1,5 @@
-import { calcularValorTotalInvestido } from "@/infraestructure/utils/calcInvestimentos";
 import { calcularRendimento } from "./calcInvestimentoService";
-import { InvestimentoRepository } from "@/adapters/database/repositories/investimentoRepository";
+import { InvestimentoRepository } from "@adapters/database/repositories/investimentoRepository";
 
 export async function adicionarInvestimento(
   usuarioId: string,

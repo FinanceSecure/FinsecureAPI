@@ -1,9 +1,9 @@
 import { ErrosUsuario } from "../erros/validation";
-import { usuarioRepository } from "@/adapters/database/repositories/usuarioRepository";
+import { usuarioRepository } from "@adapters/database/repositories/usuarioRepository";
 import {
   BadRequestError,
   NotFoundError,
-} from "@/infraestructure/utils/HttpError";
+} from "@adapters/api/exceptions/HttpError";
 import {
   validarCamposCadastro,
   validarCamposLogin,

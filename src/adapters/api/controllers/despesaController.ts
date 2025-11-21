@@ -1,7 +1,7 @@
-import { AuthRequest } from "../http/middlewares/authMiddleware";
-import { NotFoundError } from "@/infraestructure/utils/HttpError";
+import { AuthRequest } from "@adapters/http/middlewares/authMiddleware";
+import { NotFoundError } from "@adapters/api/exceptions/HttpError";
 import { Response } from "express";
-import * as DespService from "@/domain/services/despesaService";
+import * as DespService from "@domain/services/despesaService";
 
 export async function Despesas(req: AuthRequest, res: Response) {
   const usuarioId = req.user?.usuarioId;

@@ -1,6 +1,6 @@
 import { autenticarToken } from "../middlewares/authMiddleware";
 import express from "express";
-import * as usuarioCtrll from "@/adapters/controllers/usuarioController";
+import * as usuarioCtrll from "@adapters/api/controllers/usuarioController";
 
 const router = express.Router();
 const AT = [autenticarToken];

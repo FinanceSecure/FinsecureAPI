@@ -1,4 +1,4 @@
-import { ISaldoRepository } from "@/domain/ports/repositories/ISaldoRepository";
+import { ISaldoRepository } from "@domain/ports/repositories/ISaldoRepository";
 import { Saldo } from "@prisma/client";
 import prisma from "../db";
 

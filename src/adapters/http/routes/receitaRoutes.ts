@@ -1,6 +1,6 @@
 import { autenticarToken } from "../middlewares/authMiddleware";
 import { Router } from "express";
-import * as ReceitaController from "@/adapters/controllers/receitaController";
+import * as ReceitaController from "@adapters/api/controllers/receitaController"
 
 const router = Router();
 const AT = [autenticarToken]

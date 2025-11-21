@@ -1,4 +1,4 @@
-import { HttpError } from "@/infraestructure/utils/HttpError";
+import { HttpError } from "@adapters/api/exceptions/HttpError";
 import { NextFunction, Request, Response } from "express";
 
 export function erroMiddleware(

@@ -1,4 +1,4 @@
-import { Usuario } from "@/domain/entities/Usuario";
+import { Usuario } from "@domain/entities/Usuario";
 
 export interface IUsuarioRepository {
   encontrarPorEmail(email: string): Promise<Usuario | null>;

@@ -1,6 +1,6 @@
-import { AuthRequest } from "../http/middlewares/authMiddleware";
+import { AuthRequest } from "@adapters/http/middlewares/authMiddleware";
 import { Request, Response } from "express";
-import * as usuarioService from "@/domain/services/usuarioService";
+import * as usuarioService from "@domain/services/usuarioService";
 
 export async function cadastro(req: Request, res: Response) {
   const { nome, email, senha } = req.body;

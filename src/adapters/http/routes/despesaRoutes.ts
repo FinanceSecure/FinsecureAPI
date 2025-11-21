@@ -1,6 +1,6 @@
-import { autenticarToken } from "@/adapters/http/middlewares/authMiddleware";
+import { autenticarToken } from "@adapters/http/middlewares/authMiddleware";
 import { Router } from "express";
-import * as DespesaController from "@/adapters/controllers/despesaController";
+import * as DespesaController from "@adapters/api/controllers/despesaController";
 
 const router = Router();
 const AT = [autenticarToken]

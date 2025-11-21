@@ -1,5 +1,5 @@
-import prisma from "@/adapters/database/db";
-import { calcularTotalDespesas } from "@/infraestructure/utils/calcDespesas";
+import prisma from "@adapters/database/db";
+import { calcularTotalDespesas } from "@domain/utils/calcDespesas";
 
 export function listarDespesas(usuarioId: string) {
   return prisma.despesas.findMany({

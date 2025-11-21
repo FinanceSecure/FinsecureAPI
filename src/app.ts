@@ -1,5 +1,5 @@
-import { erroMiddleware } from "@/infraestructure/middlewares/erroMiddleware";
-import * as routes from "@/adapters/http/routes";
+import { erroMiddleware } from "./adapters/api/middlewares/erroMiddleware";
+import * as routes from "@adapters/http/routes"
 import dotenv from "dotenv";
 import express from "express";
 

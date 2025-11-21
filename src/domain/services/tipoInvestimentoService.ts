@@ -1,4 +1,4 @@
-import prisma from "@/adapters/database/db";
+import prisma from "@adapters/database/db";
 
 export async function acrescentartipoInvestimento(
   nome: string,

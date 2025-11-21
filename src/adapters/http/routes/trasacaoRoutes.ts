@@ -1,7 +1,7 @@
 import { autenticarToken } from "../middlewares/authMiddleware";
 import { Router } from "express";
 import { validarTransacaoMiddleware } from "../middlewares/validarTransacaoMiddleware";
-import * as transacaoCtrll from "@/adapters/controllers/transacaoController";
+import * as transacaoCtrll from "@adapters/api/controllers/transacaoController";
 
 const router = Router();
 const AT = [autenticarToken];

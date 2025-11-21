@@ -1,7 +1,7 @@
-import { AuthRequest } from "../http/middlewares/authMiddleware";
-import { NotFoundError } from "@/infraestructure/utils/HttpError";
+import { AuthRequest } from "@adapters/http/middlewares/authMiddleware";
+import { NotFoundError } from "@adapters/api/exceptions/HttpError";
 import { Request, Response } from "express";
-import * as ReceitaService from "@/domain/services/receitaService";
+import * as ReceitaService from "@domain/services/receitaService";
 
 export async function Receitas(req: AuthRequest, res: Response) {
   const usuarioId = req.user?.usuarioId;

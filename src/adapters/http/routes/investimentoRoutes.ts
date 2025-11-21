@@ -1,7 +1,7 @@
-import { autenticarToken } from "@/adapters/http/middlewares/authMiddleware";
+import { autenticarToken } from "@adapters/http/middlewares/authMiddleware";
 import { Router } from "express";
-import * as invCtrll from "@/adapters/controllers/investimentoController";
-import * as tipoInvCtrll from "@/adapters/controllers/tipoInvestimentoController";
+import * as invCtrll from "@adapters/api/controllers/investimentoController";
+import * as tipoInvCtrll from "@adapters/api/controllers/tipoInvestimentoController";
 
 const router = Router();
 const AT = [autenticarToken];
