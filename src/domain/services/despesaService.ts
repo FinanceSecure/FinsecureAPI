@@ -1,5 +1,6 @@
 import prisma from "@adapters/database/db";
 import { calcularTotalDespesas } from "@domain/utils/calcDespesas";
+import { atualizarSaldoUsuario } from "./saldoService";
 
 export function listarDespesas(usuarioId: string) {
   return prisma.despesas.findMany({
@@ -16,9 +17,13 @@ export async function criarDespesa(despesaData: {
   dataAgendamento?: Date | null;
   usuarioId: string;
 }) {
-  return prisma.despesas.create({
-    data: despesaData,
+  const despesa = await prisma.despesas.create({
+    data: despesaData
   });
+
+  await atualizarSaldoUsuario(despesaData.usuarioId);
+
+  return despesa;
 }
 
 export async function listarDespesasAgendadas(usuarioId: string) {

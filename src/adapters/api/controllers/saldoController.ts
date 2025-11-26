@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import { visualizarSaldo } from "@domain/services/saldoService";
+import { NotFoundError } from "../exceptions/HttpError";
 
 export async function verificarSaldo(req: Request, res: Response) {
   try {
     const usuarioId = req.user?.usuarioId;
-
-    if (!usuarioId)
-      return res.status(404).json({ message: "usuario nao encontrado" });
+    if (!usuarioId) return NotFoundError;
 
     const saldo = await visualizarSaldo(usuarioId);
-
     return res.status(200).json(saldo);
   } catch (error) {
     if (

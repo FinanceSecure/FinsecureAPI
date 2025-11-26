@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DB_URL")
 }
 
 enum TipoTransacao {
@@ -78,7 +77,7 @@ model Despesas {
   categoria       String
   valor           Float     @default(0.0)
   descricao       String
-  dataVencimento  DateTime?  @default(now())
+  dataVencimento  DateTime? @default(now())
   dataAgendamento DateTime?
 
   usuarioId String  @db.ObjectId

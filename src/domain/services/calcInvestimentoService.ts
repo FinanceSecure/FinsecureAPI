@@ -2,7 +2,7 @@ import { calcularCDIDiario } from "./cdiService";
 import { differenceInBusinessDays } from "date-fns";
 import { getIrRate } from "./IrService";
 
-const CDI_ANUAL = Number(process.env.CDI_ANUAL || 13.65);
+const CDI_ANUAL = Number(process.env.CDI_ANUAL || 14.90);
 
 export interface Rendimento {
   diasUteis: number;

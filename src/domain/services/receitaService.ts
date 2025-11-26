@@ -1,4 +1,5 @@
 import prisma from "@adapters/database/db";
+import { atualizarSaldoUsuario } from "./saldoService";
 
 export async function verificarReceitas(usuarioId: string) {
   const rendaFixa = await prisma.rendaFixa.findMany({
@@ -45,6 +46,8 @@ export async function adicionarRendaFixa(data: {
     }
   });
 
+  await atualizarSaldoUsuario(data.usuarioId);
+
   return novaRendaFixa;
 }
 
@@ -54,16 +57,17 @@ export async function alterarRendaFixa(data: {
 }) {
   const renda = await prisma.rendaFixa.findUnique({
     where: { usuarioId: data.usuarioId }
-  });
+  })
 
-  if (!renda) {
-    throw new Error("Renda fixa não encontrada para o usuário.");
-  }
+  if (!renda)
+    throw new Error("Renda fixa não encontrada para este usuário.")
 
   const rendaFixaAtualizada = await prisma.rendaFixa.update({
     where: { usuarioId: data.usuarioId },
     data: { valor: data.valor }
   });
+
+  await atualizarSaldoUsuario(data.usuarioId);
 
   return rendaFixaAtualizada;
 }
@@ -72,6 +76,8 @@ export async function removerRendaFixa(usuarioId: string) {
   const rendaFixaRemovida = await prisma.rendaFixa.delete({
     where: { usuarioId }
   });
+
+  await atualizarSaldoUsuario(usuarioId);
 
   return rendaFixaRemovida;
 }
@@ -108,6 +114,8 @@ export async function adicionarRendaVariavel(data: {
     }
   });
 
+  await atualizarSaldoUsuario(data.usuarioId);
+
   return novaRendaVariavel;
 }
 
@@ -134,6 +142,8 @@ export async function alterarRendaVariavel(data: {
     }
   });
 
+  await atualizarSaldoUsuario(existente.usuarioId);
+
   return rendaVariavelAtualizada;
 }
 
@@ -147,6 +157,8 @@ export async function removerRendaVariavel(id: string) {
   const rendaVariavelRemovida = await prisma.rendaVariavel.delete({
     where: { id }
   });
+
+  await atualizarSaldoUsuario(existente.usuarioId);
 
   return rendaVariavelRemovida;
 }
