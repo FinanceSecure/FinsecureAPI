@@ -1,4 +1,4 @@
-import { ErrosUsuario } from "../erros/validation";
+import { MensagensErro } from "../erros/validation";
 import { usuarioRepository } from "@adapters/database/repositories/usuarioRepository";
 import {
   BadRequestError,
@@ -12,14 +12,11 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export async function Cadastrar(nome: string, email: string, senha: string) {
-  validarCamposCadastro({
-    nome,
-    email,
-    senha,
-  });
+  validarCamposCadastro({ nome, email, senha });
 
   const usuarioExistente = await usuarioRepository.buscarPorEmail(email);
-  if (usuarioExistente) throw new BadRequestError(ErrosUsuario.jaCadastrado);
+  if (usuarioExistente)
+    throw new BadRequestError(MensagensErro.USUARIO.JA_CADASTRADO);
 
   const senhaHash = await bcrypt.hash(senha, 10);
   const novoUsuario = await usuarioRepository.criarUsuario({
@@ -35,10 +32,10 @@ export async function Logar(email: string, senha: string) {
   validarCamposLogin({ email, senha });
 
   const usuario = await usuarioRepository.buscarPorEmail(email);
-  if (!usuario) throw new NotFoundError(ErrosUsuario.naoEncontrado);
+  const senhaValida = usuario ? await bcrypt.compare(senha, usuario.senha) : false;
 
-  const senhaValida = await bcrypt.compare(senha, usuario.senha);
-  if (!senhaValida) throw new BadRequestError(ErrosUsuario.senhaIncorreta);
+  if (!usuario || !senhaValida) 
+    throw new BadRequestError(MensagensErro.AUTH.CREDENCIAIS_INVALIDAS)
 
   const token = jwt.sign(
     {
@@ -56,19 +53,21 @@ export async function Logar(email: string, senha: string) {
 }
 
 export async function Remover(usuarioId: string) {
-  if (!usuarioId) throw new NotFoundError(ErrosUsuario.naoEncontrado);
+  if (!usuarioId)
+    throw new NotFoundError(MensagensErro.USUARIO.NAO_ENCONTRADO);
 
-  usuarioRepository.deletarUsuario(usuarioId);
-
+  await usuarioRepository.deletarUsuario(usuarioId);
   return "Usuário removido com sucesso!";
 }
 
 export async function AlterarEmail(emailAntigo: string, emailNovo: string) {
   const usuario = await usuarioRepository.buscarPorEmail(emailAntigo);
-  if (!usuario) throw new Error(ErrosUsuario.naoEncontrado);
+  if (!usuario)
+    throw new NotFoundError(MensagensErro.USUARIO.NAO_ENCONTRADO);
 
   const emailCadastrado = await usuarioRepository.buscarPorEmail(emailNovo);
-  if (emailCadastrado) throw new Error(ErrosUsuario.jaCadastrado);
+  if (emailCadastrado)
+    throw new BadRequestError(MensagensErro.USUARIO.JA_CADASTRADO);
 
   await usuarioRepository.atualizarEmail(emailAntigo, emailNovo);
 
@@ -80,15 +79,20 @@ export async function AlteracaoSenha(
   senhaAntiga: string,
   senhaNova: string
 ) {
-  if (!email) throw new BadRequestError("E-mail não informado.");
-  if (!senhaAntiga) throw new BadRequestError("Senha anterior não informada.");
-  if (!senhaNova) throw new BadRequestError("Senha nova não informada.");
+  if (!email) 
+    throw new BadRequestError(MensagensErro.VALIDACAO.EMAIL);
+  if (!senhaAntiga) 
+    throw new BadRequestError(MensagensErro.VALIDACAO.SENHA_ANTIGA);
+  if (!senhaNova) 
+    throw new BadRequestError(MensagensErro.VALIDACAO.SENHA_NOVA);
 
   const usuario = await usuarioRepository.buscarPorEmail(email);
-  if (!usuario) throw new NotFoundError("Usuário não encontrado.");
+  if (!usuario) 
+    throw new NotFoundError(MensagensErro.USUARIO.NAO_ENCONTRADO);
 
   const senhaValida = await bcrypt.compare(senhaAntiga, usuario.senha);
-  if (!senhaValida) throw new BadRequestError("Senha antiga incorreta");
+  if (!senhaValida) 
+    throw new BadRequestError(MensagensErro.USUARIO.SENHA_ANTIGA_INCORRETA);
 
   const senhaHash = await bcrypt.hash(senhaNova, 10);
   await usuarioRepository.atualizarSenha(email, senhaHash);

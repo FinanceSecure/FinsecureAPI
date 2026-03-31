@@ -13,7 +13,12 @@ export const usuarioRepository = {
     const usuario = await prisma.usuario.findUnique({ where: { email } });
     if (!usuario) return null;
 
-    return new Usuario(usuario.id, usuario.nome, usuario.email, usuario.senha);
+    return new Usuario(
+      usuario.id, 
+      usuario.nome, 
+      usuario.email, 
+      usuario.senha
+    );
   },
 
   async criarUsuario(data: UsuarioCriacao): Promise<Usuario> {
