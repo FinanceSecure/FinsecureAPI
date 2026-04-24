@@ -1,10 +1,18 @@
-import { autenticarToken } from "../middlewares/authMiddleware";
-import { Router } from "express";
-import { verificarSaldo } from "@adapters/api/controllers/saldoController";
+import { FastifyInstance } from "fastify";
+import "@fastify/swagger";
+import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
+import { getBalanceFastify } from "../controllers/saldoController.js";
 
-const router = Router();
-const AT = [autenticarToken];
-
-router.get("/verificar", AT, verificarSaldo);
-
-export { router as saldo_routes };
+export async function registerBalanceRoutes(app: FastifyInstance) {
+  app.get(
+    "/api/saldo/verificar",
+    {
+      preHandler: autenticarTokenFastify,
+      schema: {
+        summary: "Verificar saldo atual",
+        tags: ["Transações"],
+      },
+    },
+    getBalanceFastify
+  );
+}

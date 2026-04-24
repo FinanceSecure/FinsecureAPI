@@ -1,4 +1,5 @@
-import prisma from "../db";
+import prisma from "../db.js";
+import { IInvestimentoRepository } from "../../../application/ports/repositories/IInvestimentoRepository.js";
 
 interface Investimento {
   usuarioId: string;
@@ -20,7 +21,7 @@ interface InvestimentoComAplicacao {
   aplicacao: AplicacaoInvestimento;
 }
 
-export const InvestimentoRepository = {
+export const InvestimentoRepository: IInvestimentoRepository = {
   async encontrarTipoInvestimento(tipoInvestimentoId: string) {
     return prisma.tipoInvestimento.findUnique({
       where: {

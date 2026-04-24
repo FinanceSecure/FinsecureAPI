@@ -1,19 +1,42 @@
-import { erroMiddleware } from "./adapters/api/middlewares/erroMiddleware";
-import * as routes from "@adapters/http/routes"
 import dotenv from "dotenv";
-import express from "express";
+import Fastify from "fastify";
+import { erroMiddleware } from "./adapters/http/middlewares/erroMiddleware.js";
+import { registerHttpRoutes } from "./adapters/http/routes/index.js";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 
 dotenv.config();
 
-const app = express();
-app.use(express.json());
+const app = Fastify({
+  logger: true,
+});
 
-app.use("/api/usuarios", routes.usuario_routes);
-app.use("/api/transacoes", routes.transacao_routes);
-app.use("/api/saldo", routes.saldo_routes);
-app.use("/api/investimento", routes.investimento_routes);
-app.use("/api/despesa", routes.despesa_routes);
-app.use("/api/receita", routes.receita_routes);
-app.use(erroMiddleware);
+await app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: "Finsecure API",
+      description: "API de gestão financeira pessoal e investimentos",
+      version: "1.0.0",
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
+  },
+});
+
+await app.register(fastifySwaggerUi, {
+  routePrefix: "/documentation",
+});
+
+app.setErrorHandler(erroMiddleware);
+
+await registerHttpRoutes(app);
 
 export default app;

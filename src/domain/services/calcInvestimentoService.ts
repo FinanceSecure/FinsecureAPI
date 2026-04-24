@@ -1,6 +1,6 @@
-import { calcularCDIDiario } from "./cdiService";
+import { calcularCDIDiario } from "./cdiService.js";
 import { differenceInBusinessDays } from "date-fns";
-import { getIrRate } from "./IrService";
+import { getIrRate } from "./IrService.js";
 
 const CDI_ANUAL = Number(process.env.CDI_ANUAL || 14.90);
 
