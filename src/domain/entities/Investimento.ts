@@ -1,4 +1,4 @@
-export class Investimentos {
+export class Investimento {
   constructor(
     public id: string | null,
     public usuarioId: string,

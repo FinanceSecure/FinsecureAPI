@@ -1,28 +1,25 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-import { Usuario } from "../../domain/entities/Usuario.js";
-import { MensagensErro } from "../../domain/erros/validation.js";
-
-import { IUsuarioRepository } from "../ports/repositories/IUsuarioRepository.js";
-
-import {
-  validarCamposCadastro,
-  validarCamposLogin,
-} from "../validators/usuarioValidator.js";
-
+import { Usuario } from "@domain/entities";
+import { MensagensErro } from "@domain/erros/validation.js";
+import { ISaldoRepository, IUsuarioRepository } from "../ports/repositories";
+import { validarCamposCadastro, validarCamposLogin } from "@application/validators";
 import {
   AuthenticationError,
   ConflictError,
   ResourceNotFoundError,
-  ValidationError,
-} from "../errors/ApplicationError.js";
-
-import { env } from "@/shared/config/env.js";
+  ValidationError
+} from "@application/errors";
+import { env } from "@/shared/config";
 
 export function criarUsuarioUseCases(
-  usuarioRepository: IUsuarioRepository
+  deps: {
+    usuarioRepository: IUsuarioRepository;
+    saldoRepository: ISaldoRepository;
+  }
 ) {
+  const { usuarioRepository, saldoRepository } = deps;
+
   return {
     async cadastrar(
       nome: string,
@@ -31,17 +28,12 @@ export function criarUsuarioUseCases(
     ) {
       validarCamposCadastro({ nome, email, senha });
 
-      const usuarioExistente =
-        await usuarioRepository.encontrarPorEmail(email);
+      const usuarioExistente = await usuarioRepository.encontrarPorEmail(email);
 
-      if (usuarioExistente) {
-        throw new ConflictError(
-          MensagensErro.USUARIO.JA_CADASTRADO
-        );
-      }
+      if (usuarioExistente)
+        throw new ConflictError(MensagensErro.USUARIO.JA_CADASTRADO);
 
       const senhaHash = await bcrypt.hash(senha, 10);
-
       const usuario = new Usuario(
         null,
         nome,
@@ -49,7 +41,12 @@ export function criarUsuarioUseCases(
         senhaHash
       );
 
-      return await usuarioRepository.salvar(usuario);
+      const usuarioSalvo = await usuarioRepository.salvar(usuario);
+
+      if (usuarioSalvo.id)
+        await saldoRepository.criarSaldo(usuarioSalvo.id, 0);
+
+      return usuarioSalvo;
     },
 
     async logar(email: string, senha: string) {

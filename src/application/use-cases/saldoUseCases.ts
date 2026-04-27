@@ -3,14 +3,9 @@ import {
   IReceitaRepository,
   ISaldoRepository,
   ITransacaoRepository,
-} from "../ports/repositories/index.js";
-
-import {
-  ResourceNotFoundError,
-  ValidationError,
-} from "../errors/ApplicationError.js";
-
-import { MensagensErro } from "../../domain/erros/validation.js";
+} from "../ports/repositories";
+import { ResourceNotFoundError, ValidationError } from "@application/errors";
+import { MensagensErro } from "@domain/erros";
 
 export function criarSaldoUseCases(deps: {
   saldoRepository: ISaldoRepository;
@@ -90,9 +85,10 @@ export function criarSaldoUseCases(deps: {
         );
 
       if (!saldo) {
-        throw new ResourceNotFoundError(
-          "Saldo não encontrado."
-        );
+        return {
+          mensagem: "Saldo localizado com sucesso.",
+          saldo: { id: null, usuarioId, valor: 0, dataAtualizacao: new Date() },
+        };
       }
 
       return {

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -10,34 +10,22 @@
     "resolveJsonModule": true,
     "rootDir": "src",
     "outDir": "dist",
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "typeRoots": [
       "./src/adapters/http/types",
       "./node_modules/@types"
     ],
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@adapters/*": [
-        "./src/adapters/*"
-      ],
-      "@application/*": [
-        "./src/application/*"
-      ],
-      "@domain/*": [
-        "./src/domain/*"
-      ],
-      "@shared/*": [
-        "./src/shared/*"
-      ],
+      "@/*": ["src/*"],
+      "@adapters/*": ["src/adapters/*"],
+      "@application/*": ["src/application/*"],
+      "@domain/*": ["src/domain/*"],
+      "@shared/*": ["src/shared/*"]
     }
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": [
     "node_modules",
     "dist"
