@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { erroMiddleware } from "./adapters/http/middlewares/erroMiddleware.js";
 import { registerHttpRoutes } from "./adapters/http/routes/index.js";
 import fastifySwagger from "@fastify/swagger";
@@ -9,6 +10,13 @@ dotenv.config();
 
 const app = Fastify({
   logger: true,
+});
+
+await app.register(cors, {
+  origin: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 });
 
 await app.register(fastifySwagger, {
@@ -36,6 +44,7 @@ await app.register(fastifySwaggerUi, {
 });
 
 app.setErrorHandler(erroMiddleware);
+console.log("ERROR: " + erroMiddleware);
 
 await registerHttpRoutes(app);
 

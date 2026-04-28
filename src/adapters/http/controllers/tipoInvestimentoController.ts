@@ -5,10 +5,10 @@ import type {
 } from "@application/dto/investimento/index.js";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { criarTipoInvestimentoUseCases } from "@application/use-cases/index.js";
-import { tipoInvestimentoRepository } from "@adapters/database/repositories/tipoInvestimentoRepository.js";
+import { TipoInvestimentoRepository } from "@adapters/database/repositories/tipoInvestimentoRepository.js";
 
 const tipoInvestimentoUseCases = criarTipoInvestimentoUseCases(
-  tipoInvestimentoRepository
+  TipoInvestimentoRepository
 );
 
 function sendFastifyError(reply: FastifyReply, error: unknown) {

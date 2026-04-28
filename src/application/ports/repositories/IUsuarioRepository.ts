@@ -1,4 +1,4 @@
-import { Usuario } from "../../../domain/entities/Usuario.js";
+import { Usuario } from "@domain/entities";
 
 export interface IUsuarioRepository {
   encontrarPorEmail(email: string): Promise<Usuario | null>;

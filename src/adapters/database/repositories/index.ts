@@ -1,0 +1,7 @@
+export { DespesaRepository } from "./despesaRepository.js"
+export { InvestimentoRepository } from "./investimentoRepository.js"
+export { ReceitaRepository } from "./receitaRepository.js"
+export { SaldoRepository } from "./saldoRepository.js"
+export { TipoInvestimentoRepository } from "./tipoInvestimentoRepository.js"
+export { TransacaoRepository } from "./transacaoRepository.js"
+export { UsuarioRepository } from "./usuarioRepository.js"

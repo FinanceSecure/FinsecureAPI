@@ -1,7 +1,7 @@
 import prisma from "../db.js";
-import { ITipoInvestimentoRepository } from "../../../application/ports/repositories/ITipoInvestimentoRepository.js";
+import { ITipoInvestimentoRepository } from "@application/ports/repositories/ITipoInvestimentoRepository.js";
 
-export const tipoInvestimentoRepository: ITipoInvestimentoRepository = {
+export const TipoInvestimentoRepository: ITipoInvestimentoRepository = {
   criar(data) {
     return prisma.tipoInvestimento.create({ data });
   },

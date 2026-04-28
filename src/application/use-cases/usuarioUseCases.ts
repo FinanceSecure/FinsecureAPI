@@ -1,24 +1,32 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { Usuario } from "@domain/entities";
+import { Usuario } from "@domain/entities/Usuario.js";
 import { MensagensErro } from "@domain/erros/validation.js";
-import { ISaldoRepository, IUsuarioRepository } from "../ports/repositories";
-import { validarCamposCadastro, validarCamposLogin } from "@application/validators";
+import { IUsuarioRepository } from "../ports/repositories/IUsuarioRepository.js";
+import { ISaldoRepository } from "../ports/repositories/ISaldoRepository.js";
+import { validarCamposCadastro, validarCamposLogin } from "../validators/index.js";
 import {
   AuthenticationError,
   ConflictError,
   ResourceNotFoundError,
   ValidationError
-} from "@application/errors";
-import { env } from "@/shared/config";
+} from "../errors/index.js";
+import { env } from "@shared/config";
 
-export function criarUsuarioUseCases(
-  deps: {
-    usuarioRepository: IUsuarioRepository;
-    saldoRepository: ISaldoRepository;
-  }
-) {
-  const { usuarioRepository, saldoRepository } = deps;
+type UsuarioUseCasesDeps = {
+  usuarioRepository: IUsuarioRepository;
+  saldoRepository: ISaldoRepository;
+}
+
+export function criarUsuarioUseCases({
+  usuarioRepository,
+  saldoRepository
+}: UsuarioUseCasesDeps) {
+  if (!usuarioRepository)
+    throw new Error("UsuarioRepository é obrigatório");
+
+  if (!saldoRepository)
+    throw new Error("SaldoRepository é obrigatório");
 
   return {
     async cadastrar(

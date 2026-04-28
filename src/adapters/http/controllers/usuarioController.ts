@@ -5,12 +5,9 @@ import type {
   UpdateUserEmailRequestDto,
   UpdateUserPasswordRequestDto,
 } from "@application/dto/usuario/index.js";
-import { criarUsuarioUseCases } from "@application/use-cases/index.js";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { usuarioRepository } from "@adapters/database/repositories/usuarioRepository.js";
 import { AuthenticatedUser } from "../middlewares/authMiddleware.js";
-
-const usuarioUseCases = criarUsuarioUseCases(usuarioRepository);
+import { usuarioUseCases } from "@shared/container/index.js";
 
 interface HttpJsonResponse {
   status(code: number): {
@@ -84,7 +81,7 @@ async function changeUserPassword(body: UpdateUserPasswordRequestDto) {
 }
 
 async function removeUser(user?: AuthenticatedUser) {
-  return usuarioUseCases.remover(String(user?.usuarioId));
+  return usuarioUseCases.remover(user?.usuarioId || "");
 }
 
 export async function registerUserHandler(

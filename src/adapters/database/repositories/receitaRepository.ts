@@ -1,7 +1,7 @@
 import prisma from "../db.js";
-import { IReceitaRepository } from "../../../application/ports/repositories/IReceitaRepository.js";
+import { IReceitaRepository } from "@application/ports/repositories/IReceitaRepository.js";
 
-export const receitaRepository: IReceitaRepository = {
+export const ReceitaRepository: IReceitaRepository = {
   listarRendaFixa(usuarioId) {
     return prisma.rendaFixa.findMany({ where: { usuarioId } });
   },

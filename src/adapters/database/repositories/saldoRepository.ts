@@ -1,4 +1,4 @@
-import { ISaldoRepository } from "../../../application/ports/repositories/ISaldoRepository.js";
+import { ISaldoRepository } from "@application/ports/repositories/ISaldoRepository.js";
 import { Saldo } from "@prisma/client";
 import prisma from "../db.js";
 

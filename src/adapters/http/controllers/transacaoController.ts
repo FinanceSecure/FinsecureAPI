@@ -6,21 +6,24 @@ import type {
 } from "@application/dto/transacao/index.js";
 import { criarSaldoUseCases, criarTransacaoUseCases } from "@application/use-cases/index.js";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { despesaRepository } from "@adapters/database/repositories/despesaRepository.js";
-import { receitaRepository } from "@adapters/database/repositories/receitaRepository.js";
+import { DespesaRepository } from "@adapters/database/repositories/despesaRepository.js";
+import { ReceitaRepository } from "@adapters/database/repositories/receitaRepository.js";
 import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
-import { transacaoRepository } from "@adapters/database/repositories/transacaoRepository.js";
+import { TransacaoRepository } from "@adapters/database/repositories/transacaoRepository.js";
 
 const saldoUseCases = criarSaldoUseCases({
   saldoRepository: new SaldoRepository(),
-  transacaoRepository,
-  receitaRepository,
-  despesaRepository,
+  transacaoRepository: TransacaoRepository,
+  receitaRepository: ReceitaRepository,
+  despesaRepository: DespesaRepository,
 });
 
 const transacaoUseCases = criarTransacaoUseCases({
-  transacaoRepository,
-  recalcularSaldo: saldoUseCases.recalcularSaldo,
+  transacaoRepository: TransacaoRepository,
+  recalcularSaldo: async (usuarioId: string) => {
+    const resultado = await saldoUseCases.recalcularSaldo(usuarioId);
+    return resultado.saldo;
+  },
 });
 
 function sendFastifyError(reply: FastifyReply, error: unknown) {

@@ -1,9 +1,9 @@
 import { ObjectId } from "bson";
-import { Usuario } from "../../../domain/entities/Usuario.js";
-import { IUsuarioRepository } from "../../../application/ports/repositories/IUsuarioRepository.js";
+import { Usuario } from "@domain/entities/Usuario.js";
+import { IUsuarioRepository } from "@application/ports/repositories/IUsuarioRepository.js";
 import prisma from "../db.js";
 
-export const usuarioRepository: IUsuarioRepository = {
+export const UsuarioRepository: IUsuarioRepository = {
   async encontrarPorEmail(email: string): Promise<Usuario | null> {
     const usuario = await prisma.usuario.findUnique({ where: { email } });
     if (!usuario) return null;

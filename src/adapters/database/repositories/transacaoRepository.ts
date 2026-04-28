@@ -1,7 +1,7 @@
 import prisma from "../db.js";
-import { ITransacaoRepository } from "../../../application/ports/repositories/ITransacaoRepository.js";
+import { ITransacaoRepository } from "@application/ports/repositories/ITransacaoRepository.js";
 
-export const transacaoRepository: ITransacaoRepository = {
+export const TransacaoRepository: ITransacaoRepository = {
   criar(data) {
     return prisma.transacao.create({ data });
   },

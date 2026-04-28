@@ -1,7 +1,7 @@
 import prisma from "../db.js";
-import { IDespesaRepository } from "../../../application/ports/repositories/IDespesaRepository.js";
+import { IDespesaRepository } from "@application/ports/repositories/IDespesaRepository.js";
 
-export const despesaRepository: IDespesaRepository = {
+export const DespesaRepository: IDespesaRepository = {
   listarPorUsuario(usuarioId) {
     return prisma.despesas.findMany({
       where: { usuarioId },

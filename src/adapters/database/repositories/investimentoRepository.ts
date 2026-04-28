@@ -1,5 +1,5 @@
 import prisma from "../db.js";
-import { IInvestimentoRepository } from "../../../application/ports/repositories/IInvestimentoRepository.js";
+import { IInvestimentoRepository } from "@application/ports/repositories/IInvestimentoRepository.js";
 
 interface Investimento {
   usuarioId: string;
