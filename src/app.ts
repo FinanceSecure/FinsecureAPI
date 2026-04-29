@@ -44,7 +44,6 @@ await app.register(fastifySwaggerUi, {
 });
 
 app.setErrorHandler(erroMiddleware);
-console.log("ERROR: " + erroMiddleware);
 
 await registerHttpRoutes(app);
 
