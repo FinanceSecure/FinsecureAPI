@@ -12,13 +12,11 @@ const tipoInvestimentoUseCases = criarTipoInvestimentoUseCases(
 );
 
 function sendFastifyError(reply: FastifyReply, error: unknown) {
-  if (error instanceof ApplicationError) {
+  if (error instanceof ApplicationError)
     return reply.status(error.statusCode).send({ error: error.message });
-  }
 
-  if (error instanceof Error) {
+  if (error instanceof Error)
     return reply.status(500).send({ error: error.message });
-  }
 
   return reply.status(500).send({ error: "Erro interno inesperado." });
 }
@@ -29,7 +27,6 @@ export async function addInvestmentTypeFastify(
 ) {
   try {
     const { nome, tipo, valorPercentual, impostoRenda } = request.body;
-
     const investmentType =
       await tipoInvestimentoUseCases.acrescentarTipoInvestimento(
         nome,
@@ -45,29 +42,27 @@ export async function addInvestmentTypeFastify(
 }
 
 export async function getInvestmentTypeFastify(
-  request: FastifyRequest<{ Params: InvestmentStatementParamsDto }>,
+  request: FastifyRequest<{
+    Params: InvestmentStatementParamsDto;
+    Querystring: { valor?: number };
+  }>,
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
     const investmentTypeId = request.params.id;
+    const valor = request.query.valor ?? 1000;
 
-    if (!userId) {
-      return reply.status(401).send({ error: "Usuário não autenticado." });
-    }
-
-    if (!investmentTypeId) {
+    if (!investmentTypeId)
       return reply.status(400).send({ error: "ID de investimento inválido." });
-    }
 
     const investmentType =
       await tipoInvestimentoUseCases.visualizarTipoInvestimento(
-        investmentTypeId
+        investmentTypeId,
+        valor
       );
 
-    if (!investmentType) {
+    if (!investmentType)
       return reply.status(404).send({ error: "Investimento não encontrado." });
-    }
 
     return reply.status(200).send(investmentType);
   } catch (error) {

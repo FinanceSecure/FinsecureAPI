@@ -16,6 +16,7 @@ import {
 } from "../controllers/investimentoController.js";
 import {
   addInvestmentTypeFastify,
+  getInvestmentTypeFastify,
 } from "../controllers/tipoInvestimentoController.js";
 
 export async function registerInvestmentRoutes(app: FastifyInstance) {
@@ -151,6 +152,62 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
       },
     },
     getInvestedAmountFastify
+  );
+
+  app.get<{
+    Params: InvestmentStatementParamsDto;
+    Querystring: { valor?: number };
+  }>(
+    "/api/investimento/tipo/:id",
+    {
+      schema: {
+        summary: "Detalhar tipo de investimento com simulação",
+        tags: ["Tipos de Investimento"],
+        security: [],
+
+        params: {
+          type: "object",
+          properties: { id: { type: "string" } },
+          required: ["id"],
+        },
+
+        querystring: {
+          type: "object",
+          properties: {
+            valor: {
+              type: "number",
+              description: "Valor para simulação (padrão: 1000)"
+            }
+          }
+        },
+
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              nome: { type: "string" },
+              tipo: { type: "string" },
+              valorPercentual: { type: "number" },
+              impostoRenda: { type: "boolean" },
+              simulacao: {
+                type: "object",
+                properties: {
+                  valorInicial: { type: "number" },
+                  rendimentoDiario: { type: "number" },
+                  rendimentoMensal: { type: "number" },
+                  rendimentoAnual: { type: "number" }
+                }
+              }
+            }
+          },
+          400: { type: "object", properties: { error: { type: "string" } } },
+          401: { type: "object", properties: { error: { type: "string" } } },
+          404: { type: "object", properties: { error: { type: "string" } } }
+        },
+      },
+    },
+    getInvestmentTypeFastify
   );
 
   app.post<{ Body: AddInvestmentTypeRequestDto }>(

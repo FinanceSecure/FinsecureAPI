@@ -13,9 +13,8 @@ export function criarTipoInvestimentoUseCases(
     ) {
       if (!nome) throw new ValidationError("Nome nao informado");
       if (!tipo) throw new ValidationError("Tipo nao informado");
-      if (!valorPercentual) {
+      if (!valorPercentual)
         throw new ValidationError("Valor percentual nao informado");
-      }
 
       return tipoInvestimentoRepository.criar({
         nome,
@@ -25,8 +24,28 @@ export function criarTipoInvestimentoUseCases(
       });
     },
 
-    visualizarTipoInvestimento(id: string) {
-      return tipoInvestimentoRepository.encontrarPorId(id);
+    async visualizarTipoInvestimento(id: string, valor = 1000) {
+      if (!id) throw new ValidationError("ID nao informado");
+
+      const investimento =
+        await tipoInvestimentoRepository.encontrarPorId(id);
+
+      if (!investimento) return null;
+
+      const taxa = investimento.valorPercentual;
+      const rendimentoDiario = valor * taxa;
+      const rendimentoMensal = rendimentoDiario * 30;
+      const rendimentoAnual = rendimentoDiario * 365;
+
+      return {
+        ...investimento,
+        simulacao: {
+          valorInicial: valor,
+          rendimentoDiario,
+          rendimentoMensal,
+          rendimentoAnual,
+        },
+      };
     },
   };
 }
