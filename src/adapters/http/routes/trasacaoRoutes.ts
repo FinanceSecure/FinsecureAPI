@@ -19,10 +19,10 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
     {
       preHandler: [autenticarTokenFastify, validarTransacaoFastify],
       schema: {
-        security: [{ bearerAuth: [] }], // Esta rota requer autenticação
+        security: [{ bearerAuth: [] }],
         summary: "Adicionar uma nova transação",
         description: "Cria uma nova transação (entrada ou saída) para o usuário autenticado. O status da transação (PENDENTE/EFETIVADA) é determinado automaticamente pela data.",
-        tags: ["Transações"], // Agrupa a rota sob a tag "Transações" no Swagger UI
+        tags: ["Transações"],
         body: {
           type: "object",
           required: ["descricao", "valor", "data", "tipo"],
@@ -38,8 +38,8 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
             },
             data: {
               type: "string",
-              format: "date-time",
-              description: "Data e hora da transação no formato ISO 8601 (ex: '2023-10-27T10:30:00Z').",
+              format: "date",
+              description: "Data e hora da transação no formato ISO (YYYY-MM-DD).",
             },
             tipo: {
               type: "string",
@@ -51,13 +51,13 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
             {
               descricao: "Salário Mensal",
               valor: 3000.00,
-              data: "2023-10-27T09:00:00Z",
+              data: "2023-10-27",
               tipo: "ENTRADA",
             },
             {
               descricao: "Conta de Luz",
               valor: -150.50,
-              data: "2023-10-27T15:00:00Z",
+              data: "2023-10-27",
               tipo: "SAIDA",
             },
           ],
@@ -103,7 +103,7 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
           properties: {
             descricao: { type: "string", description: "Nova descrição da transação.", maxLength: 255 },
             valor: { type: "number", description: "Novo valor da transação." },
-            data: { type: "string", format: "date-time", description: "Nova data e hora da transação." },
+            data: { type: "string", format: "date", description: "Nova data e hora da transação. (YYYY-MM-DD ou ISO)" },
             tipo: { type: "string", enum: ["ENTRADA", "SAIDA"], description: "Novo tipo da transação." },
           },
         },

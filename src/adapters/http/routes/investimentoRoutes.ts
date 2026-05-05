@@ -88,7 +88,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
           properties: {
             tipoInvestimentoId: { type: "string" },
             valorInvestido: { type: "number" },
-            dataCompra: { type: "string", format: "date-time" },
+            dataCompra: { type: "string", format: "date" },
           },
         },
         response: {
@@ -168,7 +168,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             nome: { type: "string" },
             tipo: { type: "string" },
             valorPercentual: { type: "number" },
-            impostoRenda: { type: "boolean" }, // Se for boolean no banco, use boolean aqui
+            impostoRenda: { type: "boolean" },
           },
         },
         response: {

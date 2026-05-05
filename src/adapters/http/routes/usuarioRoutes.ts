@@ -22,7 +22,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       schema: {
         summary: "Cadastrar novo usuário",
         tags: ["Usuários"],
-        security: [], // Aberto ao público
+        security: [],
       },
     },
     registerUserFastify
@@ -33,7 +33,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       schema: {
         summary: "Realizar login",
         tags: ["Usuários"],
-        security: [], // Aberto ao público
+        security: [],
       },
     },
     loginUserFastify

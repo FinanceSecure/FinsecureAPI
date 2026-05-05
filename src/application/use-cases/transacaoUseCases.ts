@@ -16,6 +16,17 @@ export function criarTransacaoUseCases(deps: {
       data: Date,
       tipo: TipoTransacao
     ) {
+      if (!usuarioId) throw new ValidationError("Usuário não autenticado");
+
+      if (!descricao || descricao.trim().length === 0)
+        throw new ValidationError("A descrição é obrigatória");
+
+      if (valor === undefined || valor === null)
+        throw new ValidationError("O valor é obrigatório");
+
+      if (!(data instanceof Date) || isNaN(data.getTime()))
+        throw new ValidationError("Data inválida");
+
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
@@ -23,6 +34,7 @@ export function criarTransacaoUseCases(deps: {
       dataTransacao.setHours(0, 0, 0, 0);
 
       const status = dataTransacao <= hoje ? "EFETIVADA" : "PENDENTE";
+
       const transacao = await transacaoRepository.criar({
         usuarioId,
         descricao,
@@ -33,6 +45,7 @@ export function criarTransacaoUseCases(deps: {
       });
 
       const saldoAtual = await recalcularSaldo(usuarioId);
+
       return { transacao, saldoAtual };
     },
 
@@ -46,22 +59,26 @@ export function criarTransacaoUseCases(deps: {
     ) {
       if (!id) throw new ValidationError("ID da transação inválido");
       if (!usuarioId) throw new ValidationError("Usuário não autenticado");
+      if (valor === undefined) throw new ValidationError("Valor inválido");
 
-      const transacao =
+      const transacaoExistente =
         await transacaoRepository.encontrarPorIdEUsuario(id, usuarioId);
 
-      if (!transacao) {
+      if (!transacaoExistente) {
         throw new ValidationError(
           "Transação não encontrada ou não pertence a este usuário"
         );
       }
 
-      return transacaoRepository.atualizar(id, {
+      const atualizada = await transacaoRepository.atualizar(id, {
         descricao,
         valor,
         data,
         tipo,
       });
+
+      await recalcularSaldo(usuarioId);
+      return atualizada;
     },
 
     async excluirTransacao(id: string, usuarioId: string) {
