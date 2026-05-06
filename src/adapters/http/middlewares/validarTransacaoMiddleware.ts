@@ -5,7 +5,7 @@ import type {
   CreateTransactionRequestDto,
   UpdateTransactionRequestDto,
   ValidatedTransactionDto,
-} from "@application/dto/transaction/index.js";
+} from "@application/dto/transaction/";
 
 declare module "fastify" {
   interface FastifyRequest {

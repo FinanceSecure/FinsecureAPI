@@ -4,7 +4,7 @@ import type {
   CreateTransactionRequestDto,
   TransactionParamsDto,
   UpdateTransactionRequestDto,
-} from "@application/dto/transaction/index.js";
+} from "@application/dto/transaction/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import { validarTransacaoFastify } from "../middlewares/validarTransacaoMiddleware.js";
 import {

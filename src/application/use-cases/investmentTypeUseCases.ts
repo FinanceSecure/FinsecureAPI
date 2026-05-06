@@ -1,5 +1,5 @@
 import { ValidationError } from "../errors/ApplicationError.js";
-import { IInvestmentTypeRepository } from "../ports/repositories/index.js";
+import { IInvestmentTypeRepository } from "../ports/repositories/";
 
 export function createInvestmentTypeUseCases(
   investmentTypeRepository: IInvestmentTypeRepository

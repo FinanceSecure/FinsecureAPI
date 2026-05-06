@@ -3,9 +3,9 @@ import type {
   AddInvestmentRequestDto,
   InvestmentStatementParamsDto,
   RedeemInvestmentRequestDto,
-} from "@application/dto/investment/index.js";
+} from "@application/dto/investment/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { createInvestmentUseCases } from "@application/use-cases/index.js";
+import { createInvestmentUseCases } from "@application/use-cases/";
 import { InvestmentRepository } from "@adapters/database/repositories/investmentRepository.js";
 import { BalanceRepository } from "@/adapters/database/repositories";
 

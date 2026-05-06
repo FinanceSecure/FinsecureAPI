@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { createBalanceUseCases } from "@application/use-cases/index.js";
+import { createBalanceUseCases } from "@application/use-cases/";
 import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { IncomeRepository } from "@adapters/database/repositories/incomeRepository.js";
 import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";

@@ -3,8 +3,8 @@ import type {
   CreateTransactionRequestDto,
   TransactionParamsDto,
   UpdateTransactionRequestDto,
-} from "@application/dto/transaction/index.js";
-import { createBalanceUseCases, createTransactionUseCases } from "@application/use-cases/index.js";
+} from "@application/dto/transaction/";
+import { createBalanceUseCases, createTransactionUseCases } from "@application/use-cases/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { IncomeRepository } from "@adapters/database/repositories/incomeRepository.js";

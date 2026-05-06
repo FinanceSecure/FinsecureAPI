@@ -4,12 +4,12 @@ import type {
   UpdateVariableIncomeRequestDto,
   VariableIncomeParamsDto,
   VariableIncomeRequestDto,
-} from "@application/dto/income/index.js";
+} from "@application/dto/income/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import {
   createIncomeUseCases,
   createBalanceUseCases,
-} from "@application/use-cases/index.js";
+} from "@application/use-cases/";
 import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { IncomeRepository } from "@adapters/database/repositories/incomeRepository.js";
 import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";

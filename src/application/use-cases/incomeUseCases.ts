@@ -1,5 +1,5 @@
 import { ValidationError } from "../errors/ApplicationError.js";
-import { IIncomeRepository } from "../ports/repositories/index.js";
+import { IIncomeRepository } from "../ports/repositories/";
 
 export function createIncomeUseCases(deps: {
   incomeRepository: IIncomeRepository;

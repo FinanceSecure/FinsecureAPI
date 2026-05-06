@@ -5,7 +5,7 @@ import type {
   AddInvestmentTypeRequestDto,
   InvestmentStatementParamsDto,
   RedeemInvestmentRequestDto,
-} from "@application/dto/investment/index.js";
+} from "@application/dto/investment/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import {
   addInvestmentFastify,

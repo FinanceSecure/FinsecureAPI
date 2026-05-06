@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { erroMiddleware } from "./adapters/http/middlewares/erroMiddleware.js";
-import { registerHttpRoutes } from "./adapters/http/routes/index.js";
+import { registerHttpRoutes } from "./adapters/http/routes";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 

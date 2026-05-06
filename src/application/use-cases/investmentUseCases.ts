@@ -3,7 +3,7 @@ import { ValidationError } from "../errors/ApplicationError.js";
 import {
   IInvestmentRepository,
   IBalanceRepository,
-} from "../ports/repositories/index.js";
+} from "../ports/repositories/";
 
 export function createInvestmentUseCases(deps: {
   investmentRepository: IInvestmentRepository;

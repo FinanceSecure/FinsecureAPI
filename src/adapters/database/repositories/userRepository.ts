@@ -1,4 +1,4 @@
-import { User } from "@/domain/entities/User.js";
+import { User } from "@/domain/entities";
 import { IUserRepository } from "@application/ports/repositories";
 import prisma from "../db.js";
 

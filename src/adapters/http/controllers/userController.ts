@@ -4,7 +4,7 @@ import type {
   RegisterUserRequestDto,
   UpdateUserEmailRequestDto,
   UpdateUserPasswordRequestDto,
-} from "@/application/dto/user/index.js";
+} from "@/application/dto/user/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { AuthenticatedUser } from "../middlewares/authMiddleware.js";
 import { userUseCases } from "@shared/container";

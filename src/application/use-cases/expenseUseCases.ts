@@ -1,5 +1,5 @@
 import { calcTotalExpenses } from "../../shared/utils/calcDespesas.js";
-import { IExpenseRepository } from "../ports/repositories/index.js";
+import { IExpenseRepository } from "../ports/repositories/";
 
 export function createExpenseUseCases(deps: {
   expenseRepository: IExpenseRepository;

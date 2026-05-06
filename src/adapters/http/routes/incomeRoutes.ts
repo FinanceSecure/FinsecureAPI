@@ -5,7 +5,7 @@ import type {
   UpdateVariableIncomeRequestDto,
   VariableIncomeParamsDto,
   VariableIncomeRequestDto,
-} from "@application/dto/income/index.js";
+} from "@application/dto/income/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import {
   createFixedIncomeFastify,

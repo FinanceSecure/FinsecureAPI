@@ -2,12 +2,12 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import type {
   AddExpenseRequestDto,
   ExpenseParamsDto,
-} from "@application/dto/expense/index.js";
+} from "@application/dto/expense/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import {
   createExpenseUseCases,
   createBalanceUseCases,
-} from "@application/use-cases/index.js";
+} from "@application/use-cases/";
 import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository";
 import { IncomeRepository } from "@adapters/database/repositories/incomeRepository.js";
 import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";

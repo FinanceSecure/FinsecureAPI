@@ -2,9 +2,9 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import type {
   AddInvestmentTypeRequestDto,
   InvestmentStatementParamsDto,
-} from "@application/dto/investment/index.js";
+} from "@application/dto/investment/";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { createInvestmentTypeUseCases } from "@application/use-cases/index.js";
+import { createInvestmentTypeUseCases } from "@application/use-cases/";
 import { InvestmentTypeRepository } from "@adapters/database/repositories/investmentTypeRepository.js";
 
 const investmentTypeUseCases = createInvestmentTypeUseCases(

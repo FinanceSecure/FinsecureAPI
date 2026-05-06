@@ -3,7 +3,7 @@ import "@fastify/swagger";
 import type {
   AddExpenseRequestDto,
   ExpenseParamsDto,
-} from "@application/dto/expense/index.js";
+} from "@application/dto/expense/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import {
   addExpenseFastify,

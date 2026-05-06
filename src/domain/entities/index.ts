@@ -1,6 +1,6 @@
+export { Balance } from './Balance.js';
+export { FinancialIndicator } from './FinancialIndicator.js';
+export { Investment } from './Investment.js';
+export { Transaction } from './Transaction.js';
+export { TypeInvestment } from './TypeInvestment.js';
 export { User } from './User.js';
-export { IndicadorFinanceiro } from './IndicadorFinanceiro.js';
-export { Investimento } from './Investimento.js';
-export { Saldo } from './Saldo.js';
-export { TipoInvestimento } from './TipoInvestimento.js';
-export { Transacao } from './Transacao.js';
