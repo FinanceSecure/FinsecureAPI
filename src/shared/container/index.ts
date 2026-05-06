@@ -1,8 +1,8 @@
-import { UsuarioRepository } from "@adapters/database/repositories/usuarioRepository.js";
-import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
-import { criarUsuarioUseCases } from "@application/use-cases/usuarioUseCases.js";
+import { UserRepository } from "@adapters/database/repositories/userRepository";
+import { BalanceRepository } from "@/adapters/database/repositories/balanceRepository.js";
+import { createUserUseCases } from "@/application/use-cases/userUseCases.js";
 
-export const usuarioUseCases = criarUsuarioUseCases({
-  usuarioRepository: UsuarioRepository,
-  saldoRepository: new SaldoRepository()
+export const userUseCases = createUserUseCases({
+  userRepository: new UserRepository(),
+  balanceRepository: new BalanceRepository()
 });

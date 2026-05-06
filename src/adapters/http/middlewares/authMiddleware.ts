@@ -3,12 +3,12 @@ import jwt from "jsonwebtoken";
 import { env } from "@/shared/config/env.js";
 
 export interface AuthenticatedUser {
-  usuarioId: string;
+  userId: string;
 }
 
 interface JwtPayload {
-  usuarioId: string;
-  nome: string;
+  userId: string;
+  name: string;
   iat: number;
   exp: number;
 }
@@ -40,7 +40,7 @@ export async function autenticarTokenFastify(
     ) as JwtPayload;
 
     request.user = {
-      usuarioId: decoded.usuarioId,
+      userId: decoded.userId,
     };
   } catch (error: any) {
     request.log.error(error);

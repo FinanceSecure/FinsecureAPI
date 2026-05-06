@@ -1,7 +1,7 @@
 export interface IInvestimentoRepository {
   encontrarTipoInvestimento(tipoInvestimentoId: string): Promise<any | null>;
   encontrarInvestimento(
-    usuarioId: string,
+    userId: string,
     tipoInvestimentoId: string
   ): Promise<any | null>;
   criarAplicacaoInvestimento(
@@ -10,14 +10,14 @@ export interface IInvestimentoRepository {
     dataCompra: Date
   ): Promise<any>;
   adicionarInvestimento(
-    usuarioId: string,
+    userId: string,
     tipoInvestimentoId: string,
     valorInvestido: number,
     dataCompra: Date,
     dataAtualizacao?: Date
   ): Promise<any>;
   encontrarInvestimentosComAplicacoes(
-    usuarioId: string,
+    userId: string,
     tipoInvestimentoId?: string
   ): Promise<any[]>;
   marcarInvestimentoComoResgatado(investimentoId: string): Promise<any>;
@@ -25,6 +25,6 @@ export interface IInvestimentoRepository {
     investimentoId: string,
     valorResgatado: number
   ): Promise<any>;
-  atualizarSaldo(usuarioId: string, valorResgatado: number): Promise<void>;
-  calcularTotalInvestido(usuarioId: string): Promise<number>;
+  atualizarSaldo(userId: string, valorResgatado: number): Promise<void>;
+  calcularTotalInvestido(userId: string): Promise<number>;
 }

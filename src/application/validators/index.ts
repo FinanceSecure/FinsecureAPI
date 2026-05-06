@@ -1,4 +1,4 @@
 export {
-  validarCamposCadastro,
-  validarCamposLogin
-} from "./usuarioValidator";
+  checkRegistrationFields,
+  checkLoginFields
+} from "./userValidator";

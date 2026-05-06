@@ -1,4 +1,4 @@
-export const MensagensErro = {
+export const ErroMessages = {
   VALIDACAO: {
     NOME: "Nome não informado.",
     EMAIL: "E-mail não informado.",
@@ -11,7 +11,13 @@ export const MensagensErro = {
     NAO_ENCONTRADO: "Usuário não encontrado.",
     SENHA_ANTIGA_INCORRETA: "A senha antiga informada está incorreta.",
   },
+  SALDO: {
+    NAO_ENCONTRADO: "Saldo não encontrado."
+  },
+  TRANSACAO: {
+    NAO_ENCONTRADO: "Transação não encontrada."
+  },
   AUTH: {
-    CREDENCIAIS_INVALIDAS: "E-mail ou senha incorretos." 
+    CREDENCIAIS_INVALIDAS: "E-mail ou senha incorretos."
   }
 } as const;

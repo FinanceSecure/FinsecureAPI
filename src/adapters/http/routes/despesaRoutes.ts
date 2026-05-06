@@ -10,7 +10,7 @@ import {
   getExpenseByIdFastify,
   getExpenseSummaryFastify,
   getScheduledExpensesFastify,
-} from "../controllers/despesaController.js";
+} from "../controllers";
 
 export async function registerExpenseRoutes(app: FastifyInstance) {
   app.get(

@@ -3,16 +3,16 @@ import { IReceitaRepository } from "../ports/repositories/IReceitaRepository.js"
 
 export function criarReceitaUseCases(deps: {
   receitaRepository: IReceitaRepository;
-  recalcularSaldo: (usuarioId: string) => Promise<number>;
+  recalcularSaldo: (userId: string) => Promise<number>;
 }) {
   const { receitaRepository, recalcularSaldo } = deps;
 
   return {
-    async verificarReceitas(usuarioId: string) {
+    async verificarReceitas(userId: string) {
       const rendaFixa =
-        await receitaRepository.listarRendaFixa(usuarioId);
+        await receitaRepository.listarRendaFixa(userId);
       const rendaVariavel =
-        await receitaRepository.listarRendaVariavel(usuarioId);
+        await receitaRepository.listarRendaVariavel(userId);
 
       const totalRendaFixa = rendaFixa.reduce(
         (total, renda) => total + renda.valor,
@@ -31,22 +31,22 @@ export function criarReceitaUseCases(deps: {
       };
     },
 
-    async verificarRendaFixa(usuarioId: string) {
-      const rendaFixa = await receitaRepository.obterRendaFixa(usuarioId);
+    async verificarRendaFixa(userId: string) {
+      const rendaFixa = await receitaRepository.obterRendaFixa(userId);
       return { rendaFixa };
     },
 
-    async adicionarRendaFixa(data: { usuarioId: string; valor: number }) {
+    async adicionarRendaFixa(data: { userId: string; valor: number }) {
       const novaRendaFixa = await receitaRepository.criarRendaFixa(
-        data.usuarioId,
+        data.userId,
         data.valor
       );
-      await recalcularSaldo(data.usuarioId);
+      await recalcularSaldo(data.userId);
       return novaRendaFixa;
     },
 
-    async alterarRendaFixa(data: { usuarioId: string; valor: number }) {
-      const renda = await receitaRepository.obterRendaFixa(data.usuarioId);
+    async alterarRendaFixa(data: { userId: string; valor: number }) {
+      const renda = await receitaRepository.obterRendaFixa(data.userId);
 
       if (!renda) {
         throw new ValidationError(
@@ -56,38 +56,38 @@ export function criarReceitaUseCases(deps: {
 
       const rendaFixaAtualizada =
         await receitaRepository.atualizarRendaFixa(
-          data.usuarioId,
+          data.userId,
           data.valor
         );
 
-      await recalcularSaldo(data.usuarioId);
+      await recalcularSaldo(data.userId);
       return rendaFixaAtualizada;
     },
 
-    async removerRendaFixa(usuarioId: string) {
+    async removerRendaFixa(userId: string) {
       const rendaFixaRemovida =
-        await receitaRepository.removerRendaFixa(usuarioId);
+        await receitaRepository.removerRendaFixa(userId);
 
-      await recalcularSaldo(usuarioId);
+      await recalcularSaldo(userId);
       return rendaFixaRemovida;
     },
 
-    async verificarRendaVariavel(usuarioId: string) {
+    async verificarRendaVariavel(userId: string) {
       const rendaVariavel =
-        await receitaRepository.listarRendaVariavel(usuarioId);
+        await receitaRepository.listarRendaVariavel(userId);
 
       return { rendaVariavel };
     },
 
     async adicionarRendaVariavel(data: {
-      usuarioId: string;
+      userId: string;
       descricao: string;
       valor: number;
     }) {
       const novaRendaVariavel =
         await receitaRepository.criarRendaVariavel(data);
 
-      await recalcularSaldo(data.usuarioId);
+      await recalcularSaldo(data.userId);
       return novaRendaVariavel;
     },
 
@@ -110,7 +110,7 @@ export function criarReceitaUseCases(deps: {
       const rendaVariavelAtualizada =
         await receitaRepository.atualizarRendaVariavel(data);
 
-      await recalcularSaldo(existente.usuarioId);
+      await recalcularSaldo(existente.userId);
       return rendaVariavelAtualizada;
     },
 
@@ -125,7 +125,7 @@ export function criarReceitaUseCases(deps: {
       const rendaVariavelRemovida =
         await receitaRepository.removerRendaVariavel(id);
 
-      await recalcularSaldo(existente.usuarioId);
+      await recalcularSaldo(existente.userId);
       return rendaVariavelRemovida;
     },
   };

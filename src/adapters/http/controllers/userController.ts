@@ -4,10 +4,10 @@ import type {
   RegisterUserRequestDto,
   UpdateUserEmailRequestDto,
   UpdateUserPasswordRequestDto,
-} from "@application/dto/usuario/index.js";
+} from "@/application/dto/user/index.js";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { AuthenticatedUser } from "../middlewares/authMiddleware.js";
-import { usuarioUseCases } from "@shared/container/index.js";
+import { userUseCases } from "@shared/container";
 
 interface HttpJsonResponse {
   status(code: number): {
@@ -24,17 +24,15 @@ function sendHttpError(
   response: HttpJsonResponse,
   error: unknown
 ) {
-  if (error instanceof ApplicationError) {
+  if (error instanceof ApplicationError)
     return response
       .status(error.statusCode)
       .json({ error: error.message });
-  }
 
-  if (error instanceof Error) {
+  if (error instanceof Error)
     return response.status(500).json({
       error: error.message
     });
-  }
 
   return response.status(500).json({
     error: "Erro interno inesperado."
@@ -45,15 +43,13 @@ function sendFastifyError(
   reply: FastifyReply,
   error: unknown
 ) {
-  if (error instanceof ApplicationError) {
+  if (error instanceof ApplicationError)
     return reply.status(error.statusCode).send({
       error: error.message
     });
-  }
 
-  if (error instanceof Error) {
+  if (error instanceof Error)
     return reply.status(500).send({ error: error.message });
-  }
 
   return reply.status(500).send({
     error: "Erro interno inesperado."
@@ -61,27 +57,27 @@ function sendFastifyError(
 }
 
 async function registerUser(body: RegisterUserRequestDto) {
-  return usuarioUseCases.cadastrar(body.nome, body.email, body.senha);
+  return userUseCases.register(body.name, body.email, body.password);
 }
 
 async function loginUser(body: LoginUserRequestDto) {
-  return usuarioUseCases.logar(body.email, body.senha);
+  return userUseCases.login(body.email, body.password);
 }
 
 async function changeUserEmail(body: UpdateUserEmailRequestDto) {
-  return usuarioUseCases.alterarEmail(body.emailAntigo, body.emailNovo);
+  return userUseCases.changeEmail(body.oldEmail, body.newEmail);
 }
 
 async function changeUserPassword(body: UpdateUserPasswordRequestDto) {
-  return usuarioUseCases.alterarSenha(
+  return userUseCases.changePassword(
     body.email,
-    body.senhaAntiga,
-    body.senhaNova
+    body.oldPassword,
+    body.newPassword
   );
 }
 
 async function removeUser(user?: AuthenticatedUser) {
-  return usuarioUseCases.remover(user?.usuarioId || "");
+  return userUseCases.remove(user?.userId || "");
 }
 
 export async function registerUserHandler(
@@ -206,6 +202,6 @@ export async function deleteUserFastify(
 
 export const cadastro = registerUserHandler;
 export const login = loginUserHandler;
-export const alterarEmail = updateUserEmailHandler;
-export const alterarSenha = updateUserPasswordHandler;
-export const removerUsuario = deleteUserHandler;
+export const changeEmail = updateUserEmailHandler;
+export const changePassword = updateUserPasswordHandler;
+export const deleteUser = deleteUserHandler;

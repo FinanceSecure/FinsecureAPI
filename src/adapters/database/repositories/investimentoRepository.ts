@@ -2,7 +2,7 @@ import prisma from "../db.js";
 import { IInvestimentoRepository } from "@application/ports/repositories/IInvestimentoRepository.js";
 
 interface Investimento {
-  usuarioId: string;
+  userId: string;
   tipoInvestimentoId: string;
   dataCompra: Date;
   dataAtualizacao?: Date | null;
@@ -30,10 +30,10 @@ export const InvestimentoRepository: IInvestimentoRepository = {
     });
   },
 
-  async encontrarInvestimento(usuarioId: string, tipoInvestimentoId: string) {
+  async encontrarInvestimento(userId: string, tipoInvestimentoId: string) {
     return prisma.investimento.findFirst({
       where: {
-        usuarioId,
+        userId,
         tipoInvestimentoId,
       },
     });
@@ -55,7 +55,7 @@ export const InvestimentoRepository: IInvestimentoRepository = {
   },
 
   async adicionarInvestimento(
-    usuarioId: string,
+    userId: string,
     tipoInvestimentoId: string,
     valorInvestido: number,
     dataCompra: Date,
@@ -65,13 +65,13 @@ export const InvestimentoRepository: IInvestimentoRepository = {
     if (!tipo) throw new Error("Tipo de investimento não encontrado");
 
     let investimento = await this.encontrarInvestimento(
-      usuarioId,
+      userId,
       tipoInvestimentoId
     );
     if (!investimento) {
       investimento = await prisma.investimento.create({
         data: {
-          usuarioId,
+          userId,
           tipoInvestimentoId,
           dataCompra,
           dataAtualizacao: dataAtualizacao ?? dataCompra,
@@ -89,12 +89,12 @@ export const InvestimentoRepository: IInvestimentoRepository = {
   },
 
   async encontrarInvestimentosComAplicacoes(
-    usuarioId: string,
+    userId: string,
     tipoInvestimentoId?: string
   ) {
     return prisma.investimento.findMany({
       where: {
-        usuarioId,
+        userId,
         resgatado: false,
         ...(tipoInvestimentoId && { tipoInvestimentoId }),
       },
@@ -126,11 +126,11 @@ export const InvestimentoRepository: IInvestimentoRepository = {
     });
   },
 
-  async atualizarSaldo(usuarioId: string, valorResgatado: number) {
-    const saldo = await prisma.saldo.findUnique({ where: { usuarioId } });
+  async atualizarSaldo(userId: string, valorResgatado: number) {
+    const saldo = await prisma.saldo.findUnique({ where: { userId } });
     if (saldo) {
       await prisma.saldo.update({
-        where: { usuarioId },
+        where: { userId },
         data: {
           valor: {
             increment: valorResgatado,
@@ -139,14 +139,14 @@ export const InvestimentoRepository: IInvestimentoRepository = {
       });
     } else {
       await prisma.saldo.create({
-        data: { usuarioId, valor: valorResgatado },
+        data: { userId, valor: valorResgatado },
       });
     }
   },
 
-  async calcularTotalInvestido(usuarioId: string) {
+  async calcularTotalInvestido(userId: string) {
     const result = await prisma.aplicacaoInvestimento.aggregate({
-      where: { investimento: { usuarioId } },
+      where: { investimento: { userId } },
       _sum: {
         valor: true
       }

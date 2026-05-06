@@ -1,30 +1,30 @@
 import {
-  IDespesaRepository,
+  IExpenseRepository,
   IReceitaRepository,
-  ISaldoRepository,
+  IBalanceRepository,
   ITransacaoRepository,
 } from "../ports/repositories";
 import { ResourceNotFoundError, ValidationError } from "@application/errors";
-import { MensagensErro } from "@domain/erros";
+import { ErroMessages } from "@domain/erros";
 
 export function criarSaldoUseCases(deps: {
-  saldoRepository: ISaldoRepository;
+  balanceRepository: IBalanceRepository;
   transacaoRepository: ITransacaoRepository;
   receitaRepository: IReceitaRepository;
-  despesaRepository: IDespesaRepository;
+  despesaRepository: IExpenseRepository;
 }) {
   const {
-    saldoRepository,
+    balanceRepository,
     transacaoRepository,
     receitaRepository,
     despesaRepository,
   } = deps;
 
   return {
-    async recalcularSaldo(usuarioId: string) {
-      if (!usuarioId?.trim()) {
+    async recalcularSaldo(userId: string) {
+      if (!userId?.trim()) {
         throw new ValidationError(
-          MensagensErro.USUARIO.NAO_ENCONTRADO
+          ErroMessages.USUARIO.NAO_ENCONTRADO
         );
       }
 
@@ -33,15 +33,9 @@ export function criarSaldoUseCases(deps: {
         totalReceitas,
         totalDespesas,
       ] = await Promise.all([
-        transacaoRepository.obterTotalEfetivadoPorUsuario(
-          usuarioId
-        ),
-        receitaRepository.obterTotalReceitasPorUsuario(
-          usuarioId
-        ),
-        despesaRepository.obterTotalDespesasPorUsuario(
-          usuarioId
-        ),
+        transacaoRepository.obterTotalEfetivadoPorUsuario(userId),
+        receitaRepository.obterTotalReceitasPorUsuario(userId),
+        despesaRepository.getTotalByUserId(userId),
       ]);
 
       const saldoAtualizado =
@@ -50,18 +44,18 @@ export function criarSaldoUseCases(deps: {
         Number(totalDespesas || 0);
 
       const saldoExistente =
-        await saldoRepository.obterSaldoPorUsuario(
-          usuarioId
+        await balanceRepository.obterSaldoPorUsuario(
+          userId
         );
 
       if (saldoExistente) {
-        await saldoRepository.atualizarSaldo(
+        await balanceRepository.atualizarSaldo(
           saldoExistente.id,
           saldoAtualizado
         );
       } else {
-        await saldoRepository.criarSaldo(
-          usuarioId,
+        await balanceRepository.criarSaldo(
+          userId,
           saldoAtualizado
         );
       }
@@ -72,22 +66,22 @@ export function criarSaldoUseCases(deps: {
       };
     },
 
-    async visualizarSaldo(usuarioId: string) {
-      if (!usuarioId?.trim()) {
+    async visualizarSaldo(userId: string) {
+      if (!userId?.trim()) {
         throw new ValidationError(
-          MensagensErro.USUARIO.NAO_ENCONTRADO
+          ErroMessages.USUARIO.NAO_ENCONTRADO
         );
       }
 
       const saldo =
-        await saldoRepository.obterSaldoPorUsuario(
-          usuarioId
+        await balanceRepository.obterSaldoPorUsuario(
+          userId
         );
 
       if (!saldo) {
         return {
           mensagem: "Saldo localizado com sucesso.",
-          saldo: { id: null, usuarioId, valor: 0, dataAtualizacao: new Date() },
+          saldo: { id: null, userId, valor: 0, dataAtualizacao: new Date() },
         };
       }
 
@@ -97,16 +91,16 @@ export function criarSaldoUseCases(deps: {
       };
     },
 
-    async inicializarSaldo(usuarioId: string) {
-      if (!usuarioId?.trim()) {
+    async inicializarSaldo(userId: string) {
+      if (!userId?.trim()) {
         throw new ValidationError(
-          MensagensErro.USUARIO.NAO_ENCONTRADO
+          ErroMessages.USUARIO.NAO_ENCONTRADO
         );
       }
 
       const saldoExistente =
-        await saldoRepository.obterSaldoPorUsuario(
-          usuarioId
+        await balanceRepository.obterSaldoPorUsuario(
+          userId
         );
 
       if (saldoExistente) {
@@ -117,8 +111,8 @@ export function criarSaldoUseCases(deps: {
       }
 
       const novoSaldo =
-        await saldoRepository.criarSaldo(
-          usuarioId,
+        await balanceRepository.criarSaldo(
+          userId,
           0
         );
 
@@ -128,21 +122,21 @@ export function criarSaldoUseCases(deps: {
       };
     },
 
-    async removerSaldo(usuarioId: string) {
-      if (!usuarioId?.trim()) {
+    async removerSaldo(userId: string) {
+      if (!userId?.trim()) {
         throw new ValidationError(
-          MensagensErro.USUARIO.NAO_ENCONTRADO
+          ErroMessages.USUARIO.NAO_ENCONTRADO
         );
       }
 
       const saldoExistente =
-        await saldoRepository.obterSaldoPorUsuario(
-          usuarioId
+        await balanceRepository.obterSaldoPorUsuario(
+          userId
         );
 
       if (!saldoExistente) {
         throw new ResourceNotFoundError(
-          "Saldo não encontrado."
+          ErroMessages.SALDO.NAO_ENCONTRADO
         );
       }
 

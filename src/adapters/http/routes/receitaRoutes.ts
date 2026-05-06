@@ -17,7 +17,7 @@ import {
   getVariableIncomeFastify,
   updateFixedIncomeFastify,
   updateVariableIncomeFastify,
-} from "../controllers/receitaController.js";
+} from "../controllers";
 
 export async function registerIncomeRoutes(app: FastifyInstance) {
   const auth = { preHandler: autenticarTokenFastify };

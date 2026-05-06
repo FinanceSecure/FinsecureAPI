@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import "@fastify/swagger";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
-import { getBalanceFastify } from "../controllers/saldoController.js";
+import { getBalanceFastify } from "../controllers";
 
 export async function registerBalanceRoutes(app: FastifyInstance) {
   app.get(

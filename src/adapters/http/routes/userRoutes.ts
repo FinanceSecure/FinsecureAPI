@@ -6,14 +6,14 @@ import type {
   RegisterUserRequestDto,
   UpdateUserEmailRequestDto,
   UpdateUserPasswordRequestDto,
-} from "@application/dto/usuario/index.js";
+} from "@/application/dto/user";
 import {
   deleteUserFastify,
   loginUserFastify,
   registerUserFastify,
   updateUserEmailFastify,
   updateUserPasswordFastify,
-} from "../controllers/usuarioController.js";
+} from "../controllers";
 
 export async function registerUserRoutes(app: FastifyInstance) {
   app.post<{ Body: RegisterUserRequestDto }>(
@@ -23,10 +23,21 @@ export async function registerUserRoutes(app: FastifyInstance) {
         summary: "Cadastrar novo usuário",
         tags: ["Usuários"],
         security: [],
+
+        body: {
+          type: "object",
+          properties: {
+            name: { type: "string", minLength: 3 },
+            email: { type: "string", format: "email" },
+            password: { type: "string", minLength: 8 },
+          },
+          required: ['name', 'email', 'password'],
+        }
       },
     },
     registerUserFastify
   );
+
   app.post<{ Body: LoginUserRequestDto }>(
     "/api/usuarios/login",
     {
@@ -34,11 +45,21 @@ export async function registerUserRoutes(app: FastifyInstance) {
         summary: "Realizar login",
         tags: ["Usuários"],
         security: [],
+
+        body: {
+          type: "object",
+          properties: {
+            email: { type: "string" },
+            password: { type: "string" },
+          },
+          required: ['email', 'password'],
+        }
       },
     },
     loginUserFastify
   );
-  app.post<{ Body: UpdateUserEmailRequestDto }>(
+
+  app.put<{ Body: UpdateUserEmailRequestDto }>(
     "/api/usuarios/alterar-email",
     {
       preHandler: autenticarTokenFastify,
@@ -46,11 +67,21 @@ export async function registerUserRoutes(app: FastifyInstance) {
         summary: "Alterar e-mail do usuário",
         tags: ["Usuários"],
         security: [{ bearerAuth: [] }],
+
+        body: {
+          type: "object",
+          properties: {
+            oldEmail: { type: "string", format: "email" },
+            newEmail: { type: "string", format: "email" },
+          },
+          required: ['oldEmail', 'newEmail'],
+        }
       },
     },
     updateUserEmailFastify
   );
-  app.post<{ Body: UpdateUserPasswordRequestDto }>(
+
+  app.put<{ Body: UpdateUserPasswordRequestDto }>(
     "/api/usuarios/alterar-senha",
     {
       preHandler: autenticarTokenFastify,
@@ -58,10 +89,21 @@ export async function registerUserRoutes(app: FastifyInstance) {
         summary: "Alterar senha do usuário",
         tags: ["Usuários"],
         security: [{ bearerAuth: [] }],
+
+        body: {
+          type: "object",
+          properties: {
+            email: { type: "string", format: "email" },
+            oldPassword: { type: "string", minLength: 8 },
+            newPassword: { type: "string", minLength: 8 },
+          },
+          required: ['email', 'oldPassword', 'newPassword'],
+        }
       },
     },
     updateUserPasswordFastify
   );
+
   app.delete(
     "/api/usuarios/apagar-conta",
     {

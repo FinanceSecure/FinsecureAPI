@@ -7,11 +7,11 @@ import type {
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { criarInvestimentoUseCases } from "@application/use-cases/index.js";
 import { InvestimentoRepository } from "@adapters/database/repositories/investimentoRepository.js";
-import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
+import { BalanceRepository } from "@/adapters/database/repositories";
 
 const investimentoUseCases = criarInvestimentoUseCases({
   investimentoRepository: InvestimentoRepository,
-  saldoRepository: new SaldoRepository(),
+  balanceRepository: new BalanceRepository(),
 });
 
 const cleanResponse = (data: any) => JSON.parse(JSON.stringify(data));
@@ -35,7 +35,7 @@ export async function getInvestmentStatementFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
 
     if (!userId)
       return reply.status(401).send({ error: "Usuário não autenticado." });
@@ -54,7 +54,7 @@ export async function getInvestmentStatementByTypeFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
     const investmentId = request.params.id;
 
     if (!userId)
@@ -79,7 +79,7 @@ export async function redeemInvestmentFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
     const investmentTypeId = request.params.id;
     const amountToRedeem = Number(request.body.valor);
 
@@ -106,7 +106,7 @@ export async function getInvestedAmountFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
 
     if (!userId)
       return reply.status(401).send({ error: "Usuário não autenticado." });
@@ -123,7 +123,7 @@ export async function addInvestmentFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
     const { tipoInvestimentoId, valorInvestido, dataCompra, dataAtualizacao } =
       request.body;
 

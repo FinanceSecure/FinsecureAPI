@@ -19,7 +19,7 @@ export interface TransactionParamsDto {
 }
 
 export interface ValidatedTransactionDto {
-  usuarioId: string;
+  userId: string;
   descricao: string;
   valor: number;
   data: Date;

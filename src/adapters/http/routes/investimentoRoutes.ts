@@ -10,14 +10,13 @@ import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import {
   addInvestmentFastify,
   getInvestedAmountFastify,
-  getInvestmentStatementByTypeFastify,
   getInvestmentStatementFastify,
   redeemInvestmentFastify,
-} from "../controllers/investimentoController.js";
+} from "../controllers";
 import {
   addInvestmentTypeFastify,
   getInvestmentTypeFastify,
-} from "../controllers/tipoInvestimentoController.js";
+} from "../controllers";
 
 export async function registerInvestmentRoutes(app: FastifyInstance) {
   const auth = { preHandler: autenticarTokenFastify };

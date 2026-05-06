@@ -2,14 +2,14 @@ import cron from "node-cron";
 import {
   criarSaldoUseCases,
   criarTransacaoUseCases,
-} from "../../application/use-cases/index.js";
-import { despesaRepository } from "../database/repositories/despesaRepository.js";
+} from "@application/use-cases";
+import { despesaRepository } from "../database/repositories/expenseRepository.js";
 import { receitaRepository } from "../database/repositories/receitaRepository.js";
-import { SaldoRepository } from "../database/repositories/saldoRepository.js";
+import { BalanceRepository } from "../database/repositories/";
 import { transacaoRepository } from "../database/repositories/transacaoRepository.js";
 
 const saldoUseCases = criarSaldoUseCases({
-  saldoRepository: new SaldoRepository(),
+  balanceRepository: new BalanceRepository(),
   transacaoRepository,
   receitaRepository,
   despesaRepository,

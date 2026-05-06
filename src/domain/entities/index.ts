@@ -1,4 +1,4 @@
-export { Usuario } from './Usuario.js';
+export { User } from './User.js';
 export { IndicadorFinanceiro } from './IndicadorFinanceiro.js';
 export { Investimento } from './Investimento.js';
 export { Saldo } from './Saldo.js';

@@ -1,15 +1,15 @@
 import { RendaFixa, RendaVariavel } from "@prisma/client";
 
 export interface IReceitaRepository {
-  listarRendaFixa(usuarioId: string): Promise<RendaFixa[]>;
-  obterRendaFixa(usuarioId: string): Promise<RendaFixa | null>;
-  criarRendaFixa(usuarioId: string, valor: number): Promise<RendaFixa>;
-  atualizarRendaFixa(usuarioId: string, valor: number): Promise<RendaFixa>;
-  removerRendaFixa(usuarioId: string): Promise<RendaFixa>;
-  listarRendaVariavel(usuarioId: string): Promise<RendaVariavel[]>;
+  listarRendaFixa(userId: string): Promise<RendaFixa[]>;
+  obterRendaFixa(userId: string): Promise<RendaFixa | null>;
+  criarRendaFixa(userId: string, valor: number): Promise<RendaFixa>;
+  atualizarRendaFixa(userId: string, valor: number): Promise<RendaFixa>;
+  removerRendaFixa(userId: string): Promise<RendaFixa>;
+  listarRendaVariavel(userId: string): Promise<RendaVariavel[]>;
   obterRendaVariavelPorId(id: string): Promise<RendaVariavel | null>;
   criarRendaVariavel(data: {
-    usuarioId: string;
+    userId: string;
     descricao: string;
     valor: number;
   }): Promise<RendaVariavel>;
@@ -19,5 +19,5 @@ export interface IReceitaRepository {
     valor?: number;
   }): Promise<RendaVariavel>;
   removerRendaVariavel(id: string): Promise<RendaVariavel>;
-  obterTotalReceitasPorUsuario(usuarioId: string): Promise<number>;
+  obterTotalReceitasPorUsuario(userId: string): Promise<number>;
 }

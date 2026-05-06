@@ -3,4 +3,4 @@ export type {
   RegisterUserRequestDto,
   UpdateUserEmailRequestDto,
   UpdateUserPasswordRequestDto,
-} from "./usuarioRequestDtos.js";
+} from "./userRequestDtos";

@@ -2,24 +2,24 @@ import { calcularRendimento } from "../../domain/services/calcInvestimentoServic
 import { ValidationError } from "../errors/ApplicationError.js";
 import {
   IInvestimentoRepository,
-  ISaldoRepository,
+  IBalanceRepository,
 } from "../ports/repositories/index.js";
 
 export function criarInvestimentoUseCases(deps: {
   investimentoRepository: IInvestimentoRepository;
-  saldoRepository: ISaldoRepository;
+  balanceRepository: IBalanceRepository;
 }) {
-  const { investimentoRepository, saldoRepository } = deps;
+  const { investimentoRepository, balanceRepository } = deps;
 
   return {
     async adicionarInvestimento(
-      usuarioId: string,
+      userId: string,
       tipoInvestimentoId: string,
       valorInvestido: number,
       dataCompra: Date,
       dataAtualizacao?: Date
     ) {
-      if (!usuarioId) throw new ValidationError("Usuário não autenticado.");
+      if (!userId) throw new ValidationError("Usuário não autenticado.");
       if (!tipoInvestimentoId) {
         throw new ValidationError("Tipo de investimento não informado.");
       }
@@ -31,7 +31,7 @@ export function criarInvestimentoUseCases(deps: {
       }
 
       return investimentoRepository.adicionarInvestimento(
-        usuarioId,
+        userId,
         tipoInvestimentoId,
         valorInvestido,
         dataCompra,
@@ -40,13 +40,13 @@ export function criarInvestimentoUseCases(deps: {
     },
 
     async resgatarInvestimento(
-      usuarioId: string,
+      userId: string,
       tipoInvestimentoId: string,
       valorParaResgatar: number
     ) {
       const investimentos =
         await investimentoRepository.encontrarInvestimentosComAplicacoes(
-          usuarioId,
+          userId,
           tipoInvestimentoId
         );
       if (!investimentos.length) {
@@ -150,7 +150,7 @@ export function criarInvestimentoUseCases(deps: {
         }
       }
 
-      await saldoRepository.incrementarSaldo(usuarioId, totalResgatado);
+      await balanceRepository.incrementarSaldo(userId, totalResgatado);
 
       return {
         message: "Resgate efetuado com sucesso!",
@@ -161,12 +161,12 @@ export function criarInvestimentoUseCases(deps: {
     },
 
     async consultarInvestimentosPorTipo(
-      usuarioId: string,
+      userId: string,
       tipoInvestimentoId: string
     ) {
       const investimentos =
         await investimentoRepository.encontrarInvestimentosComAplicacoes(
-          usuarioId,
+          userId,
           tipoInvestimentoId
         );
       if (!investimentos.length) {
@@ -229,22 +229,22 @@ export function criarInvestimentoUseCases(deps: {
       };
     },
 
-    async totalInvestido(usuarioId: string) {
-      if (!usuarioId) throw new ValidationError("Usuário não autenticado.");
+    async totalInvestido(userId: string) {
+      if (!userId) throw new ValidationError("Usuário não autenticado.");
       const total =
-        await investimentoRepository.calcularTotalInvestido(usuarioId);
+        await investimentoRepository.calcularTotalInvestido(userId);
       return { totalInvestido: Number(total.toFixed(2)) };
     },
 
-    async investimentosEfetuados(usuarioId: string) {
-      if (!usuarioId) throw new ValidationError("Usuário não autenticado.");
+    async investimentosEfetuados(userId: string) {
+      if (!userId) throw new ValidationError("Usuário não autenticado.");
 
       const investimentos =
         await investimentoRepository.encontrarInvestimentosComAplicacoes(
-          usuarioId
+          userId
         );
       const valorTotalInvestido =
-        await investimentoRepository.calcularTotalInvestido(usuarioId);
+        await investimentoRepository.calcularTotalInvestido(userId);
 
       return { valorTotalInvestido, investimentos };
     },

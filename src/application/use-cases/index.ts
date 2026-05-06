@@ -1,4 +1,4 @@
-export { criarUsuarioUseCases } from "./usuarioUseCases.js";
+export { createUserUseCases } from "./userUseCases.js";
 export { criarSaldoUseCases } from "./saldoUseCases.js";
 export { criarTransacaoUseCases } from "./transacaoUseCases.js";
 export { criarDespesaUseCases } from "./despesaUseCases.js";

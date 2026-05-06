@@ -1,11 +1,11 @@
-type Despesas = {
-  valor: number;
+type Expenses = {
+  amount: number;
 };
 
-export function calcularTotalDespesas(
-  despesasEfetuadas: Despesas[]
+export function calcTotalExpenses(
+  incurredExpenses: Expenses[]
 ): number {
-  return despesasEfetuadas.reduce(
-    (total, despesa) => total + despesa.valor, 0
+  return incurredExpenses.reduce(
+    (total, expense) => total + expense.amount, 0
   );
 };

@@ -6,22 +6,22 @@ import type {
 } from "@application/dto/transacao/index.js";
 import { criarSaldoUseCases, criarTransacaoUseCases } from "@application/use-cases/index.js";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { DespesaRepository } from "@adapters/database/repositories/despesaRepository.js";
+import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { ReceitaRepository } from "@adapters/database/repositories/receitaRepository.js";
-import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
+import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";
 import { TransacaoRepository } from "@adapters/database/repositories/transacaoRepository.js";
 
 const saldoUseCases = criarSaldoUseCases({
-  saldoRepository: new SaldoRepository(),
+  balanceRepository: new BalanceRepository(),
   transacaoRepository: TransacaoRepository,
   receitaRepository: ReceitaRepository,
-  despesaRepository: DespesaRepository,
+  despesaRepository: ExpenseRepository,
 });
 
 const transacaoUseCases = criarTransacaoUseCases({
   transacaoRepository: TransacaoRepository,
-  recalcularSaldo: async (usuarioId: string) => {
-    const resultado = await saldoUseCases.recalcularSaldo(usuarioId);
+  recalcularSaldo: async (userId: string) => {
+    const resultado = await saldoUseCases.recalcularSaldo(userId);
     return resultado.saldo;
   },
 });
@@ -50,7 +50,7 @@ export async function createTransactionFastify(
     }
 
     const result = await transacaoUseCases.adicionarTransacao(
-      data.usuarioId,
+      data.userId,
       data.descricao,
       data.valor,
       data.data,
@@ -72,7 +72,7 @@ export async function updateTransactionFastify(
 ) {
   try {
     const transactionId = request.params.id;
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
 
     if (!transactionId) {
       return reply.status(400).send({ error: "Transação não encontrada." });
@@ -105,7 +105,7 @@ export async function deleteTransactionFastify(
 ) {
   try {
     const transactionId = request.params.id;
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
 
     if (!transactionId) {
       return reply.status(400).send({ error: "Transação não encontrada." });

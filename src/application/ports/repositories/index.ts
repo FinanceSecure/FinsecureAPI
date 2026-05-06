@@ -1,7 +1,7 @@
-export type { IUsuarioRepository } from "./IUsuarioRepository.js";
-export type { ISaldoRepository } from "./ISaldoRepository.js";
-export type { ITransacaoRepository } from "./ITransacaoRepository.js";
-export type { IReceitaRepository } from "./IReceitaRepository.js";
-export type { IDespesaRepository } from "./IDespesaRepository.js";
-export type { IInvestimentoRepository } from "./IInvestimentoRepository.js";
-export type { ITipoInvestimentoRepository } from "./ITipoInvestimentoRepository.js";
+export type { IBalanceRepository } from "./IBalanceRepository";
+export type { IExpenseRepository } from "./IExpenseRepository";
+export type { IInvestimentoRepository } from "./IInvestimentoRepository";
+export type { IReceitaRepository } from "./IReceitaRepository";
+export type { ITipoInvestimentoRepository } from "./ITipoInvestimentoRepository";
+export type { ITransacaoRepository } from "./ITransacaoRepository";
+export type { IUserRepository } from "./IUserRepository";

@@ -10,22 +10,22 @@ import {
   criarReceitaUseCases,
   criarSaldoUseCases,
 } from "@application/use-cases/index.js";
-import { DespesaRepository } from "@adapters/database/repositories/despesaRepository.js";
+import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { ReceitaRepository } from "@adapters/database/repositories/receitaRepository.js";
-import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
+import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";
 import { TransacaoRepository } from "@adapters/database/repositories/transacaoRepository.js";
 
 const saldoUseCases = criarSaldoUseCases({
-  saldoRepository: new SaldoRepository(),
+  balanceRepository: new BalanceRepository(),
   transacaoRepository: TransacaoRepository,
   receitaRepository: ReceitaRepository,
-  despesaRepository: DespesaRepository,
+  despesaRepository: ExpenseRepository,
 });
 
 const receitaUseCases = criarReceitaUseCases({
   receitaRepository: ReceitaRepository,
-  recalcularSaldo: async (usuarioId: string) => {
-    const resultado = await saldoUseCases.recalcularSaldo(usuarioId);
+  recalcularSaldo: async (userId: string) => {
+    const resultado = await saldoUseCases.recalcularSaldo(userId);
     return resultado.saldo;
   },
 });
@@ -46,7 +46,7 @@ function getAuthenticatedUserId(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const userId = request.user?.usuarioId;
+  const userId = request.user?.userId;
 
   if (!userId) {
     reply.status(404).send({ error: "Usuário não encontrado." });
@@ -95,7 +95,7 @@ export async function createFixedIncomeFastify(
 
   try {
     const fixedIncome = await receitaUseCases.adicionarRendaFixa({
-      usuarioId: userId,
+      userId: userId,
       valor: request.body.valor,
     });
 
@@ -114,7 +114,7 @@ export async function updateFixedIncomeFastify(
 
   try {
     const updatedFixedIncome = await receitaUseCases.alterarRendaFixa({
-      usuarioId: userId,
+      userId: userId,
       valor: request.body.valor,
     });
 
@@ -167,7 +167,7 @@ export async function createVariableIncomeFastify(
 
   try {
     const variableIncome = await receitaUseCases.adicionarRendaVariavel({
-      usuarioId: userId,
+      userId: userId,
       descricao: request.body.descricao,
       valor: request.body.valor,
     });

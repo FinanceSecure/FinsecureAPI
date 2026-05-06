@@ -4,7 +4,7 @@ type TipoTransacao = "ENTRADA" | "SAIDA" | "INVESTIMENTO";
 export class Transacao {
   constructor(
     public id: string | null,
-    public usuarioId: string,
+    public userId: string,
     public tipo: TipoTransacao,
     public valor: number,
     public status: StatusTransacao,

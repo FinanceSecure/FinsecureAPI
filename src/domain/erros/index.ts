@@ -1,1 +1,1 @@
-export { MensagensErro } from "./validation"
+export { ErroMessages } from "./validation"

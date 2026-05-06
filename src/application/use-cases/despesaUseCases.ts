@@ -1,41 +1,41 @@
-import { calcularTotalDespesas } from "../../shared/utils/calcDespesas.js";
-import { IDespesaRepository } from "../ports/repositories/IDespesaRepository.js";
+import { calcTotalExpenses } from "../../shared/utils/calcDespesas.js";
+import { IExpenseRepository } from "../ports/repositories";
 
 export function criarDespesaUseCases(deps: {
-  despesaRepository: IDespesaRepository;
-  recalcularSaldo: (usuarioId: string) => Promise<number>;
+  expenseRepository: IExpenseRepository;
+  recalcBalance: (userId: string) => Promise<number>;
 }) {
-  const { despesaRepository, recalcularSaldo } = deps;
+  const { expenseRepository, recalcBalance } = deps;
 
   return {
-    listarDespesas(usuarioId: string) {
-      return despesaRepository.listarPorUsuario(usuarioId);
+    listarDespesas(userId: string) {
+      return expenseRepository.listByUserId(userId);
     },
 
-    async criarDespesa(despesaData: {
-      valor: number;
-      dataVencimento: Date | null;
-      categoria: string;
-      descricao: string;
-      dataAgendamento?: Date | null;
-      usuarioId: string;
+    async criarDespesa(expenseData: {
+      amount: number;
+      dueDate: Date | null;
+      category: string;
+      description: string;
+      scheduledAt?: Date | null;
+      userId: string;
     }) {
-      const despesa = await despesaRepository.criar(despesaData);
-      await recalcularSaldo(despesaData.usuarioId);
-      return despesa;
+      const expense = await expenseRepository.create(expenseData);
+      await recalcBalance(expenseData.userId);
+      return expense;
     },
 
-    listarDespesasAgendadas(usuarioId: string) {
-      return despesaRepository.listarAgendadas(usuarioId);
+    listarDespesasAgendadas(userId: string) {
+      return expenseRepository.listScheduled(userId);
     },
 
-    async verificarTotalDespesas(usuarioId: string) {
-      const despesas = await despesaRepository.listarPorUsuario(usuarioId);
-      const totalDespesas = calcularTotalDespesas(despesas);
+    async verificarTotalDespesas(userId: string) {
+      const expenses = await expenseRepository.listByUserId(userId);
+      const totalDespesas = calcTotalExpenses(expenses);
 
       return {
         totalDespesas,
-        detalhes: { despesas },
+        detalhes: { expenses },
       };
     },
   };

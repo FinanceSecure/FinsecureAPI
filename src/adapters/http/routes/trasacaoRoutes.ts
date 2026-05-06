@@ -11,7 +11,7 @@ import {
   createTransactionFastify,
   deleteTransactionFastify,
   updateTransactionFastify,
-} from "../controllers/transacaoController.js";
+} from "../controllers";
 
 export async function registerTransactionRoutes(app: FastifyInstance) {
   app.post<{ Body: CreateTransactionRequestDto }>(

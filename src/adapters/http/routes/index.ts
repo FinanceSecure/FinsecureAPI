@@ -4,7 +4,7 @@ import { registerExpenseRoutes } from "./despesaRoutes.js";
 import { registerIncomeRoutes } from "./receitaRoutes.js";
 import { registerInvestmentRoutes } from "./investimentoRoutes.js";
 import { registerTransactionRoutes } from "./trasacaoRoutes.js";
-import { registerUserRoutes } from "./usuarioRoutes.js";
+import { registerUserRoutes } from "./userRoutes";
 
 export async function registerHttpRoutes(app: FastifyInstance) {
   await registerUserRoutes(app);

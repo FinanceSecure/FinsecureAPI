@@ -2,33 +2,33 @@ import prisma from "../db.js";
 import { IReceitaRepository } from "@application/ports/repositories/IReceitaRepository.js";
 
 export const ReceitaRepository: IReceitaRepository = {
-  listarRendaFixa(usuarioId) {
-    return prisma.rendaFixa.findMany({ where: { usuarioId } });
+  listarRendaFixa(userId) {
+    return prisma.rendaFixa.findMany({ where: { userId } });
   },
 
-  obterRendaFixa(usuarioId) {
-    return prisma.rendaFixa.findUnique({ where: { usuarioId } });
+  obterRendaFixa(userId) {
+    return prisma.rendaFixa.findUnique({ where: { userId } });
   },
 
-  criarRendaFixa(usuarioId, valor) {
+  criarRendaFixa(userId, valor) {
     return prisma.rendaFixa.create({
-      data: { usuarioId, valor },
+      data: { userId, valor },
     });
   },
 
-  atualizarRendaFixa(usuarioId, valor) {
+  atualizarRendaFixa(userId, valor) {
     return prisma.rendaFixa.update({
-      where: { usuarioId },
+      where: { userId },
       data: { valor },
     });
   },
 
-  removerRendaFixa(usuarioId) {
-    return prisma.rendaFixa.delete({ where: { usuarioId } });
+  removerRendaFixa(userId) {
+    return prisma.rendaFixa.delete({ where: { userId } });
   },
 
-  listarRendaVariavel(usuarioId) {
-    return prisma.rendaVariavel.findMany({ where: { usuarioId } });
+  listarRendaVariavel(userId) {
+    return prisma.rendaVariavel.findMany({ where: { userId } });
   },
 
   obterRendaVariavelPorId(id) {
@@ -53,12 +53,12 @@ export const ReceitaRepository: IReceitaRepository = {
     return prisma.rendaVariavel.delete({ where: { id } });
   },
 
-  async obterTotalReceitasPorUsuario(usuarioId) {
+  async obterTotalReceitasPorUsuario(userId) {
     const rendaFixa = await prisma.rendaFixa.findMany({
-      where: { usuarioId },
+      where: { userId },
     });
     const rendaVariavel = await prisma.rendaVariavel.findMany({
-      where: { usuarioId },
+      where: { userId },
     });
 
     const totalRendaFixa = rendaFixa.reduce(

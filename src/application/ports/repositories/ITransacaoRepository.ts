@@ -2,7 +2,7 @@ import { TipoTransacao, Transacao } from "@prisma/client";
 
 export interface ITransacaoRepository {
   criar(data: {
-    usuarioId: string;
+    userId: string;
     descricao: string;
     valor: number;
     data: Date;
@@ -11,7 +11,7 @@ export interface ITransacaoRepository {
   }): Promise<Transacao>;
   encontrarPorIdEUsuario(
     id: string,
-    usuarioId: string
+    userId: string
   ): Promise<Transacao | null>;
   atualizar(
     id: string,
@@ -25,5 +25,5 @@ export interface ITransacaoRepository {
   remover(id: string): Promise<Transacao>;
   listarPendentesAte(dataLimite: Date): Promise<Transacao[]>;
   atualizarStatus(id: string, status: "EFETIVADA" | "PENDENTE"): Promise<void>;
-  obterTotalEfetivadoPorUsuario(usuarioId: string): Promise<number>;
+  obterTotalEfetivadoPorUsuario(userId: string): Promise<number>;
 }

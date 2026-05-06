@@ -6,9 +6,9 @@ export const TransacaoRepository: ITransacaoRepository = {
     return prisma.transacao.create({ data });
   },
 
-  encontrarPorIdEUsuario(id, usuarioId) {
+  encontrarPorIdEUsuario(id, userId) {
     return prisma.transacao.findFirst({
-      where: { id, usuarioId },
+      where: { id, userId },
     });
   },
 
@@ -39,10 +39,10 @@ export const TransacaoRepository: ITransacaoRepository = {
     });
   },
 
-  async obterTotalEfetivadoPorUsuario(usuarioId) {
+  async obterTotalEfetivadoPorUsuario(userId) {
     const totalTransacoes = await prisma.transacao.aggregate({
       _sum: { valor: true },
-      where: { usuarioId, status: "EFETIVADA" },
+      where: { userId, status: "EFETIVADA" },
     });
 
     return totalTransacoes._sum.valor || 0;

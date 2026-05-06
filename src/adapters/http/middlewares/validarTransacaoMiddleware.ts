@@ -10,7 +10,7 @@ declare module "fastify" {
   interface FastifyRequest {
     validatedTransaction?: ValidatedTransactionDto;
     user?: {
-      usuarioId: string;
+      userId: string;
     };
   }
 }
@@ -21,11 +21,11 @@ function buildValidatedTransaction(
   }>
 ) {
   const { descricao, valor, data, tipo } = request.body;
-  const usuarioId = request.user?.usuarioId;
+  const userId = request.user?.userId;
   const parsedDate = new Date(data);
   const tiposValidos = ["ENTRADA", "SAIDA"];
 
-  if (!usuarioId)
+  if (!userId)
     throw new HttpError("Usuário não autenticado", 401);
 
   if (!descricao || valor === undefined || !data || !tipo)
@@ -68,7 +68,7 @@ function buildValidatedTransaction(
     valor,
     data: parsedDate,
     tipo,
-    usuarioId,
+    userId,
     status,
   } satisfies ValidatedTransactionDto;
 }

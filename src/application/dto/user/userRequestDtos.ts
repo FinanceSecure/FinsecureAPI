@@ -1,21 +1,21 @@
 export interface RegisterUserRequestDto {
-  nome: string;
+  name: string;
   email: string;
-  senha: string;
+  password: string;
 }
 
 export interface LoginUserRequestDto {
   email: string;
-  senha: string;
+  password: string;
 }
 
 export interface UpdateUserEmailRequestDto {
-  emailAntigo: string;
-  emailNovo: string;
+  oldEmail: string;
+  newEmail: string;
 }
 
 export interface UpdateUserPasswordRequestDto {
   email: string;
-  senhaAntiga: string;
-  senhaNova: string;
+  oldPassword: string;
+  newPassword: string;
 }

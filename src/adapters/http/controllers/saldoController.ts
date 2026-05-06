@@ -1,16 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { criarSaldoUseCases } from "@application/use-cases/index.js";
-import { DespesaRepository } from "@adapters/database/repositories/despesaRepository.js";
+import { ExpenseRepository } from "@/adapters/database/repositories/expenseRepository.js";
 import { ReceitaRepository } from "@adapters/database/repositories/receitaRepository.js";
-import { SaldoRepository } from "@adapters/database/repositories/saldoRepository.js";
+import { BalanceRepository } from "@adapters/database/repositories/balanceRepository";
 import { TransacaoRepository } from "@adapters/database/repositories/transacaoRepository.js";
 
 const saldoUseCases = criarSaldoUseCases({
-  saldoRepository: new SaldoRepository(),
+  balanceRepository: new BalanceRepository(),
   transacaoRepository: TransacaoRepository,
   receitaRepository: ReceitaRepository,
-  despesaRepository: DespesaRepository,
+  despesaRepository: ExpenseRepository,
 });
 
 function sendFastifyError(reply: FastifyReply, error: unknown) {
@@ -30,7 +30,7 @@ export async function getBalanceFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.usuarioId;
+    const userId = request.user?.userId;
 
     if (!userId) {
       return reply.status(404).send({ error: "Usuário não encontrado." });
