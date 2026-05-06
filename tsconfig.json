@@ -11,7 +11,6 @@
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "typeRoots": [
       "./src/adapters/http/types",
       "./node_modules/@types"

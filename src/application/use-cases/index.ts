@@ -1,7 +1,7 @@
-export { createUserUseCases } from "./userUseCases.js";
-export { criarSaldoUseCases } from "./saldoUseCases.js";
-export { criarTransacaoUseCases } from "./transacaoUseCases.js";
-export { criarDespesaUseCases } from "./despesaUseCases.js";
-export { criarReceitaUseCases } from "./receitaUseCases.js";
-export { criarInvestimentoUseCases } from "./investimentoUseCases.js";
-export { criarTipoInvestimentoUseCases } from "./tipoInvestimentoUseCases.js";
+export { createUserUseCases } from "./userUseCases";
+export { createBalanceUseCases } from "./balanceUseCases";
+export { createTransactionUseCases } from "./transactionUseCases";
+export { createExpenseUseCases } from "./expenseUseCases";
+export { createIncomeUseCases } from "./incomeUseCases";
+export { createInvestmentUseCases } from "./investmentUseCases";
+export { createInvestmentTypeUseCases } from "./investmentTypeUseCases";

@@ -45,7 +45,7 @@ export function createUserUseCases({
       const userSaved = await userRepository.save(user);
 
       if (userSaved.id)
-        await balanceRepository.criarSaldo(userSaved.id, 0);
+        await balanceRepository.createBalance(userSaved.id, 0);
 
       return userSaved;
     },
@@ -75,7 +75,7 @@ export function createUserUseCases({
 
       return {
         token,
-        mensagem: "Login realizado com sucesso.",
+        message: "Login realizado com sucesso.",
       };
     },
 
@@ -90,7 +90,7 @@ export function createUserUseCases({
       await userRepository.deleteById(userId);
 
       return {
-        mensagem: "Usuário removido com sucesso.",
+        message: "Usuário removido com sucesso.",
       };
     },
 
@@ -101,8 +101,8 @@ export function createUserUseCases({
       if (!oldEmail || !newEmail)
         throw new ValidationError(ErroMessages.VALIDACAO.EMAIL);
 
-      const usuario = await userRepository.findByEmail(oldEmail);
-      if (!usuario)
+      const user = await userRepository.findByEmail(oldEmail);
+      if (!user)
         throw new ResourceNotFoundError(ErroMessages.USUARIO.NAO_ENCONTRADO);
 
       const emailExisting = await userRepository.findByEmail(newEmail);
@@ -115,7 +115,7 @@ export function createUserUseCases({
       );
 
       return {
-        mensagem: "E-mail alterado com sucesso.",
+        message: "E-mail alterado com sucesso.",
       };
     },
 
@@ -146,7 +146,7 @@ export function createUserUseCases({
       await userRepository.updatePassword(email, passwordHash);
 
       return {
-        mensagem: "Senha alterada com sucesso.",
+        message: "Senha alterada com sucesso.",
       };
     },
   };

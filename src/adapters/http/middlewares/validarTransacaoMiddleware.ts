@@ -1,10 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { TransactionType } from "@prisma/client";
 import { HttpError } from "../exceptions/HttpError.js";
 import type {
   CreateTransactionRequestDto,
   UpdateTransactionRequestDto,
   ValidatedTransactionDto,
-} from "@application/dto/transacao/index.js";
+} from "@application/dto/transaction/index.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -15,59 +16,62 @@ declare module "fastify" {
   }
 }
 
+function normalizeTransactionType(type: string) {
+  if (type === "ENTRADA") return TransactionType.INCOME;
+  if (type === "SAIDA") return TransactionType.EXPENSE;
+  return type as TransactionType;
+}
+
 function buildValidatedTransaction(
   request: FastifyRequest<{
     Body: CreateTransactionRequestDto | UpdateTransactionRequestDto;
   }>
 ) {
-  const { descricao, valor, data, tipo } = request.body;
+  const { descricao: description, valor: amount, data: date, tipo: type } = request.body;
   const userId = request.user?.userId;
-  const parsedDate = new Date(data);
-  const tiposValidos = ["ENTRADA", "SAIDA"];
+  const parsedDate = new Date(date);
+  const validTypes = ["ENTRADA", "SAIDA", ...Object.values(TransactionType)];
 
-  if (!userId)
-    throw new HttpError("Usuário não autenticado", 401);
+  if (!userId) throw new HttpError("UsuÃ¡rio nÃ£o autenticado", 401);
 
-  if (!descricao || valor === undefined || !data || !tipo)
-    throw new HttpError("Dados incompletos ou inválidos", 400);
+  if (!description || amount === undefined || !date || !type)
+    throw new HttpError("Dados incompletos ou invÃ¡lidos", 400);
 
   if (
-    typeof descricao !== "string" ||
-    typeof valor !== "number" ||
-    typeof tipo !== "string"
+    typeof description !== "string" ||
+    typeof amount !== "number" ||
+    typeof type !== "string"
   ) {
-    throw new HttpError("Formato de dados inválidos", 422);
+    throw new HttpError("Formato de dados invÃ¡lidos", 422);
   }
 
   if (isNaN(parsedDate.getTime()))
-    throw new HttpError("Data inválida", 422);
+    throw new HttpError("Data invÃ¡lida", 422);
 
-  if (!tiposValidos.includes(tipo))
+  if (!validTypes.includes(type))
     throw new HttpError("Tipo deve ser informado como ENTRADA ou SAIDA", 422);
 
-
-  if (descricao.length > 255) {
+  if (description.length > 255) {
     throw new HttpError(
-      "Descrição muito longa informada, o máximo é de 255 caracteres",
+      "DescriÃ§Ã£o muito longa informada, o mÃ¡ximo Ã© de 255 caracteres",
       422
     );
   }
 
-  if (tipo === "ENTRADA" && valor <= 0)
+  if ((type === "ENTRADA" || type === TransactionType.INCOME) && amount <= 0)
     throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422);
 
-  if (tipo === "SAIDA" && valor >= 0)
+  if ((type === "SAIDA" || type === TransactionType.EXPENSE) && amount >= 0)
     throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422);
 
-
-  const agora = new Date();
-  const status = parsedDate > agora ? "PENDENTE" : "EFETIVADA";
+  const now = new Date();
+  const status = parsedDate > now ? "PENDING" : "COMPLETED";
 
   return {
-    descricao,
-    valor,
-    data: parsedDate,
-    tipo,
+    description,
+    amount,
+    date: parsedDate,
+    type: normalizeTransactionType(type),
     userId,
     status,
   } satisfies ValidatedTransactionDto;

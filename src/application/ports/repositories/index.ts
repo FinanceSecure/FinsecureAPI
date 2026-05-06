@@ -1,7 +1,7 @@
 export type { IBalanceRepository } from "./IBalanceRepository";
 export type { IExpenseRepository } from "./IExpenseRepository";
-export type { IInvestimentoRepository } from "./IInvestimentoRepository";
-export type { IReceitaRepository } from "./IReceitaRepository";
-export type { ITipoInvestimentoRepository } from "./ITipoInvestimentoRepository";
-export type { ITransacaoRepository } from "./ITransacaoRepository";
+export type { IIncomeRepository } from "./IIncomeRepository";
+export type { IInvestmentRepository } from "./IInvestmentRepository";
+export type { IInvestmentTypeRepository } from "./IInvestmentTypeRepository";
+export type { ITransactionRepository } from "./ITransactionRepository";
 export type { IUserRepository } from "./IUserRepository";

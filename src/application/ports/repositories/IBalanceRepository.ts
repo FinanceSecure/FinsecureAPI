@@ -1,8 +1,8 @@
-import { Saldo } from "@prisma/client";
+import { Balance } from "@prisma/client";
 
 export interface IBalanceRepository {
-  obterSaldoPorUsuario(userId: string): Promise<Saldo | null>;
-  atualizarSaldo(saldoId: string, valor: number): Promise<Saldo>;
-  criarSaldo(userId: string, valor: number): Promise<Saldo>;
-  incrementarSaldo(userId: string, valor: number): Promise<void>;
+  getBalanceByUserId(userId: string): Promise<Balance | null>;
+  updateBalance(balanceId: string, amount: number): Promise<Balance>;
+  createBalance(userId: string, amount: number): Promise<Balance>;
+  incrementBalance(userId: string, amount: number): Promise<void>;
 }

@@ -1,7 +1,8 @@
 export { ExpenseRepository } from "./expenseRepository.js"
-export { InvestimentoRepository } from "./investimentoRepository.js"
-export { ReceitaRepository } from "./receitaRepository.js"
+export { InvestmentRepository } from "./investmentRepository.js"
+export { IncomeRepository } from "./incomeRepository.js"
 export { BalanceRepository } from "./balanceRepository.js"
-export { TipoInvestimentoRepository } from "./tipoInvestimentoRepository.js"
-export { TransacaoRepository } from "./transacaoRepository.js"
+export { InvestmentTypeRepository } from "./investmentTypeRepository.js"
+export { TransactionRepository } from "./transactionRepository.js"
 export { UserRepository } from "./userRepository.js"
+

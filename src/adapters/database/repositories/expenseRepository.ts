@@ -1,5 +1,5 @@
 import prisma from "../db.js";
-import { IExpenseRepository } from "@/application/ports/repositories/IExpenseRepository.js";
+import { IExpenseRepository } from "@/application/ports/repositories";
 
 export const ExpenseRepository: IExpenseRepository = {
   listByUserId(userId) {

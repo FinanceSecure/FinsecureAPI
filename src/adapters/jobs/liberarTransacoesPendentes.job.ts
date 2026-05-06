@@ -1,26 +1,29 @@
 import cron from "node-cron";
 import {
-  criarSaldoUseCases,
-  criarTransacaoUseCases,
+  createBalanceUseCases,
+  createTransactionUseCases,
 } from "@application/use-cases";
-import { despesaRepository } from "../database/repositories/expenseRepository.js";
-import { receitaRepository } from "../database/repositories/receitaRepository.js";
-import { BalanceRepository } from "../database/repositories/";
-import { transacaoRepository } from "../database/repositories/transacaoRepository.js";
+import { ExpenseRepository } from "../database/repositories/expenseRepository.js";
+import { IncomeRepository } from "../database/repositories/incomeRepository.js";
+import { BalanceRepository } from "../database/repositories/balanceRepository.js";
+import { TransactionRepository } from "../database/repositories/transactionRepository.js";
 
-const saldoUseCases = criarSaldoUseCases({
+const balanceUseCases = createBalanceUseCases({
   balanceRepository: new BalanceRepository(),
-  transacaoRepository,
-  receitaRepository,
-  despesaRepository,
+  transactionRepository: TransactionRepository,
+  incomeRepository: IncomeRepository,
+  expenseRepository: ExpenseRepository,
 });
 
-const transacaoUseCases = criarTransacaoUseCases({
-  transacaoRepository,
-  recalcularSaldo: saldoUseCases.recalcularSaldo,
+const transactionUseCases = createTransactionUseCases({
+  transactionRepository: TransactionRepository,
+  recalculateBalance: async (userId: string) => {
+    const result = await balanceUseCases.recalculateBalance(userId);
+    return result.balance;
+  },
 });
 
 cron.schedule("0 0 * * * ", async () => {
   console.log("Executando liberação de transações pendentes...");
-  await transacaoUseCases.liberarTransacoesPendentes();
+  await transactionUseCases.releasePendingTransactions();
 });
