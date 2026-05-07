@@ -3,19 +3,19 @@ export interface InvestmentStatementParamsDto {
 }
 
 export interface AddInvestmentRequestDto {
-  tipoInvestimentoId: string;
-  valorInvestido: number;
-  dataCompra: string;
-  dataAtualizacao?: string;
+  investmentTypeId: string;
+  investedAmount: number;
+  purchaseDate: string;
+  updatedAt?: string;
 }
 
 export interface RedeemInvestmentRequestDto {
-  valor: number;
+  investedAmount: number;
 }
 
 export interface AddInvestmentTypeRequestDto {
-  nome: string;
-  tipo: string;
-  valorPercentual: number;
-  impostoRenda: boolean;
+  name: string;
+  type: string;
+  percentageValue: number;
+  hasIncomeTax: boolean;
 }

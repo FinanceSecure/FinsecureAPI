@@ -1,16 +1,16 @@
 export interface FixedIncomeRequestDto {
-  valor: number;
+  amount: number;
 }
 
 export interface VariableIncomeRequestDto {
-  descricao: string;
-  valor: number;
+  description: string;
+  amount: number;
 }
 
 export interface UpdateVariableIncomeRequestDto {
   id: string;
-  descricao?: string;
-  valor?: number;
+  description?: string;
+  amount?: number;
 }
 
 export interface VariableIncomeParamsDto {

@@ -1,33 +1,74 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import {
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 import type {
   AddInvestmentRequestDto,
   InvestmentStatementParamsDto,
   RedeemInvestmentRequestDto,
-} from "@application/dto/investment/";
-import { ApplicationError } from "@application/errors/ApplicationError.js";
-import { createInvestmentUseCases } from "@application/use-cases/";
-import { InvestmentRepository } from "@adapters/database/repositories/investmentRepository.js";
-import { BalanceRepository } from "@/adapters/database/repositories";
+} from "@application/dto/investment";
+import { ApplicationError }
+  from "@application/errors/ApplicationError.js";
+import {
+  createInvestmentUseCases,
+} from "@application/use-cases";
+import { InvestmentRepository }
+  from "@adapters/database/repositories/investmentRepository.js";
 
-const investmentUseCases = createInvestmentUseCases({
-  investmentRepository: InvestmentRepository,
-  balanceRepository: new BalanceRepository(),
-});
+const investmentUseCases =
+  createInvestmentUseCases({
+    investmentRepository:
+      InvestmentRepository,
+  });
 
-const cleanResponse = (data: any) => JSON.parse(JSON.stringify(data));
+const cleanResponse = (
+  data: any
+) =>
+  JSON.parse(
+    JSON.stringify(data)
+  );
 
-function sendFastifyError(reply: FastifyReply, error: unknown) {
-  console.error("DEBUG [InvestimentoController]:", error);
+function sendFastifyError(
+  reply: FastifyReply,
+  error: unknown
+) {
+  console.error(
+    "DEBUG [InvestmentController]:",
+    error
+  );
 
   if (error instanceof ApplicationError) {
-    return reply.status(error.statusCode).send({ error: error.message });
+    return reply
+      .status(error.statusCode)
+      .send({ error: error.message });
   }
 
   if (error instanceof Error) {
-    return reply.status(500).send({ error: error.message });
+    return reply
+      .status(500)
+      .send({ error: error.message });
   }
 
-  return reply.status(500).send({ error: "Erro interno inesperado no servidor." });
+  return reply
+    .status(500)
+    .send({ error: "Erro interno inesperado no servidor." });
+}
+
+function getAuthenticatedUserId(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const userId = request.user?.userId;
+
+  if (!userId) {
+    reply
+      .status(401)
+      .send({ error: "Usuário não autenticado." });
+
+    return null;
+  }
+
+  return userId;
 }
 
 export async function getInvestmentStatementFastify(
@@ -35,39 +76,63 @@ export async function getInvestmentStatementFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.userId;
+    const userId = getAuthenticatedUserId(
+      request,
+      reply
+    );
 
     if (!userId)
-      return reply.status(401).send({ error: "Usuário não autenticado." });
+      return;
 
     const investments =
-      await investmentUseCases.investimentosEfetuados(userId);
+      await investmentUseCases.getCompletedInvestments(userId);
 
-    return reply.status(200).send(cleanResponse(investments));
+    return reply
+      .status(200)
+      .send(
+        cleanResponse(
+          investments
+        )
+      );
   } catch (error) {
-    return sendFastifyError(reply, error);
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }
 
 export async function getInvestmentStatementByTypeFastify(
-  request: FastifyRequest<{ Params: InvestmentStatementParamsDto }>,
+  request: FastifyRequest<{
+    Params: InvestmentStatementParamsDto;
+  }>,
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.userId;
-    const investmentId = request.params.id;
+    const userId =
+      getAuthenticatedUserId(
+        request,
+        reply
+      );
 
     if (!userId)
-      return reply.status(401).send({ error: "Usuário não autenticado." });
+      return;
 
-    const statement = await investmentUseCases.consultarInvestimentosPorTipo(
+    const investmentTypeId = request.params.id;
+    const statement = await investmentUseCases.getInvestmentsByType(
       userId,
-      investmentId
+      investmentTypeId
     );
 
-    return reply.status(200).send(cleanResponse(statement));
+    return reply
+      .status(200)
+      .send(cleanResponse(statement)
+      );
   } catch (error) {
-    return sendFastifyError(reply, error);
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }
 
@@ -79,25 +144,41 @@ export async function redeemInvestmentFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.userId;
-    const investmentTypeId = request.params.id;
-    const amountToRedeem = Number(request.body.valor);
+    const userId =
+      getAuthenticatedUserId(
+        request,
+        reply
+      );
 
     if (!userId)
-      return reply.status(401).send({ error: "Usuário não autenticado." });
+      return;
 
-    if (isNaN(amountToRedeem) || amountToRedeem <= 0)
-      return reply.status(400).send({ error: "Valor de resgate inválido." });
+    const investmentTypeId = request.params.id;
+    const amountToRedeem = Number(request.body.investedAmount);
 
-    const result = await investmentUseCases.resgatarInvestimento(
-      userId,
-      investmentTypeId,
-      amountToRedeem
-    );
+    if (isNaN(amountToRedeem) || amountToRedeem <= 0) {
+      return reply
+        .status(400)
+        .send({ error: "Valor de resgate inválido." });
+    }
 
-    return reply.status(200).send(cleanResponse(result));
+    const result =
+      await investmentUseCases.redeemInvestment(
+        userId,
+        investmentTypeId,
+        amountToRedeem
+      );
+
+    return reply
+      .status(200)
+      .send(
+        cleanResponse(result)
+      );
   } catch (error) {
-    return sendFastifyError(reply, error);
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }
 
@@ -106,40 +187,72 @@ export async function getInvestedAmountFastify(
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.userId;
+    const userId =
+      getAuthenticatedUserId(
+        request,
+        reply
+      );
 
     if (!userId)
-      return reply.status(401).send({ error: "Usuário não autenticado." });
+      return;
 
-    const total = await investmentUseCases.totalInvestido(userId);
-    return reply.status(200).send(cleanResponse(total));
+    const total =
+      await investmentUseCases.getTotalInvested(
+        userId
+      );
+
+    return reply
+      .status(200)
+      .send(
+        cleanResponse(total)
+      );
   } catch (error) {
-    return sendFastifyError(reply, error);
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }
 
 export async function addInvestmentFastify(
-  request: FastifyRequest<{ Body: AddInvestmentRequestDto }>,
+  request: FastifyRequest<{
+    Body: AddInvestmentRequestDto;
+  }>,
   reply: FastifyReply
 ) {
   try {
-    const userId = request.user?.userId;
-    const { tipoInvestimentoId, valorInvestido, dataCompra, dataAtualizacao } =
-      request.body;
+    const userId =
+      getAuthenticatedUserId(
+        request,
+        reply
+      );
 
     if (!userId)
-      return reply.status(401).send({ error: "Usuário não autenticado." });
+      return;
 
-    const investment = await investmentUseCases.adicionarInvestimento(
-      userId,
-      tipoInvestimentoId,
-      valorInvestido,
-      new Date(dataCompra),
-      dataAtualizacao ? new Date(dataAtualizacao) : undefined
-    );
+    const {
+      investmentTypeId,
+      investedAmount,
+      purchaseDate,
+      updatedAt,
+    } = request.body;
 
-    return reply.status(201).send(cleanResponse(investment));
+    const investment =
+      await investmentUseCases.addInvestment(
+        userId,
+        investmentTypeId,
+        investedAmount,
+        new Date(purchaseDate),
+        updatedAt ? new Date(updatedAt) : undefined
+      );
+
+    return reply
+      .status(201)
+      .send(cleanResponse(investment));
   } catch (error) {
-    return sendFastifyError(reply, error);
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }

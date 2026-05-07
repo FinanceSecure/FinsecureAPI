@@ -1,32 +1,30 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 import { User } from "@/domain/entities";
 import { ErroMessages } from "@domain/erros";
+
 import { IUserRepository } from "../ports/repositories";
-import { IBalanceRepository } from "../ports/repositories";
 import { checkRegistrationFields, checkLoginFields } from "../validators";
+
 import {
   AuthenticationError,
   ConflictError,
   ResourceNotFoundError,
   ValidationError
 } from "../errors";
+
 import { env } from "@shared/config";
 
 type UserUseCasesDeps = {
   userRepository: IUserRepository;
-  balanceRepository: IBalanceRepository;
-}
+};
 
 export function createUserUseCases({
   userRepository,
-  balanceRepository
 }: UserUseCasesDeps) {
   if (!userRepository)
     throw new Error("UserRepository é obrigatório");
-
-  if (!balanceRepository)
-    throw new Error("BalanceRepository é obrigatório");
 
   return {
     async register(
@@ -34,33 +32,57 @@ export function createUserUseCases({
       email: string,
       password: string
     ) {
-      checkRegistrationFields({ name, email, password });
+      checkRegistrationFields({
+        name,
+        email,
+        password,
+      });
 
-      const userExisting = await userRepository.findByEmail(email);
-      if (userExisting)
-        throw new ConflictError(ErroMessages.USUARIO.JA_CADASTRADO);
+      const existingUser =
+        await userRepository.findByEmail(email);
 
-      const passwordHash = await bcrypt.hash(password, 10);
-      const user = new User(null, name, email, passwordHash);
-      const userSaved = await userRepository.save(user);
+      if (existingUser)
+        throw new ConflictError(
+          ErroMessages.USUARIO.JA_CADASTRADO
+        );
 
-      if (userSaved.id)
-        await balanceRepository.createBalance(userSaved.id, 0);
+      const passwordHash =
+        await bcrypt.hash(password, 10);
 
-      return userSaved;
+      const user = new User(
+        null,
+        name,
+        email,
+        passwordHash
+      );
+
+      return userRepository.save(user);
     },
 
-    async login(email: string, password: string) {
-      checkLoginFields({ email, password });
+    async login(
+      email: string,
+      password: string
+    ) {
+      checkLoginFields({
+        email,
+        password,
+      });
 
-      const user = await userRepository.findByEmail(email);
+      const user =
+        await userRepository.findByEmail(email);
 
       if (!user)
-        throw new AuthenticationError(ErroMessages.AUTH.CREDENCIAIS_INVALIDAS);
+        throw new AuthenticationError(
+          ErroMessages.AUTH.CREDENCIAIS_INVALIDAS
+        );
 
-      const validPassword = await bcrypt.compare(password, user.password);
+      const validPassword =
+        await bcrypt.compare(password, user.password);
+
       if (!validPassword)
-        throw new AuthenticationError(ErroMessages.AUTH.CREDENCIAIS_INVALIDAS);
+        throw new AuthenticationError(
+          ErroMessages.AUTH.CREDENCIAIS_INVALIDAS
+        );
 
       const token = jwt.sign(
         {
@@ -81,11 +103,17 @@ export function createUserUseCases({
 
     async remove(userId: string) {
       if (!userId)
-        throw new ResourceNotFoundError(ErroMessages.USUARIO.NAO_ENCONTRADO);
+        throw new ResourceNotFoundError(
+          ErroMessages.USUARIO.NAO_ENCONTRADO
+        );
 
-      const user = await userRepository.findById(userId);
+      const user =
+        await userRepository.findById(userId);
+
       if (!user)
-        throw new ResourceNotFoundError(ErroMessages.USUARIO.NAO_ENCONTRADO);
+        throw new ResourceNotFoundError(
+          ErroMessages.USUARIO.NAO_ENCONTRADO
+        );
 
       await userRepository.deleteById(userId);
 
@@ -99,15 +127,25 @@ export function createUserUseCases({
       newEmail: string
     ) {
       if (!oldEmail || !newEmail)
-        throw new ValidationError(ErroMessages.VALIDACAO.EMAIL);
+        throw new ValidationError(
+          ErroMessages.VALIDACAO.EMAIL
+        );
 
-      const user = await userRepository.findByEmail(oldEmail);
+      const user =
+        await userRepository.findByEmail(oldEmail);
+
       if (!user)
-        throw new ResourceNotFoundError(ErroMessages.USUARIO.NAO_ENCONTRADO);
+        throw new ResourceNotFoundError(
+          ErroMessages.USUARIO.NAO_ENCONTRADO
+        );
 
-      const emailExisting = await userRepository.findByEmail(newEmail);
-      if (emailExisting)
-        throw new ConflictError(ErroMessages.USUARIO.JA_CADASTRADO);
+      const existingEmail =
+        await userRepository.findByEmail(newEmail);
+
+      if (existingEmail)
+        throw new ConflictError(
+          ErroMessages.USUARIO.JA_CADASTRADO
+        );
 
       await userRepository.updateEmail(
         oldEmail,
@@ -125,25 +163,46 @@ export function createUserUseCases({
       newPassword: string
     ) {
       if (!email)
-        throw new ValidationError(ErroMessages.VALIDACAO.EMAIL);
+        throw new ValidationError(
+          ErroMessages.VALIDACAO.EMAIL
+        );
 
       if (!oldPassword)
-        throw new ValidationError(ErroMessages.VALIDACAO.SENHA_ANTIGA);
+        throw new ValidationError(
+          ErroMessages.VALIDACAO.SENHA_ANTIGA
+        );
 
       if (!newPassword)
-        throw new ValidationError(ErroMessages.VALIDACAO.SENHA_NOVA);
+        throw new ValidationError(
+          ErroMessages.VALIDACAO.SENHA_NOVA
+        );
 
-      const user = await userRepository.findByEmail(email);
+      const user =
+        await userRepository.findByEmail(email);
+
       if (!user)
-        throw new ResourceNotFoundError(ErroMessages.USUARIO.NAO_ENCONTRADO);
+        throw new ResourceNotFoundError(
+          ErroMessages.USUARIO.NAO_ENCONTRADO
+        );
 
-      const validPassword = await bcrypt.compare(oldPassword, user.password);
+      const validPassword =
+        await bcrypt.compare(
+          oldPassword,
+          user.password
+        );
+
       if (!validPassword)
-        throw new ValidationError(ErroMessages.USUARIO.SENHA_ANTIGA_INCORRETA);
+        throw new ValidationError(
+          ErroMessages.USUARIO.SENHA_ANTIGA_INCORRETA
+        );
 
-      const passwordHash = await bcrypt.hash(newPassword, 10);
+      const passwordHash =
+        await bcrypt.hash(newPassword, 10);
 
-      await userRepository.updatePassword(email, passwordHash);
+      await userRepository.updatePassword(
+        email,
+        passwordHash
+      );
 
       return {
         message: "Senha alterada com sucesso.",

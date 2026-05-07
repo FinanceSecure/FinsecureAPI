@@ -1,9 +1,9 @@
 export interface AddExpenseRequestDto {
-  valor: number;
-  categoria: string;
-  descricao: string;
-  dataVencimento?: string | null;
-  dataAgendamento?: string | null;
+  amount: number;
+  category: string;
+  description: string;
+  dueDate: string;
+  scheduledAt?: string;
 }
 
 export interface ExpenseParamsDto {

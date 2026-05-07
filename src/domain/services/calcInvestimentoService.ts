@@ -1,44 +1,51 @@
-import { calcularCDIDiario } from "./cdiService.js";
 import { differenceInBusinessDays } from "date-fns";
-import { getIrRate } from "./IrService.js";
+import { calculateDailyCDI } from "./cdiService";
+import { getIncomeTaxRate } from "./incomeTaxService";
 
-const CDI_ANUAL = Number(process.env.CDI_ANUAL || 14.90);
+const ANNUAL_CDI = Number(process.env.CDI_ANUAL || 14.90);
 
-export interface Rendimento {
-  diasUteis: number;
-  rendimentoBruto: number;
-  valorTotalBruto: number;
-  imposto: number;
-  rendimentoLiquido: number;
-  valorTotalLiquido: number;
+export interface InvestmentIncome {
+  businessDays: number;
+  grossIncome: number;
+  grossTotalAmount: number;
+  taxAmount: number;
+  netIncome: number;
+  netTotalAmount: number;
 }
 
-export function calcularRendimento(
-  valorInvestido: number,
-  percentualCDI: number,
-  dataCompra: Date,
-  aplicaImposto: boolean
-): Rendimento {
-  const hoje = new Date();
-  const diasUteis = differenceInBusinessDays(hoje, dataCompra);
-  const rendimentoDiarioBase = calcularCDIDiario(CDI_ANUAL);
-  const rendimentoDiario = rendimentoDiarioBase + percentualCDI / 100;
-  const bruto =
-    valorInvestido * Math.pow(1 + rendimentoDiario, diasUteis) - valorInvestido;
+export function calculateInvestmentIncome(
+  investedAmount: number,
+  cdiPercentage: number,
+  purchaseDate: Date,
+  hasIncomeTax: boolean
+): InvestmentIncome {
+  const today = new Date();
+  const businessDays = differenceInBusinessDays(today, purchaseDate);
+  const baseDailyCDI = calculateDailyCDI(ANNUAL_CDI);
+  const dailyIncomeRate = baseDailyCDI * (cdiPercentage / 100);
 
-  let imposto = 0;
-  if (aplicaImposto) {
-    const aliquota = getIrRate(diasUteis);
-    imposto = bruto * aliquota;
+  const grossIncome =
+    investedAmount *
+    Math.pow(
+      1 + dailyIncomeRate,
+      businessDays
+    ) - investedAmount;
+
+  let taxAmount = 0;
+  if (hasIncomeTax) {
+    const taxRate = getIncomeTaxRate(businessDays);
+    taxAmount = grossIncome * taxRate;
   }
-  const liquido = bruto - imposto;
+
+  const netIncome = grossIncome - taxAmount;
 
   return {
-    diasUteis,
-    rendimentoBruto: Number(bruto.toFixed(2)),
-    valorTotalBruto: Number((valorInvestido + bruto).toFixed(2)),
-    imposto: Number(imposto.toFixed(2)),
-    rendimentoLiquido: Number(liquido.toFixed(2)),
-    valorTotalLiquido: Number((valorInvestido + liquido).toFixed(2)),
+    businessDays,
+    grossIncome: Number(grossIncome.toFixed(2)),
+    grossTotalAmount: Number((investedAmount + grossIncome).toFixed(2)),
+    taxAmount: Number(taxAmount.toFixed(2)),
+    netIncome: Number(netIncome.toFixed(2)),
+    netTotalAmount: Number((investedAmount + netIncome).toFixed(2)
+    ),
   };
 }

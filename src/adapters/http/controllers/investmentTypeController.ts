@@ -26,13 +26,18 @@ export async function addInvestmentTypeFastify(
   reply: FastifyReply
 ) {
   try {
-    const { nome, tipo, valorPercentual, impostoRenda } = request.body;
+    const {
+      name,
+      type,
+      percentageValue,
+      hasIncomeTax
+    } = request.body;
     const investmentType =
       await investmentTypeUseCases.acrescentarTipoInvestimento(
-        nome,
-        tipo,
-        valorPercentual,
-        impostoRenda
+        name,
+        type,
+        percentageValue,
+        hasIncomeTax
       );
 
     return reply.status(201).send(investmentType);

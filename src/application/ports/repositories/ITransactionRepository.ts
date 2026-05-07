@@ -1,13 +1,19 @@
-import { TransactionType, Transaction } from "@prisma/client";
+import {
+  Transaction,
+  TransactionCategory,
+  TransactionStatus,
+  TransactionType,
+} from "@prisma/client";
 
 export interface ITransactionRepository {
   create(data: {
     userId: string;
-    description: string;
+    description?: string;
     amount: number;
     date: Date;
     type: TransactionType;
-    status: "COMPLETED" | "PENDING";
+    category: TransactionCategory;
+    status: TransactionStatus;
   }): Promise<Transaction>;
   findByIdAndUserId(
     id: string,
@@ -16,14 +22,18 @@ export interface ITransactionRepository {
   update(
     id: string,
     data: {
-      description: string;
-      amount: number;
-      date: Date;
-      type: TransactionType;
+      description?: string;
+      amount?: number;
+      date?: Date;
+      type?: TransactionType;
+      category?: TransactionCategory;
     }
   ): Promise<Transaction>;
-  remove(id: string): Promise<Transaction>;
-  listPendingUntil(deadline: Date): Promise<Transaction[]>;
-  updateStatus(id: string, status: "COMPLETED" | "PENDING"): Promise<void>;
   getTotalCompletedByUser(userId: string): Promise<number>;
+  listPendingUntil(deadline: Date): Promise<Transaction[]>;
+  remove(id: string): Promise<Transaction>;
+  updateStatus(
+    id: string,
+    status: TransactionStatus
+  ): Promise<void>;
 }

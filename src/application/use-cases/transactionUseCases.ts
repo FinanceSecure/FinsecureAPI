@@ -1,10 +1,21 @@
-import { TransactionType } from "@prisma/client";
-import { ValidationError } from "../errors/ApplicationError.js";
-import { ITransactionRepository } from "../ports/repositories";
+import {
+  TransactionCategory,
+  TransactionStatus,
+  TransactionType,
+} from "@prisma/client";
+
+import { ValidationError }
+  from "../errors/ApplicationError.js";
+
+import { ITransactionRepository }
+  from "../ports/repositories";
 
 type TransactionUseCasesDeps = {
-  transactionRepository: ITransactionRepository;
-  recalculateBalance: (userId: string) => Promise<number>;
+  transactionRepository:
+  ITransactionRepository;
+
+  recalculateBalance:
+  (userId: string) => Promise<number>;
 };
 
 export function createTransactionUseCases({
@@ -12,52 +23,100 @@ export function createTransactionUseCases({
   recalculateBalance,
 }: TransactionUseCasesDeps) {
   if (!transactionRepository)
-    throw new Error("TransactionRepository é obrigatório");
+    throw new Error(
+      "TransactionRepository é obrigatório"
+    );
 
   if (!recalculateBalance)
-    throw new Error("recalculateBalance é obrigatório");
+    throw new Error(
+      "recalculateBalance é obrigatório"
+    );
 
   return {
     async addTransaction(
       userId: string,
       description: string,
-      value: number,
+      amount: number,
       date: Date,
-      type: TransactionType
+      type: TransactionType,
+      category: TransactionCategory,
+      status?: TransactionStatus
     ) {
       if (!userId)
-        throw new ValidationError("Usuário não autenticado");
+        throw new ValidationError(
+          "Usuário não autenticado"
+        );
 
-      if (!description || description.trim().length === 0)
-        throw new ValidationError("A descrição é obrigatória");
+      if (
+        !description ||
+        description.trim().length === 0
+      ) {
+        throw new ValidationError(
+          "A descrição é obrigatória"
+        );
+      }
 
-      if (value === undefined || value === null)
-        throw new ValidationError("O valor é obrigatório");
+      if (
+        amount === undefined ||
+        amount === null
+      ) {
+        throw new ValidationError(
+          "O valor é obrigatório"
+        );
+      }
 
-      if (!(date instanceof Date) || isNaN(date.getTime()))
-        throw new ValidationError("Data inválida");
+      if (
+        !(date instanceof Date) ||
+        isNaN(date.getTime())
+      ) {
+        throw new ValidationError(
+          "Data inválida"
+        );
+      }
 
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
 
-      const transactionDate = new Date(date);
-      transactionDate.setHours(0, 0, 0, 0);
+      today.setHours(
+        0,
+        0,
+        0,
+        0
+      );
 
-      const status =
-        transactionDate <= today
-          ? "COMPLETED"
-          : "PENDING";
+      const transactionDate =
+        new Date(date);
 
-      const transaction = await transactionRepository.create({
-        userId,
-        description,
-        amount: value,
-        date,
-        type,
-        status,
-      });
+      transactionDate.setHours(
+        0,
+        0,
+        0,
+        0
+      );
 
-      const currentBalance = await recalculateBalance(userId);
+      const calculatedStatus =
+        status ??
+        (
+          transactionDate <= today
+            ? "COMPLETED"
+            : "PENDING"
+        );
+
+      const transaction =
+        await transactionRepository.create({
+          userId,
+          description,
+          amount,
+          date,
+          type,
+          category,
+          status:
+            calculatedStatus,
+        });
+
+      const currentBalance =
+        await recalculateBalance(
+          userId
+        );
 
       return {
         transaction,
@@ -69,35 +128,59 @@ export function createTransactionUseCases({
       id: string,
       userId: string,
       description: string,
-      value: number,
+      amount: number,
       date: Date,
-      type: TransactionType
+      type: TransactionType,
+      category: TransactionCategory
     ) {
-      if (!id)
-        throw new ValidationError("ID da transação inválido");
+      if (!id) {
+        throw new ValidationError(
+          "ID da transação inválido"
+        );
+      }
 
-      if (!userId)
-        throw new ValidationError("Usuário não autenticado");
+      if (!userId) {
+        throw new ValidationError(
+          "Usuário não autenticado"
+        );
+      }
 
-      if (value === undefined)
-        throw new ValidationError("Valor inválido");
+      if (
+        amount === undefined ||
+        amount === null
+      ) {
+        throw new ValidationError(
+          "Valor inválido"
+        );
+      }
 
       const existingTransaction =
-        await transactionRepository.findByIdAndUserId(id, userId);
-      if (!existingTransaction)
+        await transactionRepository.findByIdAndUserId(
+          id,
+          userId
+        );
+
+      if (!existingTransaction) {
         throw new ValidationError(
           "Transação não encontrada ou não pertence a este usuário"
         );
+      }
 
       const updatedTransaction =
-        await transactionRepository.update(id, {
-          description,
-          amount: value,
-          date,
-          type,
-        });
+        await transactionRepository.update(
+          id,
+          {
+            description,
+            amount,
+            date,
+            type,
+            category,
+          }
+        );
 
-      await recalculateBalance(userId);
+      await recalculateBalance(
+        userId
+      );
 
       return updatedTransaction;
     },
@@ -106,33 +189,56 @@ export function createTransactionUseCases({
       id: string,
       userId: string
     ) {
-      if (!id)
-        throw new ValidationError("ID da transação inválido");
+      if (!id) {
+        throw new ValidationError(
+          "ID da transação inválido"
+        );
+      }
 
-      if (!userId)
-        throw new ValidationError("Usuário não autenticado");
+      if (!userId) {
+        throw new ValidationError(
+          "Usuário não autenticado"
+        );
+      }
 
       const transaction =
-        await transactionRepository.findByIdAndUserId(id, userId);
-      if (!transaction)
+        await transactionRepository.findByIdAndUserId(
+          id,
+          userId
+        );
+
+      if (!transaction) {
         throw new ValidationError(
           "Transação não encontrada ou não pertence a este usuário"
         );
+      }
 
       const removedTransaction =
-        await transactionRepository.remove(id);
+        await transactionRepository.remove(
+          id
+        );
 
-      await recalculateBalance(userId);
+      await recalculateBalance(
+        userId
+      );
 
       return removedTransaction;
     },
 
     async releasePendingTransactions() {
       const today = new Date();
-      today.setHours(23, 59, 59, 999);
+
+      today.setHours(
+        23,
+        59,
+        59,
+        999
+      );
 
       const pendingTransactions =
-        await transactionRepository.listPendingUntil(today);
+        await transactionRepository.listPendingUntil(
+          today
+        );
 
       for (const transaction of pendingTransactions) {
         await transactionRepository.updateStatus(
@@ -140,7 +246,9 @@ export function createTransactionUseCases({
           "COMPLETED"
         );
 
-        await recalculateBalance(transaction.userId);
+        await recalculateBalance(
+          transaction.userId
+        );
       }
     },
   };

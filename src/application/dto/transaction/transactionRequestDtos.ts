@@ -3,17 +3,17 @@ import { TransactionType } from "@prisma/client";
 export type TransactionRequestType = "ENTRADA" | "SAIDA" | TransactionType;
 
 export interface CreateTransactionRequestDto {
-  descricao: string;
-  valor: number;
-  data: string;
-  tipo: TransactionRequestType;
+  description: string;
+  amount: number;
+  date: string;
+  type: TransactionRequestType;
 }
 
 export interface UpdateTransactionRequestDto {
-  descricao: string;
-  valor: number;
-  data: string;
-  tipo: TransactionRequestType;
+  description: string;
+  amount: number;
+  date: string;
+  type: TransactionRequestType;
 }
 
 export interface TransactionParamsDto {

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  url      = env("MONGODB_URL")
 }
 
 enum TransactionType {
@@ -16,6 +16,49 @@ enum TransactionType {
 enum TransactionStatus {
   PENDING
   COMPLETED
+  CANCELED
+}
+
+enum TransactionCategory {
+  // INCOME
+  SALARY
+  FREELANCE
+  DIVIDENDS
+  CASHBACK
+  BONUS
+
+  // EXPENSE
+  FOOD
+  TRANSPORT
+  HEALTH
+  EDUCATION
+  ENTERTAINMENT
+  HOUSING
+  UTILITIES
+
+  // INVESTMENT
+  INVESTMENT_APPLICATION
+  INVESTMENT_REDEMPTION
+  INVESTMENT_DIVIDEND
+  INVESTMENT_INTEREST
+
+  OTHER
+}
+
+enum InvestmentCategory {
+  FIXED_INCOME
+  STOCKS
+  FII
+  ETF
+  CRYPTO
+  FUND
+}
+
+enum InvestmentApplicationType {
+  APPLICATION
+  REDEMPTION
+  DIVIDEND
+  INTEREST
 }
 
 model User {
@@ -25,95 +68,81 @@ model User {
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
 
-  transactions   Transaction[]
-  balance        Balance?        @relation("UserBalance")
-  investments    Investment[]
-  expenses       Expense[]       @relation("UserExpenses")
-  fixedIncome    FixedIncome?    @relation("UserFixedIncome")
-  variableIncome VariableIncome? @relation("UserVariableIncome")
+  transactions Transaction[]
+  investments  Investment[]
 }
 
 model Transaction {
-  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Int
   description String?
-  amount      Float
-  date        DateTime          @default(now())
   type        TransactionType
-  status      TransactionStatus @default(PENDING)
+  category    TransactionCategory
+  status      TransactionStatus   @default(PENDING)
+  isRecurring Boolean             @default(false)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime?           @updatedAt
+  deletedAt   DateTime?
 
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-}
+  userId                String                 @db.ObjectId
+  user                  User                   @relation(fields: [userId], references: [id])
+  investmentApplication InvestmentApplication?
 
-model Balance {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  amount    Float     @default(0.0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
-  userId String @unique @db.ObjectId
-  user   User   @relation("UserBalance", fields: [userId], references: [id])
-}
-
-model FixedIncome {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  amount Float  @default(0.0)
-
-  userId String @unique @db.ObjectId
-  user   User   @relation("UserFixedIncome", fields: [userId], references: [id])
-}
-
-model VariableIncome {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  amount      Float  @default(0.0)
-  description String
-
-  userId String @unique @db.ObjectId
-  user   User   @relation("UserVariableIncome", fields: [userId], references: [id])
-}
-
-model Expense {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  category    String
-  amount      Float     @default(0.0)
-  description String
-  dueDate     DateTime? @default(now())
-  scheduledAt DateTime?
-
-  userId String @db.ObjectId
-  user   User   @relation("UserExpenses", fields: [userId], references: [id])
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Investment {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  purchaseDate DateTime
-  updatedAt    DateTime? @updatedAt
-  isRedeemed   Boolean   @default(false)
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  isRedeemed Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
+  deletedAt  DateTime?
 
   userId           String                  @db.ObjectId
   investmentTypeId String                  @db.ObjectId
   user             User                    @relation(fields: [userId], references: [id])
   investmentType   InvestmentType          @relation(fields: [investmentTypeId], references: [id])
   applications     InvestmentApplication[]
+
+  @@index([userId])
+  @@index([investmentTypeId])
 }
 
 model InvestmentType {
-  id              String  @id @default(auto()) @map("_id") @db.ObjectId
-  name            String  @unique
-  type            String
-  percentageValue Float
-  hasTax          Boolean @default(true)
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                String             @unique
+  type                InvestmentCategory
+  benchmarkPercentage Float
+  hasTax              Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime?          @updatedAt
 
   investments Investment[]
+
+  @@index([type])
 }
 
 model InvestmentApplication {
-  id     String   @id @default(auto()) @map("_id") @db.ObjectId
-  type   String
-  amount Float
-  date   DateTime
+  id        String                    @id @default(auto()) @map("_id") @db.ObjectId
+  type      InvestmentApplicationType
+  amount    Int
+  date      DateTime
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime?                 @updatedAt
+  deletedAt DateTime?
 
-  investmentId String     @db.ObjectId
-  investment   Investment @relation(fields: [investmentId], references: [id])
+  investmentId  String      @db.ObjectId
+  investment    Investment  @relation(fields: [investmentId], references: [id])
+  transactionId String      @unique @db.ObjectId
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([investmentId])
+  @@index([date])
+  @@index([type])
 }
