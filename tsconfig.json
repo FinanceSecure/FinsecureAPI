@@ -8,6 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "rootDir": "./src",
     "outDir": "dist",
     "typeRoots": [
       "./src/adapters/http/types",

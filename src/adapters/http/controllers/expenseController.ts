@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ApplicationError } from "@application/errors/ApplicationError.js";
+import { ApplicationError } from "@application/errors";
 import type {
   AddExpenseRequestDto,
-  ExpenseParamsDto,
+  ExpenseParamsDto
 } from "@application/dto/expense";
 import {
   createExpenseUseCases,
@@ -10,14 +10,13 @@ import {
 } from "@application/use-cases";
 import {
   ExpenseRepository,
-  IncomeRepository,
-  TransactionRepository
+  TransactionRepository,
 } from "@/adapters/database/repositories";
+import { ValidationError } from "@application/errors";
 
 const balanceUseCases =
   createBalanceUseCases({
     transactionRepository: TransactionRepository,
-    incomeRepository: IncomeRepository,
     expenseRepository: ExpenseRepository,
   });
 
@@ -37,25 +36,31 @@ function sendFastifyError(
   reply: FastifyReply,
   error: unknown
 ) {
-  if (error instanceof ApplicationError)
-    return reply.status(error.statusCode).send({ error: error.message });
+  if (error instanceof ApplicationError) {
+    return reply
+      .status(error.statusCode)
+      .send({ error: error.message });
+  }
 
-  if (error instanceof Error)
+  if (error instanceof Error) {
     return reply.status(500).send({ error: error.message });
+  }
 
-  return reply.status(500).send({
-    error: "Erro interno inesperado.",
-  });
+  return reply
+    .status(500)
+    .send({ error: "Erro interno inesperado." });
 }
 
 function getAuthenticatedUserId(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const userId = request.user?.userId;
+  const userId =
+    request.user?.userId;
 
   if (!userId) {
     reply.status(401).send({ error: "Usuário não autenticado." });
+
     return null;
   }
 
@@ -76,11 +81,11 @@ export async function getExpenseSummaryFastify(
     return;
 
   try {
-    const totalExpenses = await expenseUseCases.verifyTotalExpenses(userId);
+    const totalExpenses =
+      await expenseUseCases.verifyTotalExpenses(userId);
 
-    return reply
-      .status(200)
-      .send(totalExpenses);
+    return reply.status(200).send(totalExpenses);
+
   } catch (error) {
     return sendFastifyError(
       reply,
@@ -96,10 +101,7 @@ export async function addExpenseFastify(
   reply: FastifyReply
 ) {
   const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
+    getAuthenticatedUserId(request, reply);
 
   if (!userId)
     return;
@@ -113,21 +115,34 @@ export async function addExpenseFastify(
       scheduledAt,
     } = request.body;
 
+    if (!description?.trim())
+      throw new ValidationError("Descrição é obrigatória.");
+
+    if (!category?.trim())
+      throw new ValidationError("Categoria é obrigatória.");
+
+    if (
+      amount === undefined ||
+      amount === null ||
+      amount <= 0
+    ) {
+      throw new ValidationError("Valor inválido.");
+    }
+
     const newExpense =
-      await expenseUseCases.createExpense(
-        {
-          userId,
-          amount,
-          category,
-          description,
-          dueDate: dueDate ? new Date(dueDate) : new Date(),
-          scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-        }
-      );
+      await expenseUseCases.createExpense({
+        userId,
+        amount,
+        category,
+        description,
+        dueDate: dueDate ? new Date(dueDate) : new Date(),
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+      });
 
     return reply
       .status(201)
       .send(newExpense);
+
   } catch (error) {
     return sendFastifyError(
       reply,
@@ -140,23 +155,17 @@ export async function getScheduledExpensesFastify(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
+  const userId = getAuthenticatedUserId(request, reply);
 
   if (!userId)
     return;
 
   try {
-    const scheduledExpenses = await expenseUseCases.listScheduledExpenses(userId);
+    const scheduledExpenses =
+      await expenseUseCases.listScheduledExpenses(userId);
 
-    return reply
-      .status(200)
-      .send(
-        scheduledExpenses
-      );
+    return reply.status(200).send(scheduledExpenses);
+
   } catch (error) {
     return sendFastifyError(
       reply,
@@ -171,11 +180,7 @@ export async function getExpenseByIdFastify(
   }>,
   reply: FastifyReply
 ) {
-  const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
+  const userId = getAuthenticatedUserId(request, reply);
 
   if (!userId)
     return;
@@ -193,9 +198,8 @@ export async function getExpenseByIdFastify(
         .send({ error: "Despesa não encontrada." });
     }
 
-    return reply
-      .status(200)
-      .send(expense);
+    return reply.status(200).send(expense);
+
   } catch (error) {
     return sendFastifyError(
       reply,

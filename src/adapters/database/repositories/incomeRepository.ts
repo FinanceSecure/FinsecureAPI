@@ -1,81 +1,233 @@
 import prisma from "../db.js";
+
+import {
+  TransactionCategory,
+  TransactionStatus,
+  TransactionType,
+} from "@prisma/client";
+
 import { IIncomeRepository } from "@/application/ports/repositories";
 
 export const IncomeRepository: IIncomeRepository = {
-  listFixedIncome(userId) {
-    return prisma.fixedIncome.findMany({ where: { userId } });
-  },
+  async listFixedIncome(userId) {
+    return prisma.transaction.findMany({
+      where: {
+        userId,
+        type: TransactionType.INCOME,
 
-  getFixedIncome(userId) {
-    return prisma.fixedIncome.findUnique({ where: { userId } });
-  },
+        category: {
+          in: [
+            TransactionCategory.SALARY,
+          ],
+        },
 
-  createFixedIncome(userId, amount) {
-    return prisma.fixedIncome.create({
-      data: { userId, amount },
-    });
-  },
-
-  updateFixedIncome(userId, amount) {
-    return prisma.fixedIncome.update({
-      where: { userId },
-      data: { amount },
-    });
-  },
-
-  removeFixedIncome(userId) {
-    return prisma.fixedIncome.delete({ where: { userId } });
-  },
-
-  listVariableIncome(userId) {
-    return prisma.variableIncome.findMany({ where: { userId } });
-  },
-
-  getVariableIncomeById(id) {
-    return prisma.variableIncome.findUnique({ where: { id } });
-  },
-
-  createVariableIncome(data) {
-    return prisma.variableIncome.create({
-      data: {
-        userId: data.userId,
-        description: data.description,
-        amount: data.amount,
-      }
-    });
-  },
-
-  updateVariableIncome(data) {
-    return prisma.variableIncome.update({
-      where: { id: data.id },
-      data: {
-        description: data.description,
-        amount: data.amount,
+        deletedAt: null,
       },
     });
   },
 
-  removeVariableIncome(id) {
-    return prisma.variableIncome.delete({ where: { id } });
+  async getFixedIncome(userId) {
+    return prisma.transaction.findFirst({
+      where: {
+        userId,
+        type: TransactionType.INCOME,
+
+        category:
+          TransactionCategory.SALARY,
+
+        deletedAt: null,
+      },
+    });
   },
 
-  async getTotalIncomeByUser(userId) {
-    const fixedIncome = await prisma.fixedIncome.findMany({
-      where: { userId },
-    });
-    const variableIncome = await prisma.variableIncome.findMany({
-      where: { userId },
-    });
+  async createFixedIncome(
+    userId,
+    amount
+  ) {
+    return prisma.transaction.create({
+      data: {
+        userId,
+        amount,
 
-    const totalFixedIncome = fixedIncome.reduce(
-      (total, income) => total + income.amount,
+        description:
+          "Renda fixa",
+
+        type:
+          TransactionType.INCOME,
+
+        category:
+          TransactionCategory.SALARY,
+
+        status:
+          TransactionStatus.COMPLETED,
+      },
+    });
+  },
+
+  async updateFixedIncome(
+    userId,
+    amount
+  ) {
+    const fixedIncome =
+      await prisma.transaction.findFirst({
+        where: {
+          userId,
+          type:
+            TransactionType.INCOME,
+
+          category:
+            TransactionCategory.SALARY,
+
+          deletedAt: null,
+        },
+      });
+
+    if (!fixedIncome) {
+      throw new Error(
+        "Renda fixa não encontrada."
+      );
+    }
+
+    return prisma.transaction.update({
+      where: {
+        id: fixedIncome.id,
+      },
+
+      data: {
+        amount,
+      },
+    });
+  },
+
+  async removeFixedIncome(userId) {
+    const fixedIncome =
+      await prisma.transaction.findFirst({
+        where: {
+          userId,
+
+          type:
+            TransactionType.INCOME,
+
+          category:
+            TransactionCategory.SALARY,
+
+          deletedAt: null,
+        },
+      });
+
+    if (!fixedIncome) {
+      throw new Error(
+        "Renda fixa não encontrada."
+      );
+    }
+
+    return prisma.transaction.delete({
+      where: {
+        id: fixedIncome.id,
+      },
+    });
+  },
+
+  async listVariableIncome(userId) {
+    return prisma.transaction.findMany({
+      where: {
+        userId,
+
+        type:
+          TransactionType.INCOME,
+
+        category: {
+          in: [
+            TransactionCategory.FREELANCE,
+            TransactionCategory.BONUS,
+            TransactionCategory.CASHBACK,
+            TransactionCategory.DIVIDENDS,
+          ],
+        },
+
+        deletedAt: null,
+      },
+    });
+  },
+
+  async getVariableIncomeById(id) {
+    return prisma.transaction.findUnique({
+      where: {
+        id,
+      },
+    });
+  },
+
+  async createVariableIncome(
+    data
+  ) {
+    return prisma.transaction.create({
+      data: {
+        userId: data.userId,
+
+        description:
+          data.description,
+
+        amount: data.amount,
+
+        type:
+          TransactionType.INCOME,
+
+        category:
+          TransactionCategory.FREELANCE,
+
+        status:
+          TransactionStatus.COMPLETED,
+      },
+    });
+  },
+
+  async updateVariableIncome(
+    data
+  ) {
+    return prisma.transaction.update({
+      where: {
+        id: data.id,
+      },
+
+      data: {
+        description:
+          data.description,
+
+        amount:
+          data.amount,
+      },
+    });
+  },
+
+  async removeVariableIncome(id) {
+    return prisma.transaction.delete({
+      where: { id },
+    });
+  },
+
+  async getTotalIncomeByUser(
+    userId
+  ) {
+    const incomes =
+      await prisma.transaction.findMany({
+        where: {
+          userId,
+
+          type:
+            TransactionType.INCOME,
+
+          status:
+            TransactionStatus.COMPLETED,
+
+          deletedAt: null,
+        },
+      });
+
+    return incomes.reduce(
+      (total, income) =>
+        total + income.amount,
       0
     );
-    const totalVariableIncome = variableIncome.reduce(
-      (total, income) => total + income.amount,
-      0
-    );
-
-    return totalFixedIncome + totalVariableIncome;
   },
 };

@@ -1,9 +1,11 @@
+import { TransactionCategory } from "@prisma/client";
+
 export interface AddExpenseRequestDto {
   amount: number;
-  category: string;
-  description: string;
-  dueDate: string;
-  scheduledAt?: string;
+  category: TransactionCategory;
+  description?: string;
+  dueDate: Date | null;
+  scheduledAt: Date | null;
 }
 
 export interface ExpenseParamsDto {

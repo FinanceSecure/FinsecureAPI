@@ -8,12 +8,10 @@ import { ErroMessages } from "@domain/erros";
 
 export function createBalanceUseCases(deps: {
   transactionRepository: ITransactionRepository;
-  incomeRepository: IIncomeRepository;
   expenseRepository: IExpenseRepository;
 }) {
   const {
     transactionRepository,
-    incomeRepository,
     expenseRepository,
   } = deps;
 
@@ -26,16 +24,13 @@ export function createBalanceUseCases(deps: {
 
       const [
         totalTransactions,
-        totalIncome,
         totalExpenses,
       ] = await Promise.all([
         transactionRepository.getTotalCompletedByUser(userId),
-        incomeRepository.getTotalIncomeByUser(userId),
         expenseRepository.getTotalByUserId(userId),
       ]);
 
       const balance =
-        Number(totalIncome || 0) +
         Number(totalTransactions || 0) -
         Number(totalExpenses || 0);
 
@@ -51,16 +46,13 @@ export function createBalanceUseCases(deps: {
 
       const [
         totalTransactions,
-        totalIncome,
         totalExpenses,
       ] = await Promise.all([
         transactionRepository.getTotalCompletedByUser(userId),
-        incomeRepository.getTotalIncomeByUser(userId),
         expenseRepository.getTotalByUserId(userId),
       ]);
 
       const balance =
-        Number(totalIncome || 0) +
         Number(totalTransactions || 0) -
         Number(totalExpenses || 0);
 
