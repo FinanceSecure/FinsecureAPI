@@ -81,6 +81,7 @@ export function createIncomeUseCases(deps: {
 
     async addVariableIncome(data: {
       userId: string;
+      title: string;
       description: string;
       amount: number;
     }) {

@@ -3,12 +3,8 @@ import {
   TransactionStatus,
   TransactionType,
 } from "@prisma/client";
-
-import { ValidationError }
-  from "../errors/ApplicationError.js";
-
-import { ITransactionRepository }
-  from "../ports/repositories";
+import { ValidationError } from "../errors/ApplicationError.js";
+import { ITransactionRepository } from "../ports/repositories";
 
 type TransactionUseCasesDeps = {
   transactionRepository:
@@ -34,12 +30,13 @@ export function createTransactionUseCases({
 
   return {
     async addTransaction(
+      title: string,
       userId: string,
-      description: string,
       amount: number,
       date: Date,
       type: TransactionType,
       category: TransactionCategory,
+      description?: string,
       status?: TransactionStatus
     ) {
       if (!userId)
@@ -48,7 +45,7 @@ export function createTransactionUseCases({
         );
 
       if (
-        !description ||
+        description &&
         description.trim().length === 0
       ) {
         throw new ValidationError(
@@ -103,14 +100,14 @@ export function createTransactionUseCases({
 
       const transaction =
         await transactionRepository.create({
+          title,
           userId,
           description,
           amount,
           date,
           type,
           category,
-          status:
-            calculatedStatus,
+          status: calculatedStatus,
         });
 
       const currentBalance =
@@ -127,11 +124,12 @@ export function createTransactionUseCases({
     async updateTransaction(
       id: string,
       userId: string,
-      description: string,
-      amount: number,
-      date: Date,
-      type: TransactionType,
-      category: TransactionCategory
+      title?: string,
+      description?: string,
+      amount?: number,
+      date?: Date,
+      type?: TransactionType,
+      category?: TransactionCategory
     ) {
       if (!id) {
         throw new ValidationError(
@@ -146,8 +144,8 @@ export function createTransactionUseCases({
       }
 
       if (
-        amount === undefined ||
-        amount === null
+        amount !== undefined &&
+        typeof amount !== "number"
       ) {
         throw new ValidationError(
           "Valor inválido"
@@ -170,6 +168,7 @@ export function createTransactionUseCases({
         await transactionRepository.update(
           id,
           {
+            title,
             description,
             amount,
             date,

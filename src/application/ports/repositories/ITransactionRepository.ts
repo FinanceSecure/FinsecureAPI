@@ -7,6 +7,7 @@ import {
 
 export interface ITransactionRepository {
   create(data: {
+    title: string;
     userId: string;
     description?: string;
     amount: number;
@@ -22,6 +23,7 @@ export interface ITransactionRepository {
   update(
     id: string,
     data: {
+      title?: string;
       description?: string;
       amount?: number;
       date?: Date;

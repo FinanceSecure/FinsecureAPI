@@ -6,7 +6,10 @@ import type {
   UpdateTransactionRequestDto,
 } from "@application/dto/transaction/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
-import { validarTransacaoFastify } from "../middlewares/validarTransacaoMiddleware.js";
+import {
+  validarAtualizacaoTransacaoFastify,
+  validarTransacaoFastify
+} from "../middlewares/validarTransacaoMiddleware.js";
 import {
   createTransactionFastify,
   deleteTransactionFastify,
@@ -17,65 +20,140 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
   app.post<{ Body: CreateTransactionRequestDto }>(
     "/api/transacoes/adicionar",
     {
-      preHandler: [autenticarTokenFastify, validarTransacaoFastify],
+      preHandler: [
+        autenticarTokenFastify,
+        validarTransacaoFastify
+      ],
       schema: {
         security: [{ bearerAuth: [] }],
         summary: "Adicionar uma nova transação",
-        description: "Cria uma nova transação (entrada ou saída) para o usuário autenticado. O status da transação (PENDENTE/EFETIVADA) é determinado automaticamente pela data.",
+        description: "Cria uma nova transação financeira para o usuário autenticado.",
         tags: ["Transações"],
         body: {
           type: "object",
-          required: ["descricao", "valor", "data", "tipo"],
+          required: ["title", "amount", "date", "type"],
           properties: {
-            descricao: {
+            title: {
               type: "string",
-              description: "Descrição da transação",
+              maxLength: 100,
+              description: "Título principal da transação",
+              examples: ["Salário"]
+            },
+            description: {
+              type: "string",
               maxLength: 255,
+              description: "Descrição complementar da transação",
+              examples: ["Pagamento mensal da empresa"]
             },
-            valor: {
+            amount: {
               type: "number",
-              description: "Valor da transação. Deve ser positivo para ENTRADA e negativo para SAIDA.",
+              description:
+                "Valor da transação"
             },
-            data: {
+            date: {
               type: "string",
-              format: "date",
-              description: "Data e hora da transação no formato ISO (YYYY-MM-DD).",
+              format: "date-time",
+              description:
+                "Data da transação no formato ISO"
             },
-            tipo: {
+            type: {
               type: "string",
-              enum: ["ENTRADA", "SAIDA"],
-              description: "Tipo da transação: 'ENTRADA' para receitas, 'SAIDA' para despesas.",
+              enum: ["INCOME", "EXPENSE"],
+              description:
+                "Tipo da transação"
             },
+            category: {
+              type: "string",
+              enum: [
+                "SALARY",
+                "FREELANCE",
+                "DIVIDENDS",
+                "CASHBACK",
+                "BONUS",
+                "FOOD",
+                "TRANSPORT",
+                "HEALTH",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "HOUSING",
+                "UTILITIES",
+                "OTHER"
+              ],
+              description:
+                "Categoria da transação"
+            },
+            isRecurring: {
+              type: "boolean",
+              default: false,
+              description:
+                "Define se a transação é recorrente"
+            }
           },
           examples: [
             {
-              descricao: "Salário Mensal",
-              valor: 3000.00,
-              data: "2023-10-27",
-              tipo: "ENTRADA",
+              title: "Salário",
+              description: "Pagamento mensal",
+              amount: 3000.00,
+              date: "2026-05-05T00:00:00.000Z",
+              type: "INCOME",
+              category: "SALARY",
+              isRecurring: true
             },
             {
-              descricao: "Conta de Luz",
-              valor: -150.50,
-              data: "2023-10-27",
-              tipo: "SAIDA",
-            },
-          ],
+              title: "Conta de Luz",
+              description: "Energia elétrica",
+              amount: 150.50,
+              date: "2026-05-10T00:00:00.000Z",
+              type: "EXPENSE",
+              category: "UTILITIES",
+              isRecurring: true
+            }
+          ]
         },
         response: {
           201: {
             description: "Transação criada com sucesso",
             type: "object",
             properties: {
-              message: { type: "string", example: "Transação adicionada com sucesso." },
-              transactionId: { type: "string", format: "uuid", example: "a1b2c3d4-e5f6-7890-1234-567890abcdef" },
-            },
+              message: {
+                type: "string",
+                example: ["Transação adicionada com sucesso."]
+              },
+              transactionId: {
+                type: "string",
+                example: ["6820bf0d47a66cb77f7b11f4"]
+              }
+            }
           },
-          400: { description: "Requisição inválida", type: "object", properties: { error: { type: "string" } } },
-          401: { description: "Não autorizado", type: "object", properties: { error: { type: "string" } } },
-          422: { description: "Erro de validação", type: "object", properties: { error: { type: "string" } } },
-        },
-      },
+          400: {
+            description: "Requisição inválida",
+            type: "object",
+            properties: {
+              error: {
+                type: "string"
+              }
+            }
+          },
+          401: {
+            description: "Não autorizado",
+            type: "object",
+            properties: {
+              error: {
+                type: "string"
+              }
+            }
+          },
+          422: {
+            description: "Erro de validação",
+            type: "object",
+            properties: {
+              error: {
+                type: "string"
+              }
+            }
+          }
+        }
+      }
     },
     createTransactionFastify
   );
@@ -85,7 +163,7 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
   }>(
     "/api/transacoes/alterar/:id",
     {
-      preHandler: [autenticarTokenFastify, validarTransacaoFastify],
+      preHandler: [autenticarTokenFastify, validarAtualizacaoTransacaoFastify],
       schema: {
         security: [{ bearerAuth: [] }],
         summary: "Atualizar uma transação existente",
@@ -94,21 +172,21 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
         params: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid", description: "ID da transação a ser atualizada." },
+            id: { type: "string", pattern: "^[a-fA-F0-9]{24}$", description: "ID da transação a ser atualizada." },
           },
           required: ["id"],
         },
         body: {
           type: "object",
           properties: {
-            descricao: { type: "string", description: "Nova descrição da transação.", maxLength: 255 },
-            valor: { type: "number", description: "Novo valor da transação." },
-            data: { type: "string", format: "date", description: "Nova data e hora da transação. (YYYY-MM-DD ou ISO)" },
-            tipo: { type: "string", enum: ["ENTRADA", "SAIDA"], description: "Novo tipo da transação." },
+            description: { type: "string", description: "Nova descrição da transação.", maxLength: 255 },
+            amount: { type: "number", description: "Novo valor da transação." },
+            date: { type: "string", format: "date", description: "Nova data e hora da transação. (YYYY-MM-DD ou ISO)" },
+            type: { type: "string", enum: ["ENTRADA", "SAIDA"], description: "Novo tipo da transação." },
           },
         },
         response: {
-          200: { type: "object", properties: { message: { type: "string", example: "Transação atualizada com sucesso." } } },
+          200: { type: "object", properties: { message: { type: "string", example: ["Transação atualizada com sucesso."] } } },
           400: { description: "Requisição inválida", type: "object", properties: { error: { type: "string" } } },
           401: { description: "Não autorizado", type: "object", properties: { error: { type: "string" } } },
           404: { description: "Transação não encontrada", type: "object", properties: { error: { type: "string" } } },
@@ -129,12 +207,12 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
         params: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid", description: "ID da transação a ser cancelada." },
+            id: { type: "string", pattern: "^[a-fA-F0-9]{24}$", description: "ID da transação a ser cancelada." },
           },
           required: ["id"],
         },
         response: {
-          200: { type: "object", properties: { message: { type: "string", example: "Transação cancelada com sucesso." } } },
+          200: { type: "object", properties: { message: { type: "string", example: ["Transação cancelada com sucesso."] } } },
           401: { description: "Não autorizado", type: "object", properties: { error: { type: "string" } } },
           404: { description: "Transação não encontrada", type: "object", properties: { error: { type: "string" } } },
         },

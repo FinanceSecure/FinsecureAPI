@@ -1,4 +1,4 @@
-import { Expense } from "@prisma/client";
+import { Expense } from "@/domain/entities";
 
 export interface IExpenseRepository {
   listByUserId(userId: string): Promise<Expense[]>;

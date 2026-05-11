@@ -1,19 +1,27 @@
-import { TransactionType } from "@prisma/client";
-
-export type TransactionRequestType = "ENTRADA" | "SAIDA" | TransactionType;
+import {
+  TransactionCategory,
+  TransactionStatus,
+  TransactionType
+} from "@prisma/client";
 
 export interface CreateTransactionRequestDto {
-  description: string;
+  title: string;
+  description?: string;
   amount: number;
   date: string;
-  type: TransactionRequestType;
+  type: TransactionType;
+  category?: TransactionCategory;
+  isRecurring?: boolean;
 }
 
 export interface UpdateTransactionRequestDto {
-  description: string;
-  amount: number;
-  date: string;
-  type: TransactionRequestType;
+  title?: string;
+  description?: string;
+  amount?: number;
+  date?: string;
+  type?: TransactionType;
+  category?: TransactionCategory;
+  isRecurring?: boolean;
 }
 
 export interface TransactionParamsDto {
@@ -21,10 +29,13 @@ export interface TransactionParamsDto {
 }
 
 export interface ValidatedTransactionDto {
+  title: string;
   userId: string;
-  description: string;
+  description?: string;
   amount: number;
   date: Date;
   type: TransactionType;
-  status: "PENDING" | "COMPLETED";
+  category?: TransactionCategory;
+  status: TransactionStatus;
+  isRecurring: boolean;
 }

@@ -1,24 +1,19 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-
 import type {
   CreateTransactionRequestDto,
   TransactionParamsDto,
   UpdateTransactionRequestDto,
 } from "@application/dto/transaction";
-
 import {
   createBalanceUseCases,
   createTransactionUseCases,
 } from "@application/use-cases";
-
 import { ApplicationError } from "@application/errors";
-
 import {
   ExpenseRepository,
   IncomeRepository,
   TransactionRepository,
 } from "@/adapters/database/repositories";
-
 import {
   TransactionCategory,
   TransactionStatus,
@@ -27,14 +22,7 @@ import {
 
 const balanceUseCases =
   createBalanceUseCases({
-    transactionRepository:
-      TransactionRepository,
-
-    incomeRepository:
-      IncomeRepository,
-
-    expenseRepository:
-      ExpenseRepository,
+    transactionRepository: TransactionRepository,
   });
 
 const transactionUseCases =
@@ -132,6 +120,7 @@ export async function createTransactionFastify(
 
   try {
     const {
+      title,
       description,
       amount,
       date,
@@ -143,12 +132,13 @@ export async function createTransactionFastify(
 
     const result =
       await transactionUseCases.addTransaction(
+        title,
         userId,
-        description,
         amount,
         new Date(date),
         normalizedType,
         TransactionCategory.OTHER,
+        description,
         TransactionStatus.COMPLETED
       );
 
@@ -193,31 +183,36 @@ export async function updateTransactionFastify(
     }
 
     const {
+      title,
       description,
       amount,
       date,
       type,
+      category,
     } = request.body;
 
-    const normalizedType =
-      normalizeTransactionType(type);
-
+    const normalizedType = type ? normalizeTransactionType(type) : undefined;
     const updatedTransaction =
       await transactionUseCases.updateTransaction(
         transactionId,
         userId,
+        title,
         description,
         amount,
-        new Date(date),
+        date ? new Date(date) : undefined,
         normalizedType,
-        TransactionCategory.OTHER
+        category
       );
 
     return reply
       .status(200)
-      .send(
-        updatedTransaction
-      );
+      .send({
+        message:
+          "Transação atualizada com sucesso.",
+        transaction:
+          updatedTransaction,
+      });
+
   } catch (error) {
     return sendFastifyError(
       reply,
@@ -249,8 +244,7 @@ export async function deleteTransactionFastify(
       return reply
         .status(400)
         .send({
-          error:
-            "Transação não encontrada.",
+          error: "Transação não encontrada.",
         });
     }
 

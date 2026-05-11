@@ -271,6 +271,7 @@ export async function createVariableIncomeFastify(
     const variableIncome =
       await incomeUseCases.addVariableIncome({
         userId,
+        title: request.body.title,
         description: request.body.description,
         amount: request.body.amount,
       });

@@ -3,6 +3,7 @@ export interface FixedIncomeRequestDto {
 }
 
 export interface VariableIncomeRequestDto {
+  title: string;
   description: string;
   amount: number;
 }

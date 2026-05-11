@@ -1,18 +1,14 @@
-import {
-  IExpenseRepository,
-  IIncomeRepository,
-  ITransactionRepository,
-} from "../ports/repositories";
+import { ITransactionRepository } from "../ports/repositories";
 import { ValidationError } from "@application/errors";
 import { ErroMessages } from "@domain/erros";
 
-export function createBalanceUseCases(deps: {
-  transactionRepository: ITransactionRepository;
-  expenseRepository: IExpenseRepository;
-}) {
+export function createBalanceUseCases(
+  deps: {
+    transactionRepository: ITransactionRepository;
+  }
+) {
   const {
     transactionRepository,
-    expenseRepository,
   } = deps;
 
   return {
@@ -22,43 +18,31 @@ export function createBalanceUseCases(deps: {
       if (!userId?.trim())
         throw new ValidationError(ErroMessages.USUARIO.NAO_ENCONTRADO);
 
-      const [
-        totalTransactions,
-        totalExpenses,
-      ] = await Promise.all([
-        transactionRepository.getTotalCompletedByUser(userId),
-        expenseRepository.getTotalByUserId(userId),
-      ]);
-
       const balance =
-        Number(totalTransactions || 0) -
-        Number(totalExpenses || 0);
+        await transactionRepository.getTotalCompletedByUser(userId);
 
       return {
         message: "Saldo recalculado com sucesso.",
-        balance,
+        balance: Number(balance || 0),
       };
     },
 
-    async viewBalance(userId: string) {
+    async viewBalance(
+      userId: string
+    ) {
       if (!userId?.trim())
         throw new ValidationError(ErroMessages.USUARIO.NAO_ENCONTRADO);
 
-      const [
-        totalTransactions,
-        totalExpenses,
-      ] = await Promise.all([
-        transactionRepository.getTotalCompletedByUser(userId),
-        expenseRepository.getTotalByUserId(userId),
-      ]);
-
       const balance =
-        Number(totalTransactions || 0) -
-        Number(totalExpenses || 0);
+        await transactionRepository.getTotalCompletedByUser(
+          userId
+        );
 
       return {
-        message: "Saldo localizado com sucesso.",
-        balance,
+        message:
+          "Saldo localizado com sucesso.",
+        balance:
+          Number(balance || 0),
       };
     },
   };

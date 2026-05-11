@@ -1,4 +1,4 @@
-import { FixedIncome, VariableIncome } from "@prisma/client";
+import { FixedIncome, VariableIncome } from "@/domain/entities";
 
 export interface IIncomeRepository {
   listFixedIncome(userId: string): Promise<FixedIncome[]>;
@@ -9,6 +9,7 @@ export interface IIncomeRepository {
   listVariableIncome(userId: string): Promise<VariableIncome[]>;
   getVariableIncomeById(id: string): Promise<VariableIncome | null>;
   createVariableIncome(data: {
+    title: string;
     userId: string;
     description: string;
     amount: number;

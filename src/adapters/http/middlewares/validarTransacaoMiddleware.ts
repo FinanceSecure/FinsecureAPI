@@ -1,5 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { TransactionType } from "@prisma/client";
+import {
+  TransactionCategory,
+  TransactionStatus,
+  TransactionType,
+} from "@prisma/client";
 import { HttpError } from "../exceptions/HttpError.js";
 import type {
   CreateTransactionRequestDto,
@@ -16,65 +20,86 @@ declare module "fastify" {
   }
 }
 
-function normalizeTransactionType(type: string) {
-  if (type === "ENTRADA") return TransactionType.INCOME;
-  if (type === "SAIDA") return TransactionType.EXPENSE;
-  return type as TransactionType;
-}
-
 function buildValidatedTransaction(
   request: FastifyRequest<{
     Body: CreateTransactionRequestDto | UpdateTransactionRequestDto;
   }>
-) {
-  const { descricao: description, valor: amount, data: date, tipo: type } = request.body;
+): ValidatedTransactionDto {
+
+  const {
+    title,
+    description,
+    amount,
+    date,
+    type,
+    category,
+    isRecurring,
+  } = request.body;
+
   const userId = request.user?.userId;
-  const parsedDate = new Date(date);
-  const validTypes = ["ENTRADA", "SAIDA", ...Object.values(TransactionType)];
 
-  if (!userId) throw new HttpError("UsuÃ¡rio nÃ£o autenticado", 401);
+  if (!userId)
+    throw new HttpError("Usuário não autenticado", 401);
 
-  if (!description || amount === undefined || !date || !type)
-    throw new HttpError("Dados incompletos ou invÃ¡lidos", 400);
+  if (!title || amount === undefined || !date || !type)
+    throw new HttpError("Dados incompletos ou inválidos", 400);
 
   if (
-    typeof description !== "string" ||
+    typeof title !== "string" ||
     typeof amount !== "number" ||
     typeof type !== "string"
   ) {
-    throw new HttpError("Formato de dados invÃ¡lidos", 422);
+    throw new HttpError("Formato de dados inválidos", 422);
   }
 
+  if (amount <= 0)
+    throw new HttpError("O valor da transação deve ser maior que zero", 422);
+
+  const parsedDate = new Date(date);
   if (isNaN(parsedDate.getTime()))
-    throw new HttpError("Data invÃ¡lida", 422);
+    throw new HttpError("Data inválida", 422);
 
-  if (!validTypes.includes(type))
-    throw new HttpError("Tipo deve ser informado como ENTRADA ou SAIDA", 422);
+  if (!Object.values(TransactionType).includes(type))
+    throw new HttpError("Tipo de transação inválido", 422);
 
-  if (description.length > 255) {
+  if (category && !Object.values(TransactionCategory)
+    .includes(category as TransactionCategory)
+  ) {
     throw new HttpError(
-      "DescriÃ§Ã£o muito longa informada, o mÃ¡ximo Ã© de 255 caracteres",
+      "Categoria inválida",
       422
     );
   }
 
-  if ((type === "ENTRADA" || type === TransactionType.INCOME) && amount <= 0)
-    throw new HttpError("O valor da ENTRADA deve ser superior a 0", 422);
+  if (title.length > 100)
+    throw new HttpError(
+      "Título muito longo",
+      422
+    );
 
-  if ((type === "SAIDA" || type === TransactionType.EXPENSE) && amount >= 0)
-    throw new HttpError("O valor da SAIDA deve ser inferior a 0", 422);
+  if (description && description.length > 255)
+    throw new HttpError(
+      "Descrição muito longa",
+      422
+    );
 
   const now = new Date();
-  const status = parsedDate > now ? "PENDING" : "COMPLETED";
+  const status: TransactionStatus =
+    parsedDate > now
+      ? "PENDING"
+      : "COMPLETED";
 
   return {
-    description,
+    userId,
+    title: title.trim(),
+    description: description?.trim(),
     amount,
     date: parsedDate,
-    type: normalizeTransactionType(type),
-    userId,
+    type,
+    category,
     status,
-  } satisfies ValidatedTransactionDto;
+    isRecurring: isRecurring ?? false,
+  };
 }
 
 export async function validarTransacaoFastify(
@@ -84,11 +109,64 @@ export async function validarTransacaoFastify(
   reply: FastifyReply
 ) {
   try {
-    request.validatedTransaction = buildValidatedTransaction(request);
+    request.validatedTransaction =
+      buildValidatedTransaction(request);
   } catch (error) {
-    if (error instanceof HttpError)
-      return reply.status(error.status).send({ error: error.message });
 
-    return reply.status(500).send({ error: "Erro interno do servidor" });
+    if (error instanceof HttpError) {
+      return reply
+        .status(error.status)
+        .send({ error: error.message });
+    }
+
+    return reply
+      .status(500)
+      .send({
+        error: "Erro interno do servidor",
+      });
+  }
+}
+
+export async function validarAtualizacaoTransacaoFastify(
+  request: FastifyRequest<{
+    Body: UpdateTransactionRequestDto;
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const {
+      title,
+      description,
+      amount,
+      date,
+      type,
+    } = request.body;
+
+    if (title !== undefined && typeof title !== "string")
+      throw new HttpError("Título inválido", 422);
+
+    if (description !== undefined && typeof description !== "string")
+      throw new HttpError("Descrição inválida", 422);
+
+    if (amount !== undefined && typeof amount !== "number")
+      throw new HttpError("Valor inválido", 422);
+
+    if (date !== undefined && isNaN(new Date(date).getTime()))
+      throw new HttpError("Data inválida", 422);
+
+    if (type !== undefined && !Object.values(TransactionType).includes(type))
+      throw new HttpError("Tipo inválido", 422);
+
+
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return reply.status(error.status).send({
+        error: error.message
+      });
+    }
+
+    return reply.status(500).send({
+      error: "Erro interno do servidor"
+    });
   }
 }

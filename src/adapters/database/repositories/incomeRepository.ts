@@ -46,20 +46,13 @@ export const IncomeRepository: IIncomeRepository = {
   ) {
     return prisma.transaction.create({
       data: {
+        title: "Salário",
         userId,
         amount,
-
-        description:
-          "Renda fixa",
-
-        type:
-          TransactionType.INCOME,
-
-        category:
-          TransactionCategory.SALARY,
-
-        status:
-          TransactionStatus.COMPLETED,
+        description: "Renda fixa",
+        type: TransactionType.INCOME,
+        category: TransactionCategory.SALARY,
+        status: TransactionStatus.COMPLETED,
       },
     });
   },
@@ -72,21 +65,14 @@ export const IncomeRepository: IIncomeRepository = {
       await prisma.transaction.findFirst({
         where: {
           userId,
-          type:
-            TransactionType.INCOME,
-
-          category:
-            TransactionCategory.SALARY,
-
+          type: TransactionType.INCOME,
+          category: TransactionCategory.SALARY,
           deletedAt: null,
         },
       });
 
-    if (!fixedIncome) {
-      throw new Error(
-        "Renda fixa não encontrada."
-      );
-    }
+    if (!fixedIncome)
+      throw new Error("Renda fixa não encontrada.");
 
     return prisma.transaction.update({
       where: {
@@ -104,22 +90,14 @@ export const IncomeRepository: IIncomeRepository = {
       await prisma.transaction.findFirst({
         where: {
           userId,
-
-          type:
-            TransactionType.INCOME,
-
-          category:
-            TransactionCategory.SALARY,
-
+          type: TransactionType.INCOME,
+          category: TransactionCategory.SALARY,
           deletedAt: null,
         },
       });
 
-    if (!fixedIncome) {
-      throw new Error(
-        "Renda fixa não encontrada."
-      );
-    }
+    if (!fixedIncome)
+      throw new Error("Renda fixa não encontrada.");
 
     return prisma.transaction.delete({
       where: {
@@ -132,10 +110,7 @@ export const IncomeRepository: IIncomeRepository = {
     return prisma.transaction.findMany({
       where: {
         userId,
-
-        type:
-          TransactionType.INCOME,
-
+        type: TransactionType.INCOME,
         category: {
           in: [
             TransactionCategory.FREELANCE,
@@ -144,7 +119,6 @@ export const IncomeRepository: IIncomeRepository = {
             TransactionCategory.DIVIDENDS,
           ],
         },
-
         deletedAt: null,
       },
     });
@@ -163,21 +137,13 @@ export const IncomeRepository: IIncomeRepository = {
   ) {
     return prisma.transaction.create({
       data: {
+        title: data.title,
         userId: data.userId,
-
-        description:
-          data.description,
-
+        description: data.description,
         amount: data.amount,
-
-        type:
-          TransactionType.INCOME,
-
-        category:
-          TransactionCategory.FREELANCE,
-
-        status:
-          TransactionStatus.COMPLETED,
+        type: TransactionType.INCOME,
+        category: TransactionCategory.FREELANCE,
+        status: TransactionStatus.COMPLETED,
       },
     });
   },
@@ -189,13 +155,9 @@ export const IncomeRepository: IIncomeRepository = {
       where: {
         id: data.id,
       },
-
       data: {
-        description:
-          data.description,
-
-        amount:
-          data.amount,
+        description: data.description,
+        amount: data.amount,
       },
     });
   },
@@ -213,13 +175,8 @@ export const IncomeRepository: IIncomeRepository = {
       await prisma.transaction.findMany({
         where: {
           userId,
-
-          type:
-            TransactionType.INCOME,
-
-          status:
-            TransactionStatus.COMPLETED,
-
+          type: TransactionType.INCOME,
+          status: TransactionStatus.COMPLETED,
           deletedAt: null,
         },
       });
