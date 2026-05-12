@@ -4,42 +4,25 @@ import type {
   TransactionParamsDto,
   UpdateTransactionRequestDto,
 } from "@application/dto/transaction";
-import {
-  createBalanceUseCases,
-  createTransactionUseCases,
-} from "@application/use-cases";
+
+import { createTransactionUseCases } from "@application/use-cases";
 import { ApplicationError } from "@application/errors";
+
 import {
-  ExpenseRepository,
-  IncomeRepository,
   TransactionRepository,
 } from "@/adapters/database/repositories";
+
 import {
   TransactionCategory,
   TransactionStatus,
   TransactionType,
 } from "@prisma/client";
 
-const balanceUseCases =
-  createBalanceUseCases({
-    transactionRepository: TransactionRepository,
-  });
-
 const transactionUseCases =
   createTransactionUseCases({
-    transactionRepository:
-      TransactionRepository,
+    transactionRepository: TransactionRepository,
 
-    recalculateBalance: async (
-      userId: string
-    ) => {
-      const result =
-        await balanceUseCases.recalculateBalance(
-          userId
-        );
-
-      return result.balance;
-    },
+    recalculateBalance: async () => 0,
   });
 
 function sendFastifyError(
@@ -65,8 +48,7 @@ function sendFastifyError(
   return reply
     .status(500)
     .send({
-      error:
-        "Erro interno inesperado.",
+      error: "Erro interno inesperado.",
     });
 }
 
@@ -74,15 +56,13 @@ function getAuthenticatedUserId(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const userId =
-    request.user?.userId;
+  const userId = request.user?.userId;
 
   if (!userId) {
     reply
       .status(401)
       .send({
-        error:
-          "Usuário não autenticado.",
+        error: "Usuário não autenticado.",
       });
 
     return null;
@@ -125,6 +105,7 @@ export async function createTransactionFastify(
       amount,
       date,
       type,
+      category,
     } = request.body;
 
     const normalizedType =
@@ -137,7 +118,7 @@ export async function createTransactionFastify(
         amount,
         new Date(date),
         normalizedType,
-        TransactionCategory.OTHER,
+        category ?? TransactionCategory.OTHER,
         description,
         TransactionStatus.COMPLETED
       );
@@ -145,6 +126,31 @@ export async function createTransactionFastify(
     return reply
       .status(201)
       .send(result);
+
+  } catch (error) {
+    return sendFastifyError(
+      reply,
+      error
+    );
+  }
+}
+
+export async function getStatementFastify(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const userId = getAuthenticatedUserId(request, reply);
+
+  if (!userId)
+    return;
+
+  try {
+    const statement = await transactionUseCases.getFinancialStatement(userId);
+
+    return reply
+      .status(200)
+      .send(statement);
+
   } catch (error) {
     return sendFastifyError(
       reply,
@@ -177,8 +183,7 @@ export async function updateTransactionFastify(
       return reply
         .status(400)
         .send({
-          error:
-            "Transação não encontrada.",
+          error: "Transação não encontrada.",
         });
     }
 
@@ -192,6 +197,7 @@ export async function updateTransactionFastify(
     } = request.body;
 
     const normalizedType = type ? normalizeTransactionType(type) : undefined;
+
     const updatedTransaction =
       await transactionUseCases.updateTransaction(
         transactionId,
@@ -207,10 +213,8 @@ export async function updateTransactionFastify(
     return reply
       .status(200)
       .send({
-        message:
-          "Transação atualizada com sucesso.",
-        transaction:
-          updatedTransaction,
+        message: "Transação atualizada com sucesso.",
+        transaction: updatedTransaction,
       });
 
   } catch (error) {
@@ -259,6 +263,7 @@ export async function deleteTransactionFastify(
       .send(
         removedTransaction
       );
+
   } catch (error) {
     return sendFastifyError(
       reply,

@@ -14,6 +14,7 @@ import {
   createTransactionFastify,
   deleteTransactionFastify,
   updateTransactionFastify,
+  getStatementFastify
 } from "../controllers";
 
 export async function registerTransactionRoutes(app: FastifyInstance) {
@@ -156,6 +157,21 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
       }
     },
     createTransactionFastify
+  );
+  app.get(
+    "/api/transacoes/extrato",
+    {
+      preHandler: autenticarTokenFastify,
+      schema: {
+        security: [
+          { bearerAuth: [] }
+        ],
+        summary: "Consultar extrato financeiro",
+        description: "Retorna saldo, resumo financeiro e movimentações do usuário.",
+        tags: ["Transações"],
+      },
+    },
+    getStatementFastify
   );
   app.put<{
     Params: TransactionParamsDto;

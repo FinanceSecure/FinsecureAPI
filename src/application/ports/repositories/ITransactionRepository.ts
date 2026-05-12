@@ -20,6 +20,9 @@ export interface ITransactionRepository {
     id: string,
     userId: string
   ): Promise<Transaction | null>;
+  findByUserId(
+    userId: string
+  ): Promise<Transaction[]>;
   update(
     id: string,
     data: {

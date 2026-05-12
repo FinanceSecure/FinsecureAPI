@@ -121,6 +121,32 @@ export function createTransactionUseCases({
       };
     },
 
+    async getFinancialStatement(userId: string) {
+      const transactions = await transactionRepository.findByUserId(userId);
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      for (const transaction of transactions) {
+        if (transaction.type === "INCOME")
+          totalIncome += transaction.amount;
+
+        if (transaction.type === "EXPENSE")
+          totalExpense += transaction.amount;
+      }
+
+      const balance = totalIncome - totalExpense;
+
+      return {
+        balance,
+        summary: {
+          incomes: totalIncome,
+          expenses: totalExpense,
+        },
+        transactions,
+      };
+    },
+
     async updateTransaction(
       id: string,
       userId: string,

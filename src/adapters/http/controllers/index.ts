@@ -1,6 +1,4 @@
-export * from './expenseController'
 export * from './investmentController'
-export * from './incomeController'
 export * from './investmentTypeController'
 export * from './transactionController'
 export * from './userController'

@@ -6,6 +6,20 @@ export const TransactionRepository: ITransactionRepository = {
     return prisma.transaction.create({ data });
   },
 
+  async findByUserId(userId: string) {
+    const transactions =
+      await prisma.transaction.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          date: "desc",
+        },
+      });
+
+    return transactions;
+  },
+
   findByIdAndUserId(id, userId) {
     return prisma.transaction.findFirst({
       where: { id, userId },
