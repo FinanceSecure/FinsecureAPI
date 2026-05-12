@@ -162,18 +162,16 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
   }>(
     "/api/investimento/tipo/:id",
     {
-      ...auth,
+      preHandler: autenticarTokenFastify,
       schema: {
         summary: "Detalhar tipo de investimento com simulação",
         tags: ["Tipos de Investimento"],
-        security: [],
-
+        security: [{ bearerAuth: [] }],
         params: {
           type: "object",
           properties: { id: { type: "string" } },
           required: ["id"],
         },
-
         querystring: {
           type: "object",
           properties: {
@@ -183,7 +181,6 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             }
           }
         },
-
         response: {
           200: {
             type: "object",
