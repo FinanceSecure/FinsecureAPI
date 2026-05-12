@@ -5,13 +5,16 @@ import type {
   AddInvestmentTypeRequestDto,
   InvestmentStatementParamsDto,
   RedeemInvestmentRequestDto,
+  UpdateInvestmentTypeRequestDto,
 } from "@application/dto/investment/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
 import {
   addInvestmentFastify,
   getInvestedAmountFastify,
   getInvestmentStatementFastify,
+  listInvestmentTypesFastify,
   redeemInvestmentFastify,
+  updateInvestmentTypeFastify,
 } from "../controllers";
 import {
   addInvestmentTypeFastify,
@@ -48,8 +51,8 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
                     tipoInvestimento: {
                       type: "object",
                       properties: {
-                        nome: { type: "string" },
-                        valorPercentual: { type: "number" }
+                        name: { type: "string" },
+                        benchmarkPercentage: { type: "number" }
                       }
                     },
                     aplicacoes: {
@@ -159,6 +162,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
   }>(
     "/api/investimento/tipo/:id",
     {
+      ...auth,
       schema: {
         summary: "Detalhar tipo de investimento com simulação",
         tags: ["Tipos de Investimento"],
@@ -185,10 +189,10 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             type: "object",
             properties: {
               id: { type: "string" },
-              nome: { type: "string" },
-              tipo: { type: "string" },
-              valorPercentual: { type: "number" },
-              impostoRenda: { type: "boolean" },
+              name: { type: "string" },
+              type: { type: "string" },
+              benchmarkPercentage: { type: "number" },
+              hasIncomeTax: { type: "boolean" },
               simulacao: {
                 type: "object",
                 properties: {
@@ -209,6 +213,34 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
     getInvestmentTypeFastify
   );
 
+  app.get(
+    "/api/investimento/tipo",
+    {
+      schema: {
+        summary: "Listar tipos de investimento",
+        tags: ["Tipos de Investimento"],
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                type: { type: "string" },
+                benchmarkPercentage: { type: "number" },
+                hasIncomeTax: { type: "boolean" }
+              }
+            }
+          },
+          401: { type: "object", properties: { error: { type: "string" } } }
+        },
+      },
+    },
+    listInvestmentTypesFastify
+  );
+
   app.post<{ Body: AddInvestmentTypeRequestDto }>(
     "/api/investimento/tipo/adicionar",
     {
@@ -219,13 +251,32 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
         tags: ["Tipos de Investimento"],
         body: {
           type: "object",
-          required: ["nome", "tipo", "valorPercentual", "impostoRenda"],
+          required: [
+            "name",
+            "type",
+            "benchmarkPercentage",
+            "hasIncomeTax"
+          ],
           properties: {
-            nome: { type: "string" },
-            tipo: { type: "string" },
-            valorPercentual: { type: "number" },
-            impostoRenda: { type: "boolean" },
-          },
+            name: {
+              type: "string"
+            },
+            type: {
+              type: "string",
+              enum: [
+                "FIXED_INCOME",
+                "VARIABLE_INCOME",
+                "CRYPTO",
+                "REAL_ESTATE"
+              ]
+            },
+            benchmarkPercentage: {
+              type: "number"
+            },
+            hasIncomeTax: {
+              type: "boolean"
+            },
+          }
         },
         response: {
           201: { type: "object", properties: { id: { type: "string" } } }
@@ -233,5 +284,54 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
       },
     },
     addInvestmentTypeFastify
+  );
+
+  app.put<{
+    Params: {
+      id: string
+    }
+    Body: UpdateInvestmentTypeRequestDto
+  }>(
+    "/api/investimento/tipo/atualizar/:id",
+    {
+      ...auth,
+      schema: {
+        security: [{ bearerAuth: [] }],
+        summary: "Atualizar tipo de investimento",
+        tags: ["Tipos de Investimento"],
+        body: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            type: {
+              type: "string",
+              enum: [
+                "CDI",
+                "CDB",
+                "TESOURO_DIRETO",
+                "POUPANCA",
+                "IPCA",
+                "SELIC",
+                "IBOVESPA",
+                "FII",
+                "ETF",
+                "AÇÕES",
+                "CRYPTO",
+                "REAL_ESTATE"
+              ],
+            },
+            benchmarkPercentage: { type: "number" },
+            hasIncomeTax: { type: "boolean" }
+          },
+        },
+        response: {
+          200: {
+            description: "Tipo de investimento atualizado com sucesso",
+            type: "object", properties: { message: { type: "string" } }
+          }
+        },
+      },
+    },
+    updateInvestmentTypeFastify
   );
 }

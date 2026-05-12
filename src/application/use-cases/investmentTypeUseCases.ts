@@ -1,3 +1,4 @@
+import { InvestmentCategory } from "@prisma/client";
 import { ValidationError } from "../errors/ApplicationError.js";
 import { IInvestmentTypeRepository } from "../ports/repositories/";
 
@@ -7,32 +8,41 @@ export function createInvestmentTypeUseCases(
   return {
     async acrescentarTipoInvestimento(
       name: string,
-      type: string,
-      percentageValue: number,
-      incomeTax: boolean
+      type: InvestmentCategory,
+      benchmarkPercentage: number,
+      hasIncomeTax: boolean
     ) {
-      if (!name) throw new ValidationError("Nome nao informado");
-      if (!type) throw new ValidationError("Tipo nao informado");
-      if (!percentageValue)
+      if (!name)
+        throw new ValidationError("Nome nao informado");
+
+      if (!type)
+        throw new ValidationError("Tipo nao informado");
+
+      if (benchmarkPercentage === undefined || benchmarkPercentage === null)
         throw new ValidationError("Valor percentual nao informado");
 
       return investmentTypeRepository.create({
         name,
         type,
-        percentageValue,
-        incomeTax,
+        benchmarkPercentage,
+        hasIncomeTax,
       });
     },
 
-    async visualizarTipoInvestimento(id: string, amount = 1000) {
-      if (!id) throw new ValidationError("ID nao informado");
+    async visualizarTipoInvestimento(
+      id: string,
+      amount = 1000
+    ) {
+      if (!id)
+        throw new ValidationError("ID nao informado");
 
       const investmentType =
         await investmentTypeRepository.findById(id);
 
-      if (!investmentType) return null;
+      if (!investmentType)
+        return null;
 
-      const rate = investmentType.percentageValue;
+      const rate = investmentType.benchmarkPercentage;
       const dailyYield = amount * rate;
       const monthlyYield = dailyYield * 30;
       const annualYield = dailyYield * 365;
@@ -46,6 +56,40 @@ export function createInvestmentTypeUseCases(
           rendimentoAnual: annualYield,
         },
       };
+    },
+
+    async listarTiposInvestimento() {
+      return investmentTypeRepository.findAll();
+    },
+
+    async atualizarTipoInvestimento(
+      id: string,
+      data: {
+        name?: string;
+        type?: InvestmentCategory;
+        benchmarkPercentage?: number;
+        hasIncomeTax?: boolean;
+      }
+    ) {
+      if (!id)
+        throw new ValidationError("ID nao informado");
+
+      const investmentType =
+        await investmentTypeRepository.findById(id);
+
+      if (!investmentType)
+        throw new ValidationError("Tipo de investimento nao encontrado");
+
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).filter(
+          ([_, value]) => value !== undefined
+        )
+      );
+
+      return investmentTypeRepository.update(
+        id,
+        cleanedData
+      );
     },
   };
 }

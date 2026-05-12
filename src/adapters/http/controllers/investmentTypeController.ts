@@ -6,6 +6,7 @@ import type {
 import { ApplicationError } from "@application/errors/ApplicationError.js";
 import { createInvestmentTypeUseCases } from "@application/use-cases/";
 import { InvestmentTypeRepository } from "@adapters/database/repositories/investmentTypeRepository.js";
+import { UpdateInvestmentTypeRequestDto } from "@/application/dto/investment/investmentRequestDtos";
 
 const investmentTypeUseCases = createInvestmentTypeUseCases(
   InvestmentTypeRepository
@@ -29,14 +30,14 @@ export async function addInvestmentTypeFastify(
     const {
       name,
       type,
-      percentageValue,
+      benchmarkPercentage,
       hasIncomeTax
     } = request.body;
     const investmentType =
       await investmentTypeUseCases.acrescentarTipoInvestimento(
         name,
         type,
-        percentageValue,
+        benchmarkPercentage,
         hasIncomeTax
       );
 
@@ -72,5 +73,54 @@ export async function getInvestmentTypeFastify(
     return reply.status(200).send(investmentType);
   } catch (error) {
     return sendFastifyError(reply, error);
+  }
+}
+
+export async function listInvestmentTypesFastify(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const investmentTypes = await investmentTypeUseCases.listarTiposInvestimento();
+    return reply.status(200).send(investmentTypes);
+  } catch (error) {
+    return sendFastifyError(reply, error);
+  }
+}
+
+export async function updateInvestmentTypeFastify(
+  request: FastifyRequest<{
+    Params: {
+      id: string;
+    };
+    Body: UpdateInvestmentTypeRequestDto;
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const { id } = request.params;
+    const {
+      name,
+      type,
+      benchmarkPercentage,
+      hasIncomeTax,
+    } = request.body;
+    const result =
+      await investmentTypeUseCases.atualizarTipoInvestimento(
+        id,
+        {
+          name,
+          type,
+          benchmarkPercentage,
+          hasIncomeTax,
+        }
+      );
+
+    return reply.status(200).send(result);
+  } catch (error) {
+    return sendFastifyError(
+      reply,
+      error
+    );
   }
 }

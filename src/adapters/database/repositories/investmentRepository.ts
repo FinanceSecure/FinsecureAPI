@@ -58,8 +58,10 @@ export const InvestmentRepository: IInvestmentRepository = {
     const transaction =
       await prisma.transaction.create({
         data: {
+          title: "Aplicação de investimento",
           userId,
           amount: investedAmount,
+          date: purchaseDate,
           description: "Aplicação de investimento",
           type: TransactionType.INVESTMENT,
           category: TransactionCategory.INVESTMENT_APPLICATION,
@@ -83,28 +85,20 @@ export const InvestmentRepository: IInvestmentRepository = {
     investmentTypeId: string,
     investedAmount: number,
     purchaseDate: Date,
-    updateDate?: Date
   ): Promise<InvestmentWithApplication> {
 
     const type = await this.findTypeInvestment(investmentTypeId);
-    if (!type) {
+    if (!type)
       throw new Error("Tipo de investimento não encontrado");
-    }
 
-    let investment =
-      await this.findInvestment(
-        userId,
-        investmentTypeId
-      );
-
+    let investment = await this.findInvestment(userId, investmentTypeId);
     if (!investment) {
-      investment =
-        await prisma.investment.create({
-          data: {
-            userId,
-            investmentTypeId,
-          },
-        });
+      investment = await prisma.investment.create({
+        data: {
+          userId,
+          investmentTypeId,
+        },
+      });
     }
 
     const application =
@@ -157,9 +151,11 @@ export const InvestmentRepository: IInvestmentRepository = {
     const transaction =
       await prisma.transaction.create({
         data: {
+          title: "Resgate de investimento",
           userId,
           amount: redeemedAmount,
           description: "Resgate de investimento",
+          date: new Date(),
           type: TransactionType.INVESTMENT,
           category: TransactionCategory.INVESTMENT_REDEMPTION,
           status: TransactionStatus.COMPLETED,

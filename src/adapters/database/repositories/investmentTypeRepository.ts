@@ -11,4 +11,17 @@ export const InvestmentTypeRepository: IInvestmentTypeRepository = {
       where: { id },
     });
   },
+
+  findAll() {
+    return prisma.investmentType.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
+  update(id: string, data) {
+    return prisma.investmentType.update({
+      where: { id },
+      data,
+    });
+  },
 };

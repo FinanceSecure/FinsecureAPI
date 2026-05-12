@@ -3,6 +3,6 @@ export class TypeInvestment {
     public id: string | null,
     public name: string,
     public type: string,
-    public percentageValue: number
+    public benchmarkPercentage: number
   ) { }
 }

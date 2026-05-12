@@ -1,3 +1,5 @@
+import { InvestmentCategory } from "@prisma/client";
+
 export interface InvestmentStatementParamsDto {
   id: string;
 }
@@ -15,7 +17,14 @@ export interface RedeemInvestmentRequestDto {
 
 export interface AddInvestmentTypeRequestDto {
   name: string;
-  type: string;
-  percentageValue: number;
+  type: InvestmentCategory;
+  benchmarkPercentage: number;
   hasIncomeTax: boolean;
+}
+
+export interface UpdateInvestmentTypeRequestDto {
+  name?: string;
+  type?: InvestmentCategory;
+  benchmarkPercentage?: number;
+  hasIncomeTax?: boolean;
 }

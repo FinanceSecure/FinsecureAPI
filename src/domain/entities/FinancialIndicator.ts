@@ -2,7 +2,7 @@ export class FinancialIndicator {
   constructor(
     public id: string,
     public name: string,
-    public percentageValue: number,
+    public benchmarkPercentage: number,
     public referenceDate: Date
   ) { }
 }

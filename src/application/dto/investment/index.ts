@@ -3,4 +3,5 @@ export type {
   AddInvestmentTypeRequestDto,
   InvestmentStatementParamsDto,
   RedeemInvestmentRequestDto,
+  UpdateInvestmentTypeRequestDto,
 } from "./investmentRequestDtos.js";
