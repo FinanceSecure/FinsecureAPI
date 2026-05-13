@@ -32,49 +32,22 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
         security: [{ bearerAuth: [] }],
         summary: "Obter extrato de investimentos",
         tags: ["Investimentos"],
-        response: {
-          200: {
-            description: "Extrato retornado com sucesso",
-            type: "object",
-            properties: {
-              valorTotalInvestido: { type: "number" },
-              valorTotalRendimentoLiquido: { type: "number" },
-              investimentos: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: { type: "string" },
-                    tipoInvestimentoId: { type: "string" },
-                    dataCompra: { type: "string" },
-                    resgatado: { type: "boolean" },
-                    tipoInvestimento: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        benchmarkPercentage: { type: "number" }
-                      }
-                    },
-                    aplicacoes: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          valor: { type: "number" },
-                          data: { type: "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          401: { type: "object", properties: { error: { type: "string" } } }
-        },
       },
     },
     getInvestmentStatementFastify
+  );
+
+  app.get(
+    "/api/investimento/total-investido",
+    {
+      ...auth,
+      schema: {
+        security: [{ bearerAuth: [] }],
+        summary: "Obter total investido",
+        tags: ["Investimentos"],
+      },
+    },
+    getInvestedAmountFastify
   );
 
   app.post<{ Body: AddInvestmentRequestDto }>(
@@ -83,20 +56,47 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
       ...auth,
       schema: {
         security: [{ bearerAuth: [] }],
-        summary: "Adicionar um novo investimento",
+        summary: "Adicionar investimento",
         tags: ["Investimentos"],
         body: {
           type: "object",
-          required: ["tipoInvestimentoId", "valorInvestido", "dataCompra"],
+          required: ["investmentTypeId", "investedAmount", "purchaseDate"],
           properties: {
-            tipoInvestimentoId: { type: "string" },
-            valorInvestido: { type: "number" },
-            dataCompra: { type: "string", format: "date" },
+            investmentTypeId: { type: "string" },
+            investedAmount: { type: "number" },
+            purchaseDate: { type: "string", format: "date" },
+            updatedAt: { type: "string", format: "date" },
           },
         },
         response: {
-          201: { type: "object", properties: { id: { type: "string" } } },
-          400: { type: "object", properties: { error: { type: "string" } } }
+          201: {
+            type: "object",
+            properties: {
+              investment: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  userId: { type: "string" },
+                  investmentTypeId: { type: "string" },
+                  isRedeemed: { type: "boolean" },
+                  createdAt: { type: "string" },
+                  updatedAt: { type: "string", nullable: true }
+                }
+              },
+              application: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  investmentId: { type: "string" },
+                  type: { type: "string" },
+                  amount: { type: "number" },
+                  date: { type: "string" },
+                  transactionId: { type: "string" }
+                }
+              }
+            }
+          },
+          400: { type: "object", properties: { error: { type: "string" } } },
         },
       },
     },
@@ -112,48 +112,43 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
       ...auth,
       schema: {
         security: [{ bearerAuth: [] }],
-        summary: "Resgatar um investimento",
+        summary: "Resgatar investimento por tipo",
+        description: "Realiza o resgate debitando dos aportes mais antigos do tipo especificado.",
         tags: ["Investimentos"],
         params: {
           type: "object",
-          properties: { id: { type: "string" } },
           required: ["id"],
+          properties: {
+            id: { type: "string", description: "investmentTypeId" },
+          },
         },
         body: {
           type: "object",
-          required: ["valor"],
+          anyOf: [
+            { required: ["amount"] },
+            { required: ["investedAmount"] },
+          ],
           properties: {
-            valor: { type: "number" }
+            amount: { type: "number" },
+            investedAmount: { type: "number" },
           },
         },
-        response: {
-          200: { type: "object", properties: { message: { type: "string" } } },
-          400: { type: "object", properties: { error: { type: "string" } } }
-        },
-      },
-    },
-    redeemInvestmentFastify
-  );
-
-  app.get(
-    "/api/investimento/totalInvestido",
-    {
-      ...auth,
-      schema: {
-        security: [{ bearerAuth: [] }],
-        summary: "Obter valor total investido",
-        tags: ["Investimentos"],
         response: {
           200: {
             type: "object",
             properties: {
-              totalInvestido: { type: "number" },
+              message: { type: "string" },
+              requested: { type: "number" },
+              totalRedeemed: { type: "number" },
+              remainingBalance: { type: "number" },
+              details: { type: "array" },
             },
-          }
+          },
+          400: { type: "object", properties: { error: { type: "string" } } },
         },
       },
     },
-    getInvestedAmountFastify
+    redeemInvestmentFastify
   );
 
   app.get<{

@@ -1,6 +1,21 @@
 import { calculateInvestmentIncome } from "@domain/services/calcInvestimentoService";
 import { ValidationError } from "../errors/ApplicationError.js";
-import { IInvestmentRepository, } from "../ports/repositories";
+import {
+  IInvestmentRepository,
+  InvestmentWithRelations,
+} from "../ports/repositories";
+
+const APPLICATION = "APPLICATION";
+const REDEMPTION = "REDEMPTION";
+
+function calculateLedgerBalance(investment: InvestmentWithRelations) {
+  return (investment.applications ?? []).reduce((balance, application) => {
+    const amount = Number(application.amount);
+    if (application.type === APPLICATION) return balance + amount;
+    if (application.type === REDEMPTION) return balance - amount;
+    return balance;
+  }, 0);
+}
 
 export function createInvestmentUseCases(deps: {
   investmentRepository: IInvestmentRepository;
@@ -12,289 +27,217 @@ export function createInvestmentUseCases(deps: {
       userId: string,
       investmentTypeId: string,
       investedAmount: number,
-      purchaseDate: Date,
-      updatedAt?: Date
+      purchaseDate: Date
     ) {
-      if (!userId)
-        throw new ValidationError("Usuário não autenticado.");
+      if (!userId) throw new ValidationError("Usuario nao autenticado.");
 
       if (!investmentTypeId)
-        throw new ValidationError("Tipo de investimento não informado.");
+        throw new ValidationError("Tipo de investimento nao informado.");
 
       if (!investedAmount || investedAmount <= 0)
-        throw new ValidationError("Valor inválido.");
+        throw new ValidationError("Valor invalido.");
 
       if (!purchaseDate)
-        throw new ValidationError("Data de compra não informada.");
+        throw new ValidationError("Data de compra nao informada.");
 
       return investmentRepository.addInvestment(
         userId,
         investmentTypeId,
         investedAmount,
-        purchaseDate,
-        updatedAt
+        purchaseDate
       );
     },
 
     async redeemInvestment(
       userId: string,
-      investmentTypeId: string,
+      id: string,
       amountToRedeem: number
     ) {
-      const investments =
-        await investmentRepository.findInvestmentsWithApplications(
-          userId,
-          investmentTypeId
-        );
+      if (!userId) throw new ValidationError("Usuario nao autenticado.");
+      if (!id)
+        throw new ValidationError("Tipo de investimento nao informado.");
+      if (!amountToRedeem || amountToRedeem <= 0)
+        throw new ValidationError("Valor de resgate invalido.");
 
-      if (!investments.length)
-        throw new ValidationError("Nenhum investimento encontrado");
+      const allInvestments =
+        await investmentRepository.findInvestmentsWithApplications(userId);
 
-      let totalAvailableAmount = 0;
+      let investments = allInvestments.filter(inv => inv.id === id);
 
-      const calculatedIncomes = [];
-
-      for (const investment of investments) {
-        const investedAmount =
-          investment.applications
-            ?.filter(
-              (application: any) =>
-                application.type === "APPLICATION"
-            )
-            .reduce(
-              (acc: number, current: any) =>
-                acc + current.amount,
-              0
-            ) ?? 0;
-
-        const redeemedAmount =
-          investment.applications
-            ?.filter(
-              (application: any) =>
-                application.type === "REDEMPTION"
-            )
-            .reduce(
-              (acc: number, current: any) =>
-                acc + current.amount,
-              0
-            ) ?? 0;
-
-        const netInvestedAmount = investedAmount - redeemedAmount;
-        const income = calculateInvestmentIncome(
-          investedAmount,
-          investment.investmentType.benchmarkPercentage,
-          investment.createdAt,
-          investment.investmentType.hasTax
-        );
-
-        const totalNetAmount = netInvestedAmount + income.netIncome;
-        totalAvailableAmount += totalNetAmount;
-
-        calculatedIncomes.push({
-          investment,
-          ...income,
-          netInvestedAmount,
-          totalNetAmount,
-        });
+      if (investments.length === 0) {
+        investments = allInvestments.filter(inv => inv.investmentType.id === id);
       }
 
-      if (totalAvailableAmount < amountToRedeem)
-        throw new ValidationError("Valor para resgatar superior ao disponível.");
+      investments.sort((a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
 
-      let remainingAmountToRedeem = amountToRedeem;
-      let totalRedeemed = 0;
+      if (!investments.length)
+        throw new ValidationError(
+          "Nenhum investimento encontrado para este tipo."
+        );
 
-      const redemptionDetails = [];
+      let totalAvailable = 0;
 
-      for (const incomeInfo of calculatedIncomes) {
-        if (remainingAmountToRedeem <= 0) break;
+      const mapped = investments.map((investment) => {
+        const balance = calculateLedgerBalance(investment);
+        totalAvailable += balance;
 
-        const {
+        return {
           investment,
-          netIncome,
-          taxAmount,
-          netInvestedAmount,
-          totalNetAmount,
-        } = incomeInfo;
+          balance,
+        };
+      }).filter(item => item.balance > 0);
 
-        if (totalNetAmount <= remainingAmountToRedeem) {
-          await investmentRepository.markInvestmentAsRedeemed(
-            investment.id
-          );
+      if (Number(totalAvailable.toFixed(2)) < amountToRedeem) {
+        throw new ValidationError("Valor de resgate maior que o disponivel");
+      }
 
+      let remaining = amountToRedeem;
+      const details = [];
+
+      for (const item of mapped) {
+        if (remaining <= 0) break;
+
+        const { investment, balance } = item;
+
+        if (balance <= remaining) {
           await investmentRepository.createRedemptionApplication(
             investment.id,
-            netInvestedAmount
+            userId,
+            balance
           );
 
-          remainingAmountToRedeem -= totalNetAmount;
+          remaining -= balance;
 
-          totalRedeemed += totalNetAmount;
-
-          redemptionDetails.push({
-            id: investment.id,
-            type: "total",
-            redeemedAmount: totalNetAmount,
-            purchaseDate: investment.createdAt,
-            netIncome,
-            taxAmount,
+          details.push({
+            investmentId: investment.id,
+            redeemed: balance,
+            type: "full",
           });
         } else {
-          const percentage = remainingAmountToRedeem / totalNetAmount;
-
-          const partialInvestedAmount = netInvestedAmount * percentage;
-
           await investmentRepository.createRedemptionApplication(
             investment.id,
-            partialInvestedAmount
+            userId,
+            remaining
           );
 
-          totalRedeemed += remainingAmountToRedeem;
-
-          redemptionDetails.push({
-            id: investment.id,
+          details.push({
+            investmentId: investment.id,
+            redeemed: remaining,
             type: "partial",
-            redeemedAmount: remainingAmountToRedeem,
-            purchaseDate: investment.createdAt,
-            netIncome: netIncome * percentage,
-            tax: taxAmount * percentage,
           });
 
-          remainingAmountToRedeem = 0;
+          remaining = 0;
         }
       }
 
       return {
-        message: "Resgate efetuado com sucesso!",
-        totalRedeemed: Number(totalRedeemed.toFixed(2)),
-        remainingAmountToRedeem: Number(remainingAmountToRedeem.toFixed(2)),
-        details: redemptionDetails,
+        message: "Resgate realizado com sucesso",
+        requested: Number(amountToRedeem.toFixed(2)),
+        totalRedeemed: amountToRedeem,
+        remainingBalance: Number((totalAvailable - amountToRedeem).toFixed(2)),
+        details,
       };
     },
 
-    async getInvestmentsByType(
-      userId: string,
-      investmentTypeId: string
-    ) {
-      const investments =
-        await investmentRepository.findInvestmentsWithApplications(
-          userId,
-          investmentTypeId
-        );
+    async getInvestmentsByType(userId: string, investmentTypeId: string) {
+      const all = await investmentRepository.findInvestmentsWithApplications(userId);
+      const investments = all.filter(inv =>
+        inv.investmentType.id === investmentTypeId || inv.id === investmentTypeId
+      );
 
       if (!investments.length)
-        throw new ValidationError("Nenhum investimento ativo deste tipo encontrado");
+        throw new ValidationError("Nenhum investimento encontrado.");
 
-      let totalInvestedAmount = 0;
-      let totalGrossIncome = 0;
+      let totalInvested = 0;
+      let totalGross = 0;
       let totalTax = 0;
-      let totalNetIncome = 0;
-      let totalNetAmount = 0;
+      let totalNet = 0;
+      let totalFinal = 0;
 
-      const statement = investments.map(
-        (investment: any) => {
-          const investedAmount =
-            investment.applications
-              ?.filter(
-                (application: any) =>
-                  application.type ===
-                  "APPLICATION"
-              )
-              .reduce(
-                (
-                  acc: number,
-                  current: any
-                ) => acc + current.amount,
-                0
-              ) ?? 0;
+      const statement = investments.map((investment) => {
+        const applications = investment.applications ?? [];
+        const netInvestedAmount = calculateLedgerBalance(investment);
 
-          const income =
-            calculateInvestmentIncome(
-              investedAmount,
-              investment.investmentType.benchmarkPercentage,
-              investment.createdAt,
-              investment.investmentType.hasTax
-            );
+        const referenceDate =
+          applications.length > 0
+            ? new Date(
+              Math.min(...applications.map((a) => new Date(a.date).getTime()))
+            )
+            : investment.createdAt;
 
-          const netAmount = investedAmount + income.netIncome;
-          totalInvestedAmount += investedAmount;
-          totalGrossIncome += income.grossIncome;
-          totalTax += income.taxAmount;
-          totalNetIncome += income.netIncome;
-          totalNetAmount += netAmount;
+        const income = calculateInvestmentIncome(
+          netInvestedAmount,
+          investment.investmentType.benchmarkPercentage,
+          referenceDate,
+          investment.investmentType.hasIncomeTax
+        );
 
-          return {
-            id: investment.id,
-            purchaseDate: investment.createdAt,
-            investedAmount: Number(investedAmount.toFixed(2)),
-            grossIncome: Number(income.grossIncome.toFixed(2)),
-            tax: Number(income.taxAmount.toFixed(2)),
-            netIncome: Number(income.netIncome.toFixed(2)),
-            totalNetAmount: Number(netAmount.toFixed(2)),
-          };
-        }
-      );
+        const netAmount = netInvestedAmount + income.netIncome;
+
+        totalInvested += netInvestedAmount;
+        totalGross += income.grossIncome;
+        totalTax += income.taxAmount;
+        totalNet += income.netIncome;
+        totalFinal += netAmount;
+
+        return {
+          id: investment.id,
+          purchaseDate: investment.createdAt,
+          investedAmount: Number(netInvestedAmount.toFixed(2)),
+          grossIncome: Number(income.grossIncome.toFixed(2)),
+          tax: Number(income.taxAmount.toFixed(2)),
+          netIncome: Number(income.netIncome.toFixed(2)),
+          totalNetAmount: Number(netAmount.toFixed(2)),
+        };
+      });
 
       return {
         investmentTypeId,
-        name:
-          investments[0].investmentType.name,
-
-        totalInvestedAmount: Number(
-          totalInvestedAmount.toFixed(2)
-        ),
-
-        totalGrossIncome: Number(
-          totalGrossIncome.toFixed(2)
-        ),
-
-        totalTax: Number(
-          totalTax.toFixed(2)
-        ),
-
-        totalNetIncome: Number(
-          totalNetIncome.toFixed(2)
-        ),
-
-        totalNetAmount: Number(
-          totalNetAmount.toFixed(2)
-        ),
-
+        name: investments[0].investmentType.name,
+        totalInvestedAmount: Number(totalInvested.toFixed(2)),
+        totalGrossIncome: Number(totalGross.toFixed(2)),
+        totalTax: Number(totalTax.toFixed(2)),
+        totalNetIncome: Number(totalNet.toFixed(2)),
+        totalNetAmount: Number(totalFinal.toFixed(2)),
         latestApplications: statement,
       };
     },
 
-    async getTotalInvested(
-      userId: string
-    ) {
-      if (!userId) throw new ValidationError("Usuário não autenticado.");
-
-      const total =
-        await investmentRepository.calculateTotalInvested(
-          userId
-        );
-
-      return {
-        totalInvested: Number(
-          total.toFixed(2)
-        ),
-      };
-    },
-
-    async getCompletedInvestments(
-      userId: string
-    ) {
-      if (!userId) throw new ValidationError("Usuário não autenticado.");
+    async getTotalInvested(userId: string) {
+      if (!userId) throw new ValidationError("Usuario nao autenticado.");
 
       const investments =
         await investmentRepository.findInvestmentsWithApplications(userId);
 
-      const totalInvestedAmount =
-        await investmentRepository.calculateTotalInvested(userId);
+      const total = investments.reduce((sum, inv) => {
+        return sum + calculateLedgerBalance(inv);
+      }, 0);
 
       return {
-        totalInvestedAmount,
-        investments,
+        totalInvested: Number(total.toFixed(2)),
+      };
+    },
+
+    async getCompletedInvestments(userId: string) {
+      if (!userId) throw new ValidationError("Usuario nao autenticado.");
+
+      const investments =
+        await investmentRepository.findInvestmentsWithApplications(userId);
+
+      const detailedInvestments = investments.map(inv => ({
+        ...inv,
+        currentBalance: calculateLedgerBalance(inv)
+      }));
+
+      const totalInvestedAmount = detailedInvestments.reduce((sum, inv) => {
+        return sum + inv.currentBalance;
+      }, 0);
+
+      return {
+        totalInvestedAmount: Number(totalInvestedAmount.toFixed(2)),
+        investments: detailedInvestments,
       };
     },
   };

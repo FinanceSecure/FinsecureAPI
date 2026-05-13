@@ -1,7 +1,31 @@
+export type InvestmentApplicationLedgerType =
+  | "APPLICATION"
+  | "REDEMPTION"
+  | "DIVIDEND"
+  | "INTEREST";
+
+export interface InvestmentApplicationLedger {
+  id: string;
+  type: InvestmentApplicationLedgerType;
+  amount: number;
+  date: Date;
+}
+
+export interface InvestmentWithRelations {
+  id: string;
+  investmentTypeId: string;
+  createdAt: Date;
+  applications: InvestmentApplicationLedger[];
+  investmentType: {
+    id: string;
+    name: string;
+    benchmarkPercentage: number;
+    hasIncomeTax: boolean;
+  };
+}
+
 export interface IInvestmentRepository {
-  findTypeInvestment(
-    investmentTypeId: string
-  ): Promise<any | null>;
+  findTypeInvestment(investmentTypeId: string): Promise<any | null>;
   findInvestment(
     userId: string,
     investmentTypeId: string
@@ -16,13 +40,12 @@ export interface IInvestmentRepository {
     userId: string,
     investmentTypeId: string,
     investedAmount: number,
-    purchaseDate: Date,
-    updateDate?: Date
+    purchaseDate: Date
   ): Promise<any>;
   findInvestmentsWithApplications(
     userId: string,
     investmentTypeId?: string
-  ): Promise<any[]>;
+  ): Promise<InvestmentWithRelations[]>;
   markInvestmentAsRedeemed(
     investmentId: string
   ): Promise<any>;

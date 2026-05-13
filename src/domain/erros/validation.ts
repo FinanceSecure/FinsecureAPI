@@ -17,6 +17,11 @@ export const ErroMessages = {
   TRANSACAO: {
     NAO_ENCONTRADO: "Transação não encontrada."
   },
+  INVESTIMENTO: {
+    VALOR_RESGATE_INVALIDO: "Valor de resgate inválido.",
+    NAO_ENCONTRADO: "Investimento não encontrado.",
+    SALDO_INSUFICIENTE: "Saldo insuficiente para realizar o resgate."
+  },
   AUTH: {
     CREDENCIAIS_INVALIDAS: "E-mail ou senha incorretos."
   }

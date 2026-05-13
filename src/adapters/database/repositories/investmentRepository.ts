@@ -7,45 +7,16 @@ import {
 } from "@prisma/client";
 import { IInvestmentRepository } from "@/application/ports/repositories";
 
-interface Investment {
-  userId: string;
-  investmentTypeId: string;
-  updatedAt?: Date | null;
-}
-
-interface InvestmentApplication {
-  id: string;
-  investmentId: string;
-  type: InvestmentApplicationType;
-  amount: number;
-  date: Date;
-}
-
-interface InvestmentWithApplication {
-  investment: Investment;
-  application: InvestmentApplication;
-}
-
 export const InvestmentRepository: IInvestmentRepository = {
-  async findTypeInvestment(
-    investmentTypeId: string
-  ) {
+  async findTypeInvestment(investmentTypeId: string) {
     return prisma.investmentType.findUnique({
-      where: {
-        id: investmentTypeId,
-      },
+      where: { id: investmentTypeId },
     });
   },
 
-  async findInvestment(
-    userId: string,
-    investmentTypeId: string
-  ) {
+  async findInvestment(userId: string, investmentTypeId: string) {
     return prisma.investment.findFirst({
-      where: {
-        userId,
-        investmentTypeId,
-      },
+      where: { userId, investmentTypeId },
     });
   },
 
@@ -55,19 +26,18 @@ export const InvestmentRepository: IInvestmentRepository = {
     investedAmount: number,
     purchaseDate: Date
   ) {
-    const transaction =
-      await prisma.transaction.create({
-        data: {
-          title: "Aplicação de investimento",
-          userId,
-          amount: investedAmount,
-          date: purchaseDate,
-          description: "Aplicação de investimento",
-          type: TransactionType.INVESTMENT,
-          category: TransactionCategory.INVESTMENT_APPLICATION,
-          status: TransactionStatus.COMPLETED,
-        },
-      });
+    const transaction = await prisma.transaction.create({
+      data: {
+        title: "Aplicação de investimento",
+        userId,
+        amount: investedAmount,
+        date: purchaseDate,
+        description: "Aplicação de investimento",
+        type: TransactionType.INVESTMENT,
+        category: TransactionCategory.INVESTMENT_APPLICATION,
+        status: TransactionStatus.COMPLETED,
+      },
+    });
 
     return prisma.investmentApplication.create({
       data: {
@@ -81,15 +51,13 @@ export const InvestmentRepository: IInvestmentRepository = {
   },
 
   async addInvestment(
-    userId: string,
-    investmentTypeId: string,
-    investedAmount: number,
-    purchaseDate: Date,
-  ): Promise<InvestmentWithApplication> {
-
+    userId,
+    investmentTypeId,
+    investedAmount,
+    purchaseDate
+  ) {
     const type = await this.findTypeInvestment(investmentTypeId);
-    if (!type)
-      throw new Error("Tipo de investimento não encontrado");
+    if (!type) throw new Error("Tipo de investimento não encontrado");
 
     let investment = await this.findInvestment(userId, investmentTypeId);
     if (!investment) {
@@ -101,13 +69,12 @@ export const InvestmentRepository: IInvestmentRepository = {
       });
     }
 
-    const application =
-      await this.createInvestmentApplication(
-        investment.id,
-        userId,
-        investedAmount,
-        purchaseDate
-      );
+    const application = await this.createInvestmentApplication(
+      investment.id,
+      userId,
+      investedAmount,
+      purchaseDate
+    );
 
     return {
       investment,
@@ -115,27 +82,27 @@ export const InvestmentRepository: IInvestmentRepository = {
     };
   },
 
-  async findInvestmentsWithApplications(
-    userId: string,
-    investmentTypeId?: string
-  ) {
+  async findInvestmentsWithApplications(userId, investmentTypeId) {
     return prisma.investment.findMany({
       where: {
         userId,
-        isRedeemed: false,
-        ...(investmentTypeId && {
-          investmentTypeId
-        }),
+        ...(investmentTypeId && { investmentTypeId }),
       },
-
-      include: { investmentType: true, applications: true },
-      orderBy: { createdAt: "asc" },
+      include: {
+        investmentType: true,
+        applications: {
+          orderBy: {
+            date: "asc",
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
   },
 
-  async markInvestmentAsRedeemed(
-    investmentId: string
-  ) {
+  async markInvestmentAsRedeemed(investmentId: string) {
     return prisma.investment.update({
       where: { id: investmentId },
       data: { isRedeemed: true },
@@ -147,20 +114,18 @@ export const InvestmentRepository: IInvestmentRepository = {
     userId: string,
     redeemedAmount: number
   ) {
-
-    const transaction =
-      await prisma.transaction.create({
-        data: {
-          title: "Resgate de investimento",
-          userId,
-          amount: redeemedAmount,
-          description: "Resgate de investimento",
-          date: new Date(),
-          type: TransactionType.INVESTMENT,
-          category: TransactionCategory.INVESTMENT_REDEMPTION,
-          status: TransactionStatus.COMPLETED,
-        },
-      });
+    const transaction = await prisma.transaction.create({
+      data: {
+        title: "Resgate de investimento",
+        userId,
+        amount: redeemedAmount,
+        description: "Resgate de investimento",
+        date: new Date(),
+        type: TransactionType.INVESTMENT,
+        category: TransactionCategory.INVESTMENT_REDEMPTION,
+        status: TransactionStatus.COMPLETED,
+      },
+    });
 
     return prisma.investmentApplication.create({
       data: {
@@ -173,22 +138,29 @@ export const InvestmentRepository: IInvestmentRepository = {
     });
   },
 
-  async calculateTotalInvested(
-    userId: string
-  ) {
-
-    const result =
-      await prisma.investmentApplication.aggregate({
-        where: {
-          investment: {
-            userId,
-          },
+  async calculateTotalInvested(userId: string) {
+    const applications = await prisma.investmentApplication.findMany({
+      where: {
+        investment: {
+          userId,
         },
-        _sum: {
-          amount: true,
-        },
-      });
+      },
+      select: {
+        type: true,
+        amount: true,
+      },
+    });
 
-    return result._sum.amount || 0;
+    return applications.reduce((total, application) => {
+      if (application.type === InvestmentApplicationType.APPLICATION) {
+        return total + application.amount;
+      }
+
+      if (application.type === InvestmentApplicationType.REDEMPTION) {
+        return total - application.amount;
+      }
+
+      return total;
+    }, 0);
   },
 };
