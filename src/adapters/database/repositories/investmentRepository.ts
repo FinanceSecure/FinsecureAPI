@@ -20,6 +20,33 @@ export const InvestmentRepository: IInvestmentRepository = {
     });
   },
 
+  async findActiveByUserId(userId: string) {
+    const investments = await prisma.investment.findMany({
+      where: {
+        userId,
+        isRedeemed: false,
+      },
+      include: {
+        applications: true,
+      },
+    });
+
+    return investments.map((inv) => {
+      const investedAmount = inv.applications.reduce((acc, app) => {
+        if (app.type === InvestmentApplicationType.APPLICATION)
+          return acc + app.amount;
+        if (app.type === InvestmentApplicationType.REDEMPTION)
+          return acc - app.amount;
+        return acc;
+      }, 0);
+
+      return {
+        id: inv.id,
+        investedAmount,
+      };
+    });
+  },
+
   async createInvestmentApplication(
     investmentId: string,
     userId: string,

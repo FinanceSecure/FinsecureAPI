@@ -46,6 +46,9 @@ export interface IInvestmentRepository {
     userId: string,
     investmentTypeId?: string
   ): Promise<InvestmentWithRelations[]>;
+  findActiveByUserId(
+    userId: string
+  ): Promise<{ id: string; investedAmount: number }[]>;
   markInvestmentAsRedeemed(
     investmentId: string
   ): Promise<any>;

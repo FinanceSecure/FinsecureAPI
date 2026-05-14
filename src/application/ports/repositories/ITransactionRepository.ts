@@ -15,6 +15,7 @@ export interface ITransactionRepository {
     type: TransactionType;
     category: TransactionCategory;
     status: TransactionStatus;
+    isRecurring: boolean;
   }): Promise<Transaction>;
   findByIdAndUserId(
     id: string,

@@ -4,99 +4,75 @@ import type {
   TransactionParamsDto,
   UpdateTransactionRequestDto,
 } from "@application/dto/transaction";
-
 import { createTransactionUseCases } from "@application/use-cases";
 import { ApplicationError } from "@application/errors";
-
 import {
   TransactionRepository,
+  InvestmentRepository
 } from "@/adapters/database/repositories";
-
 import {
   TransactionCategory,
   TransactionStatus,
   TransactionType,
 } from "@prisma/client";
 
-const transactionUseCases =
-  createTransactionUseCases({
-    transactionRepository: TransactionRepository,
+const transactionUseCases = createTransactionUseCases({
+  transactionRepository: TransactionRepository,
+  investmentRepository: InvestmentRepository,
 
-    recalculateBalance: async () => 0,
-  });
+  recalculateBalance: async (userId: string) => {
+    const transactions = await TransactionRepository.findByUserId(userId);
+    const incomes = transactions
+      .filter(t => t.type === "INCOME")
+      .reduce((acc, t) => acc + t.amount, 0);
+    const expenses = transactions
+      .filter(t => t.type === "EXPENSE")
+      .reduce((acc, t) => acc + t.amount, 0);
+    return incomes - expenses;
+  },
+});
 
-function sendFastifyError(
-  reply: FastifyReply,
-  error: unknown
-) {
-  if (error instanceof ApplicationError) {
-    return reply
-      .status(error.statusCode)
-      .send({
-        error: error.message,
-      });
-  }
-
-  if (error instanceof Error) {
-    return reply
-      .status(500)
-      .send({
-        error: error.message,
-      });
-  }
-
-  return reply
-    .status(500)
-    .send({
-      error: "Erro interno inesperado.",
+function sendFastifyError(reply: FastifyReply, error: unknown) {
+  if (error instanceof ApplicationError)
+    return reply.status(error.statusCode).send({
+      error: error.message
     });
+
+  if (error instanceof Error)
+    return reply.status(500).send({
+      error: error.message
+    });
+
+  return reply.status(500).send({
+    error: "Erro interno inesperado."
+  });
 }
 
-function getAuthenticatedUserId(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+function getAuthenticatedUserId(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.user?.userId;
 
   if (!userId) {
-    reply
-      .status(401)
-      .send({
-        error: "Usuário não autenticado.",
-      });
-
+    reply.status(401).send({
+      error: "Usuário não autenticado."
+    });
     return null;
   }
 
   return userId;
 }
 
-function normalizeTransactionType(
-  type: string
-): TransactionType {
-  if (type === "ENTRADA")
-    return "INCOME";
-
-  if (type === "SAIDA")
-    return "EXPENSE";
-
+function normalizeTransactionType(type: string): TransactionType {
+  if (type === "ENTRADA") return "INCOME";
+  if (type === "SAIDA") return "EXPENSE";
   return type as TransactionType;
 }
 
 export async function createTransactionFastify(
-  request: FastifyRequest<{
-    Body: CreateTransactionRequestDto;
-  }>,
+  request: FastifyRequest<{ Body: CreateTransactionRequestDto }>,
   reply: FastifyReply
 ) {
-  const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
-
-  if (!userId)
-    return;
+  const userId = getAuthenticatedUserId(request, reply);
+  if (!userId) return;
 
   try {
     const {
@@ -106,32 +82,25 @@ export async function createTransactionFastify(
       date,
       type,
       category,
+      isRecurring
     } = request.body;
 
-    const normalizedType =
-      normalizeTransactionType(type);
-
-    const result =
-      await transactionUseCases.addTransaction(
-        title,
-        userId,
-        amount,
-        new Date(date),
-        normalizedType,
-        category ?? TransactionCategory.OTHER,
-        description,
-        TransactionStatus.COMPLETED
-      );
-
-    return reply
-      .status(201)
-      .send(result);
-
-  } catch (error) {
-    return sendFastifyError(
-      reply,
-      error
+    const normalizedType = normalizeTransactionType(type);
+    const result = await transactionUseCases.addTransaction(
+      title,
+      userId,
+      amount,
+      new Date(date),
+      normalizedType,
+      category ?? TransactionCategory.OTHER,
+      description,
+      TransactionStatus.COMPLETED,
+      isRecurring ?? false
     );
+
+    return reply.status(201).send(result);
+  } catch (error) {
+    return sendFastifyError(reply, error);
   }
 }
 
@@ -140,22 +109,13 @@ export async function getStatementFastify(
   reply: FastifyReply
 ) {
   const userId = getAuthenticatedUserId(request, reply);
-
-  if (!userId)
-    return;
+  if (!userId) return;
 
   try {
     const statement = await transactionUseCases.getFinancialStatement(userId);
-
-    return reply
-      .status(200)
-      .send(statement);
-
+    return reply.status(200).send(statement);
   } catch (error) {
-    return sendFastifyError(
-      reply,
-      error
-    );
+    return sendFastifyError(reply, error);
   }
 }
 
@@ -166,26 +126,15 @@ export async function updateTransactionFastify(
   }>,
   reply: FastifyReply
 ) {
-  const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
-
-  if (!userId)
-    return;
+  const userId = getAuthenticatedUserId(request, reply);
+  if (!userId) return;
 
   try {
-    const transactionId =
-      request.params.id;
-
-    if (!transactionId) {
-      return reply
-        .status(400)
-        .send({
-          error: "Transação não encontrada.",
-        });
-    }
+    const transactionId = request.params.id;
+    if (!transactionId)
+      return reply.status(400).send({
+        error: "Transação não encontrada."
+      });
 
     const {
       title,
@@ -193,81 +142,51 @@ export async function updateTransactionFastify(
       amount,
       date,
       type,
-      category,
-    } = request.body;
+      category } = request.body;
 
     const normalizedType = type ? normalizeTransactionType(type) : undefined;
 
-    const updatedTransaction =
-      await transactionUseCases.updateTransaction(
-        transactionId,
-        userId,
-        title,
-        description,
-        amount,
-        date ? new Date(date) : undefined,
-        normalizedType,
-        category
-      );
-
-    return reply
-      .status(200)
-      .send({
-        message: "Transação atualizada com sucesso.",
-        transaction: updatedTransaction,
-      });
-
-  } catch (error) {
-    return sendFastifyError(
-      reply,
-      error
+    const updatedTransaction = await transactionUseCases.updateTransaction(
+      transactionId,
+      userId,
+      title,
+      description,
+      amount,
+      date ? new Date(date) : undefined,
+      normalizedType,
+      category
     );
+
+    return reply.status(200).send({
+      message: "Transação atualizada com sucesso.",
+      transaction: updatedTransaction,
+    });
+  } catch (error) {
+    return sendFastifyError(reply, error);
   }
 }
 
 export async function deleteTransactionFastify(
-  request: FastifyRequest<{
-    Params: TransactionParamsDto;
-  }>,
+  request: FastifyRequest<{ Params: TransactionParamsDto }>,
   reply: FastifyReply
 ) {
-  const userId =
-    getAuthenticatedUserId(
-      request,
-      reply
-    );
-
-  if (!userId)
-    return;
+  const userId = getAuthenticatedUserId(request, reply);
+  if (!userId) return;
 
   try {
-    const transactionId =
-      request.params.id;
+    const transactionId = request.params.id;
+    if (!transactionId)
+      return reply.status(400).send({
+        error: "Transação não encontrada."
+      });
 
-    if (!transactionId) {
-      return reply
-        .status(400)
-        .send({
-          error: "Transação não encontrada.",
-        });
-    }
-
-    const removedTransaction =
-      await transactionUseCases.removeTransaction(
-        transactionId,
-        userId
-      );
-
-    return reply
-      .status(200)
-      .send(
-        removedTransaction
-      );
-
-  } catch (error) {
-    return sendFastifyError(
-      reply,
-      error
+    const removedTransaction = await transactionUseCases.removeTransaction(
+      transactionId,
+      userId
     );
+
+    return reply.status(200).send(removedTransaction);
+  } catch (error) {
+    return sendFastifyError(reply, error);
   }
 }
