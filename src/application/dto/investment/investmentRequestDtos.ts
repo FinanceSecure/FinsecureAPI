@@ -17,9 +17,12 @@ export interface UpdateInvestmentDto {
 }
 
 export interface AddInvestmentRequestDto {
-  investmentTypeId: string;
-  investedAmount: number;
-  purchaseDate: string;
+  investmentTypeId?: string;
+  investedAmount?: number;
+  purchaseDate?: string;
+  tipoInvestimentoId?: string;
+  valorInvestido?: number;
+  dataCompra?: string;
   updatedAt?: string;
 }
 

@@ -10,10 +10,12 @@ export interface LoginUserRequestDto {
 }
 
 export interface UpdateUserEmailRequestDto {
+  oldEmail: string;
   newEmail: string;
 }
 
 export interface UpdateUserPasswordRequestDto {
+  email: string;
   oldPassword: string;
   newPassword: string;
 }

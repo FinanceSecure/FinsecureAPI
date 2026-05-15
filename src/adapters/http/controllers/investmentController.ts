@@ -152,18 +152,40 @@ export async function addInvestmentFastify(
     const userId = getAuthenticatedUserId(request, reply);
     if (!userId) return;
 
-    const {
-      investmentTypeId,
-      investedAmount,
-      purchaseDate,
-    } = request.body;
+    const investmentTypeId =
+      request.body.investmentTypeId ?? request.body.tipoInvestimentoId;
+    const investedAmount = Number(
+      request.body.investedAmount ?? request.body.valorInvestido
+    );
+    const purchaseDateValue =
+      request.body.purchaseDate ?? request.body.dataCompra;
+
+    if (!investmentTypeId) {
+      return reply.status(400).send({
+        error: "Tipo de investimento nao informado.",
+      });
+    }
+
+    if (!purchaseDateValue) {
+      return reply.status(400).send({
+        error: "Data de investimento nao informada.",
+      });
+    }
+
+    const purchaseDate = new Date(purchaseDateValue);
+
+    if (Number.isNaN(purchaseDate.getTime())) {
+      return reply.status(400).send({
+        error: "Data de investimento invalida.",
+      });
+    }
 
     const investment =
       await investmentUseCases.addInvestment(
         userId,
         investmentTypeId,
         investedAmount,
-        new Date(purchaseDate)
+        purchaseDate
       );
 
     return reply.status(201).send(cleanResponse(investment));

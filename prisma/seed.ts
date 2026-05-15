@@ -1,84 +1,82 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, InvestmentCategory } from "@prisma/client";
 import dotenv from "dotenv";
 dotenv.config();
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const CDI_DIARIO = parseFloat(process.env.CDI_DIARIO || "0.000459");
-
   const tipos = [
     {
-      nome: "LCI (100% do CDI) - Isento de IR",
-      tipo: "CDI",
-      valorPercentual: CDI_DIARIO,
-      impostoRenda: false,
+      name: "LCI (100% do CDI) - Isento de IR",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 100,
+      hasIncomeTax: false,
     },
     {
-      nome: "Saldo - Mercado Pago (100% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO,
-      impostoRenda: true,
+      name: "Saldo - Mercado Pago (100% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 100,
+      hasIncomeTax: true,
     },
     {
-      nome: "Saldo - Mercado Pago (105% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.05,
-      impostoRenda: true,
+      name: "Saldo - Mercado Pago (105% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 105,
+      hasIncomeTax: true,
     },
     {
-      nome: "Saldo - Mercado Pago (107% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.07,
-      impostoRenda: true,
+      name: "Saldo - Mercado Pago (107% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 107,
+      hasIncomeTax: true,
     },
     {
-      nome: "Cofrinho - Mercado Pago (115% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.15,
-      impostoRenda: true,
+      name: "Cofrinho - Mercado Pago (115% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 115,
+      hasIncomeTax: true,
     },
     {
-      nome: "Cofrinho - Mercado Pago Meli+",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.2,
-      impostoRenda: true,
+      name: "Cofrinho Mercado Pago 120% do CDI",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 120,
+      hasIncomeTax: false,
     },
     {
-      nome: "CDB Banco Inter (110% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.1,
-      impostoRenda: true,
+      name: "CDB Banco Inter (110% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 110,
+      hasIncomeTax: true,
     },
     {
-      nome: "Caixinha Nubank 1 ano (112% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.12,
-      impostoRenda: true,
+      name: "Caixinha Nubank 1 ano (112% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 112,
+      hasIncomeTax: true,
     },
     {
-      nome: "Saldo PicPay (102% do CDI)",
-      tipo: "CDB",
-      valorPercentual: CDI_DIARIO * 1.02,
-      impostoRenda: true,
+      name: "Saldo PicPay (102% do CDI)",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 102,
+      hasIncomeTax: true,
     },
     {
-      nome: "Banco do Brasil (98% do CDI) - Isento IR",
-      tipo: "LCA",
-      valorPercentual: CDI_DIARIO * 0.98,
-      impostoRenda: false,
+      name: "Banco do Brasil (98% do CDI) - Isento IR",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 98,
+      hasIncomeTax: false,
     },
     {
-      nome: "Tesouro Selic 2029",
-      tipo: "SELIC",
-      valorPercentual: CDI_DIARIO,
-      impostoRenda: true,
+      name: "Tesouro Selic 2029",
+      type: InvestmentCategory.FIXED_INCOME,
+      benchmarkPercentage: 100,
+      hasIncomeTax: true,
     },
   ];
 
   for (const tipo of tipos) {
-    await prisma.tipoInvestimento.upsert({
-      where: { nome: tipo.nome },
+    await prisma.investmentType.upsert({
+      where: { name: tipo.name },
       update: {},
       create: tipo,
     });

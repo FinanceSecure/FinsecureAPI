@@ -1,5 +1,8 @@
 import os from 'node:os';
 import app from "./app.js";
+import { startInvestmentYieldJob } from '@adapters/database/jobs/apply-daily-yield.js';
+
+startInvestmentYieldJob();
 
 const PORT = Number(process.env.PORT) || 3333;
 const HOST = process.env.HOST || "0.0.0.0";

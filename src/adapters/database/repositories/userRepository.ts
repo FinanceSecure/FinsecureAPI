@@ -60,18 +60,25 @@ export class UserRepository implements IUserRepository {
   }
 
   async deleteById(userId: string): Promise<void> {
-    const idParaDeletar = userId;
+    const investments = await prisma.investment.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+    const investmentIds = investments.map((investment) => investment.id);
 
-    await prisma.balance.deleteMany({
-      where: { userId: idParaDeletar },
+    await prisma.investmentYieldHistory.deleteMany({
+      where: { investmentId: { in: investmentIds } },
+    });
+    await prisma.investmentApplication.deleteMany({
+      where: { investmentId: { in: investmentIds } },
     });
     await prisma.transaction.deleteMany({
-      where: { userId: idParaDeletar },
+      where: { userId },
     });
     await prisma.investment.deleteMany({
-      where: { userId: idParaDeletar },
+      where: { userId },
     });
 
-    await prisma.user.delete({ where: { id: idParaDeletar } });
+    await prisma.user.delete({ where: { id: userId } });
   }
 }

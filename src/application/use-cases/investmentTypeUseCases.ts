@@ -42,8 +42,10 @@ export function createInvestmentTypeUseCases(
       if (!investmentType)
         return null;
 
-      const rate = investmentType.benchmarkPercentage;
-      const dailyYield = amount * rate;
+      // Taxa CDI diária aproximada (base 14.4% a.a)
+      const CDI_DIARIO = 0.000459;
+      const rateMultiplier = investmentType.benchmarkPercentage / 100;
+      const dailyYield = amount * (CDI_DIARIO * rateMultiplier);
       const monthlyYield = dailyYield * 30;
       const annualYield = dailyYield * 365;
 

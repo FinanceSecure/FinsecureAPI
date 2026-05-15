@@ -60,11 +60,17 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
         tags: ["Investimentos"],
         body: {
           type: "object",
-          required: ["investmentTypeId", "investedAmount", "purchaseDate"],
+          anyOf: [
+            { required: ["investmentTypeId", "investedAmount", "purchaseDate"] },
+            { required: ["tipoInvestimentoId", "valorInvestido", "dataCompra"] },
+          ],
           properties: {
             investmentTypeId: { type: "string" },
             investedAmount: { type: "number" },
             purchaseDate: { type: "string", format: "date" },
+            tipoInvestimentoId: { type: "string" },
+            valorInvestido: { type: "number" },
+            dataCompra: { type: "string", format: "date" },
             updatedAt: { type: "string", format: "date" },
           },
         },
@@ -72,12 +78,17 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
           201: {
             type: "object",
             properties: {
+              message: { type: "string" },
               investment: {
                 type: "object",
                 properties: {
                   id: { type: "string" },
                   userId: { type: "string" },
                   investmentTypeId: { type: "string" },
+                  totalApplied: { type: "number" },
+                  totalRedeemed: { type: "number" },
+                  currentBalance: { type: "number" },
+                  lastYieldAt: { type: "string", nullable: true },
                   isRedeemed: { type: "boolean" },
                   createdAt: { type: "string" },
                   updatedAt: { type: "string", nullable: true }
@@ -257,9 +268,11 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
               type: "string",
               enum: [
                 "FIXED_INCOME",
-                "VARIABLE_INCOME",
+                "STOCKS",
+                "FII",
+                "ETF",
                 "CRYPTO",
-                "REAL_ESTATE"
+                "FUND"
               ]
             },
             benchmarkPercentage: {
@@ -298,18 +311,12 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             type: {
               type: "string",
               enum: [
-                "CDI",
-                "CDB",
-                "TESOURO_DIRETO",
-                "POUPANCA",
-                "IPCA",
-                "SELIC",
-                "IBOVESPA",
+                "FIXED_INCOME",
+                "STOCKS",
                 "FII",
                 "ETF",
-                "AÇÕES",
                 "CRYPTO",
-                "REAL_ESTATE"
+                "FUND"
               ],
             },
             benchmarkPercentage: { type: "number" },

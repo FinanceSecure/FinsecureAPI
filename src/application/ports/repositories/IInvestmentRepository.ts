@@ -11,11 +11,26 @@ export interface InvestmentApplicationLedger {
   date: Date;
 }
 
+export interface InvestmentYieldLedger {
+  id: string;
+  date: Date;
+  dailyRate: number;
+  yieldAmount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+}
+
 export interface InvestmentWithRelations {
   id: string;
   investmentTypeId: string;
+  totalApplied: number;
+  totalRedeemed: number;
+  currentBalance: number;
+  lastYieldAt: Date | null;
+  isRedeemed: boolean;
   createdAt: Date;
   applications: InvestmentApplicationLedger[];
+  yields: InvestmentYieldLedger[];
   investmentType: {
     id: string;
     name: string;
@@ -46,6 +61,9 @@ export interface IInvestmentRepository {
     userId: string,
     investmentTypeId?: string
   ): Promise<InvestmentWithRelations[]>;
+  findInvestmentsPendingYield(
+    userId?: string
+  ): Promise<InvestmentWithRelations[]>;
   findActiveByUserId(
     userId: string
   ): Promise<{ id: string; investedAmount: number }[]>;
@@ -55,7 +73,21 @@ export interface IInvestmentRepository {
   createRedemptionApplication(
     investmentId: string,
     userId: string,
-    redeemedAmount: number
+    redeemedAmount: number,
+    redeemedAt?: Date
+  ): Promise<any>;
+  createYieldHistory(data: {
+    investmentId: string;
+    date: Date;
+    dailyRate: number;
+    yieldAmount: number;
+    balanceBefore: number;
+    balanceAfter: number;
+  }): Promise<any>;
+  updateYieldSnapshot(
+    investmentId: string,
+    currentBalance: number,
+    lastYieldAt: Date
   ): Promise<any>;
   calculateTotalInvested(
     userId: string

@@ -102,20 +102,29 @@ model Transaction {
 }
 
 model Investment {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  isRedeemed Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @updatedAt
-  deletedAt  DateTime?
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String    @db.ObjectId
+  investmentTypeId String    @db.ObjectId
+  totalApplied     Float     @default(0)
+  totalRedeemed    Float     @default(0)
+  currentBalance   Float     @default(0)
+  lastYieldAt      DateTime?
+  isRedeemed       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime? @updatedAt
+  deletedAt        DateTime?
 
-  userId           String                  @db.ObjectId
-  investmentTypeId String                  @db.ObjectId
-  user             User                    @relation(fields: [userId], references: [id])
-  investmentType   InvestmentType          @relation(fields: [investmentTypeId], references: [id])
-  applications     InvestmentApplication[]
+  applications InvestmentApplication[]
+  yields       InvestmentYieldHistory[]
+
+  user           User           @relation(fields: [userId], references: [id])
+  investmentType InvestmentType @relation(fields: [investmentTypeId], references: [id])
 
   @@index([userId])
   @@index([investmentTypeId])
+  @@index([userId, investmentTypeId])
+  @@index([isRedeemed])
+  @@index([lastYieldAt])
 }
 
 model InvestmentType {
@@ -135,7 +144,7 @@ model InvestmentType {
 model InvestmentApplication {
   id        String                    @id @default(auto()) @map("_id") @db.ObjectId
   type      InvestmentApplicationType
-  amount    Int
+  amount    Float
   date      DateTime
   createdAt DateTime                  @default(now())
   updatedAt DateTime?                 @updatedAt
@@ -149,4 +158,21 @@ model InvestmentApplication {
   @@index([investmentId])
   @@index([date])
   @@index([type])
+}
+
+model InvestmentYieldHistory {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  investmentId  String   @db.ObjectId
+  date          DateTime
+  dailyRate     Float
+  yieldAmount   Float
+  balanceBefore Float
+  balanceAfter  Float
+  createdAt     DateTime @default(now())
+
+  investment Investment @relation(fields: [investmentId], references: [id])
+
+  @@index([investmentId])
+  @@index([date])
+  @@unique([investmentId, date])
 }
