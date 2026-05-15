@@ -1,53 +1,85 @@
-# 🛡️ Finsecure API
+# 🔐 Finsecure API
 
-API de alta segurança para gestão financeira, desenvolvida com *Node.js* e *TypeScript*. O projeto foi concebido sob os pilares da **Arquitetura Hexagonal (Ports & Adapters)**, **Domain-Driven Design (DDD)** e **Clean Architecture**, garantindo uma aplicação testável, agnóstica a bancos de dados e de fácil manutenção.
+API de alta performance para gestão financeira pessoal e investimentos, desenvolvida com **Node.js**, **Fastify** e **TypeScript**.
 
----
-## 🏛️ Arquitetura e Design
+## 🏗️ Arquitetura
+O projeto utiliza a **Arquitetura Hexagonal (Ports and Adapters)**, garantindo que o núcleo do negócio seja independente de frameworks e bancos de dados.
 
-O projeto segue a divisão de responsabilidade para isolar a lógica de detalhes de infraestrutura:
--   **Domain (Core):** Contém entidades, objetos de valor e regras de negócio independentes de framework.
--   **Application (Use cases):** Orquestra o fluxo de dados e define os contratos (**Ports**) de entrada e saída
--   **Infrastructure (Adapters):** Implementações técnicas como Prisma ORM, MongoDB/ PostgreSQL e serviços de criptografia (**bcrybt**).
--   **Interface (Adapters):** Porta de entrada da aplicação, utilizando Express para exposição de rotas HTTP.
----
+### Camadas Principais:
+- **Core (Domínio/Aplicação):** Onde reside a inteligência financeira e os casos de uso.
+- **Adapters (Entrada/Saída):** Implementações concretas de HTTP (Fastify) e Persistência (Prisma/MongoDB).
 
-## 🛠️ Tecnologias
+## 📑 Documentação Viva (Swagger)
+A API é auto-documentada. Com o servidor rodando, acesse:
+👉 `http://localhost:3333/documentation`
 
-- **Runtime:** Node.js + TypeScript
-- **Web Framework:** Express
-- **ORM:** Prisma
-- **Databases:** PostgreSQL (Produção) / MongoDB (Logs/Suporte)
-- **Security:** Bcrypt (Hashing de senhas) & JWT
-- **Environment:** Dotenv
+## 🚀 Tecnologias
+- **Fastify:** Framework web ultra-veloz.
+- **Prisma & MongoDB:** Persistência de dados flexível e escalável.
+- **JWT & Bcrypt:** Segurança robusta para autenticação.
+- **Swagger (OpenAPI 3.0):** Documentação interativa de endpoints.
 
+## 📂 Estrutura de Pastas Simplificada
+```text
+src/
+├── 📁 domain/        # Entidades e Regras de Negócio
+├── 📁 application/   # Casos de Uso, DTOs e Portas (Interfaces)
+├── 📁 adapters/      # HTTP (Controllers/Rotas) e DB (Prisma)
+├── app.ts            # Configuração do Container (Plugins/Swagger)
+└── server.ts         # Boot do servidor
+```
 
----
+## 🛠️ Como Executar
 
-## Documentação detalhada
+1. **Instalação:**
+```bash
+npm install
+```
 
-- [Arquitetura](docs/arquitetura.md)
-- [Filtros e validações](docs/filtros.md)
-- [Autenticação e Segurança](docs/seguranca.md)
+2. **Ambiente:**
+Crie um arquivo `.env` com `DATABASE_URL` e `JWT_SECRET`.
 
----
+3. **Execução:**
+```bash
+npm run dev
+```
 
-## Execução do Projeto
+## Execução
 
-### Rodar o servidor local
+### Rodar o servidor em desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-Desta forma rodará em:
-~> <http://localhost:3000/api/usuarios>
+Servidor padrão:
 
-### Visualização de banco de dados pelo Prisma Studio
+```text
+http://localhost:3333
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Prisma Studio
 
 ```bash
 npx prisma studio
 ```
 
-Desta forma rodará em:
-~> <http://localhost:5555>
+## Próximos Passos Recomendados
+
+- adicionar schemas por rota para documentação Swagger
+- padronizar DTOs de resposta quando necessário
+- revisar mensagens com acentuação antiga em alguns arquivos legados
+- adicionar testes para casos de uso e adapters HTTP
+
+## Documentação Complementar
+
+- [Arquitetura](docs/arquitetura.md)
+- [Filtros e validações](docs/filtros.md)
+- [Autenticação e segurança](docs/seguranca.md)
+- [Documentação atualizada da API](docs/documentacao_atualizada.md)

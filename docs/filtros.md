@@ -1,28 +1,7 @@
 # 🧹 Filtros e Validações
 
-Listagem de ***filtros e validações de entrada com dados esperados pela API***
+> 📢 **Nota Importante**: Esta documentação foi movida e agora é gerada dinamicamente pelo **Swagger UI**.
 
-## Cadastro de Usuário
+Para visualizar os campos obrigatórios, formatos de data, limites de caracteres e códigos de resposta HTTP (400, 401, 404, etc.), por favor utilize a interface interativa:
 
-**Endpoint**: `POST /api/usuarios`
-
-*Campos obrigatóroios*:
-`email`: texto, obrigatório
-`senha`: mínimo de 8 caracteres
-`primeiro_nome`: texto, obrigatório
-`ultimo_nome`: texto, obrigatório
-
-*Validações*:
->message: `E-mail já cadastrado`
-    >status: `409` conflict
-
-___
-
-## Resposta padrão
-
-- `400 Bad Request`: Campos inválidos
-- `401 Unautorized`: Token ausente ou inválido
-- `403 Forbidden`: Acesso negado devido a falta de permissões
-- `404 Not Found`: Recurso não encontrada
-- `409 Conflict`: Conflito com dados existentes
-- `500 Server-side error`: Erro interno do servidor
+👉 **Acesse:** `http://localhost:3333/documentation`

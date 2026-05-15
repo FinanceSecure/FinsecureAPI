@@ -1,34 +1,44 @@
-# Arquitetura da Aplicação
+# 🏗️ Arquitetura Detalhada (Hexagonal / Ports & Adapters)
 
-Feita de forma a seguir os princpipios da ***Arquitetura Hexagonal (Ports and Adapters)***, dividindo em camadas.
-Arquitetura ao qual utiliza a filosofia ***Domain-Driven Design (Eric Evans)***
+O sistema foi projetado para ser agnóstico a tecnologias externas. Isso significa que o núcleo (regras de negócio) não depende de frameworks como Fastify ou ORMs como Prisma; ele apenas os utiliza através de interfaces.
 
-## Camadas
+## 🧱 Estrutura de Pastas e Camadas
 ___
-├📁 node_modules/ ~> Dependências
-├📁 prisma/ ~> Destinado a configurações do Prisma
 ├📁 src/
 │
-│── 📁 domain/ ~> Destinado a regras de negócio
-│   ├── 📁 entities/ ~> Entidades
-│   ├── 📁 errors/ ~> Erros de negócio
-│   ├── 📁 validators/ ~> Validações
+│── 📁 domain/             # 🧠 O Coração (Lógica Pura)
+│   ├── 📁 entities/       # Entidades (ex: Usuario, Transacao)
+│   ├── 📁 errors/         # Exceções exclusivas de negócio
+│   └── 📁 validators/     # Validações de domínio
 │
-│── 📁 application/ ~> Destinado a casos de uso da aplicação
-│   ├── 📁 use-cases/ ~> Orquestram regras do domínio
-│   ├── 📁 errors/ ~> Erros de aplicação (ex: HttpError)
+│── 📁 application/        # ⚙️ Orquestração (Casos de Uso)
+│   ├── 📁 use-cases/      # Implementação dos requisitos funcionais
+│   ├── 📁 dto/            # Data Transfer Objects (Input/Output)
+│   └── 📁 errors/         # Erros de aplicação
 │
-│── 📁 ports/ ~> Destinado a interfaces abstratas
-│   ├── 📁 repositories/ ~> Contratos de persistência
+│── 📁 ports/              # 🔌 Contratos (Interfaces)
+│   └── 📁 repositories/   # Interfaces que definem a persistência
 │
-│── 📁 adapters/ ~> Destinado a implementações
-│   ├── 📁 controllers/ ~> Controllers HTTP
-│   ├── 📁 database/ ~> Prisma + repositórios
-│   │    ├── db.ts ~> conexão Prisma/Pool
-│   ├── 📁 middlewares/ ~> Autenticação JWT, etc
-│   ├── 📁 routes/ ~> Definição de rotas
+│── 📁 adapters/           # 🛠️ Implementações Concretas
+│   ├── 📁 http/           # Borda de Entrada (Fastify Controllers)
+│   └── 📁 database/       # Borda de Saída (Prisma Repositories)
 │
-│── 📁 types/ ~> Tipos globais (ex: Express Request com userId)
-│
-│── app.ts ~> Configuração do Express (rotas, middlewares)
-│── server.ts ~> Inicialização do servidor
+│── app.ts                 # Bootstrap de Plugins e Middlewares
+│── server.ts              # Inicialização do Servidor
+
+## ⚙️ Fluxo de Execução Técnica
+
+Para garantir a integridade, os dados fluem através de uma cadeia de responsabilidades:
+
+1.  **Entrada:** O cliente envia uma requisição HTTP.
+2.  **Adapter (HTTP):** O Fastify recebe, valida o Schema (Swagger) e repassa ao **Controller**.
+3.  **Controller:** Traduz a requisição para um **DTO** e chama o **Use Case**.
+4.  **Application (Use Case):** Orquestra a lógica, chamando entidades do domínio.
+5.  **Port (Interface):** O Use Case solicita persistência através de uma interface abstrata.
+6.  **Adapter (Database):** O Prisma implementa a interface e salva no **MongoDB**.
+7.  **Resposta:** O resultado faz o caminho inverso, sendo convertido em resposta JSON no Controller.
+
+## 🛡️ Benefícios desta Abordagem
+- **Testabilidade:** Podemos testar os `use-cases` sem precisar de um banco de dados real (usando mocks das `ports`).
+- **Manutenibilidade:** Trocar o MongoDB por PostgreSQL afetaria apenas a camada de `adapters`, sem tocar na lógica de negócio.
+- **Clareza:** Cada arquivo tem uma única responsabilidade clara.

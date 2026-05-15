@@ -4,115 +4,175 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
-enum TipoTransacao {
-  ENTRADA
-  SAIDA
-  INVESTIMENTO
+enum TransactionType {
+  INCOME
+  EXPENSE
+  INVESTMENT
 }
 
-enum StatusTranscao {
-  PENDENTE
-  EFETIVADA
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELED
 }
 
-model Usuario {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  email      String    @unique
-  senha      String
-  nome       String
-  criado     DateTime  @default(now())
-  atualizado DateTime? @updatedAt
+enum TransactionCategory {
+  // INCOME
+  SALARY
+  FREELANCE
+  DIVIDENDS
+  CASHBACK
+  BONUS
 
-  transacoes    Transacao[]
-  saldo         Saldo?         @relation("UsuarioSaldo")
-  Investimento  Investimento[]
-  Despesas      Despesas[]     @relation("UsuarioDespesas")
-  RendaFixa     RendaFixa?     @relation("UsuarioRendaFixa")
-  RendaVariavel RendaVariavel? @relation("RendaVariavel")
+  // EXPENSE
+  FOOD
+  TRANSPORT
+  HEALTH
+  EDUCATION
+  ENTERTAINMENT
+  HOUSING
+  UTILITIES
+
+  // INVESTMENT
+  INVESTMENT_APPLICATION
+  INVESTMENT_REDEMPTION
+  INVESTMENT_DIVIDEND
+  INVESTMENT_INTEREST
+
+  OTHER
 }
 
-model Transacao {
-  id        String         @id @default(auto()) @map("_id") @db.ObjectId
-  descricao String?
-  valor     Float
-  data      DateTime       @default(now())
-  tipo      TipoTransacao
-  status    StatusTranscao @default(PENDENTE)
-
-  usuarioId String  @db.ObjectId
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+enum InvestmentCategory {
+  FIXED_INCOME
+  STOCKS
+  FII
+  ETF
+  CRYPTO
+  FUND
 }
 
-model Saldo {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  valor      Float     @default(0.0)
-  data       DateTime  @default(now())
-  atualizado DateTime? @updatedAt
-
-  usuarioId String  @unique @db.ObjectId
-  usuario   Usuario @relation("UsuarioSaldo", fields: [usuarioId], references: [id])
+enum InvestmentApplicationType {
+  APPLICATION
+  REDEMPTION
+  DIVIDEND
+  INTEREST
 }
 
-model RendaFixa {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  valor Float  @default(0.0)
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
 
-  usuarioId String  @unique @db.ObjectId
-  usuario   Usuario @relation("UsuarioRendaFixa", fields: [usuarioId], references: [id])
+  transactions Transaction[]
+  investments  Investment[]
 }
 
-model RendaVariavel {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  valor     Float  @default(0.0)
-  descricao String
+model Transaction {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  amount      Float
+  date        DateTime
+  type        TransactionType
+  category    TransactionCategory?
+  status      TransactionStatus    @default(PENDING)
+  isRecurring Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime?            @updatedAt
+  deletedAt   DateTime?
 
-  usuarioId String  @unique @db.ObjectId
-  usuario   Usuario @relation("RendaVariavel", fields: [usuarioId], references: [id])
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  investmentApplication InvestmentApplication?
+
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([date])
+  @@index([createdAt])
 }
 
-model Despesas {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  categoria       String
-  valor           Float     @default(0.0)
-  descricao       String
-  dataVencimento  DateTime? @default(now())
-  dataAgendamento DateTime?
+model Investment {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String    @db.ObjectId
+  investmentTypeId String    @db.ObjectId
+  totalApplied     Float     @default(0)
+  totalRedeemed    Float     @default(0)
+  currentBalance   Float     @default(0)
+  lastYieldAt      DateTime?
+  isRedeemed       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime? @updatedAt
+  deletedAt        DateTime?
 
-  usuarioId String  @db.ObjectId
-  usuario   Usuario @relation("UsuarioDespesas", fields: [usuarioId], references: [id])
+  applications InvestmentApplication[]
+  yields       InvestmentYieldHistory[]
+
+  user           User           @relation(fields: [userId], references: [id])
+  investmentType InvestmentType @relation(fields: [investmentTypeId], references: [id])
+
+  @@index([userId])
+  @@index([investmentTypeId])
+  @@index([userId, investmentTypeId])
+  @@index([isRedeemed])
+  @@index([lastYieldAt])
 }
 
-model Investimento {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  dataCompra      DateTime
-  dataAtualizacao DateTime?
-  resgatado       Boolean   @default(false)
+model InvestmentType {
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                String             @unique
+  type                InvestmentCategory
+  benchmarkPercentage Float
+  hasIncomeTax        Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime?          @updatedAt
 
-  usuarioId          String                  @db.ObjectId
-  tipoInvestimentoId String                  @db.ObjectId
-  usuario            Usuario                 @relation(fields: [usuarioId], references: [id])
-  tipoInvestimento   TipoInvestimento        @relation(fields: [tipoInvestimentoId], references: [id])
-  aplicacoes         AplicacaoInvestimento[]
+  investments Investment[]
+
+  @@index([type])
 }
 
-model TipoInvestimento {
-  id              String         @id @default(auto()) @map("_id") @db.ObjectId
-  nome            String         @unique
-  tipo            String
-  valorPercentual Float
-  impostoRenda    Boolean        @default(true)
-  investimentos   Investimento[]
+model InvestmentApplication {
+  id        String                    @id @default(auto()) @map("_id") @db.ObjectId
+  type      InvestmentApplicationType
+  amount    Float
+  date      DateTime
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime?                 @updatedAt
+  deletedAt DateTime?
+
+  investmentId  String      @db.ObjectId
+  investment    Investment  @relation(fields: [investmentId], references: [id])
+  transactionId String      @unique @db.ObjectId
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([investmentId])
+  @@index([date])
+  @@index([type])
 }
 
-model AplicacaoInvestimento {
-  id    String   @id @default(auto()) @map("_id") @db.ObjectId
-  tipo  String
-  valor Float
-  data  DateTime
+model InvestmentYieldHistory {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  investmentId  String   @db.ObjectId
+  date          DateTime
+  dailyRate     Float
+  yieldAmount   Float
+  balanceBefore Float
+  balanceAfter  Float
+  createdAt     DateTime @default(now())
 
-  investimentoId String       @db.ObjectId
-  investimento   Investimento @relation(fields: [investimentoId], references: [id])
+  investment Investment @relation(fields: [investmentId], references: [id])
+
+  @@index([investmentId])
+  @@index([date])
+  @@unique([investmentId, date])
 }
