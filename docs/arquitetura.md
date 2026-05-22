@@ -1,44 +1,166 @@
-# 🏗️ Arquitetura Detalhada (Hexagonal / Ports & Adapters)
+# Arquitetura
 
-O sistema foi projetado para ser agnóstico a tecnologias externas. Isso significa que o núcleo (regras de negócio) não depende de frameworks como Fastify ou ORMs como Prisma; ele apenas os utiliza através de interfaces.
+A Finsecure API segue uma organização inspirada em **Ports and Adapters**, também conhecida como Arquitetura Hexagonal. A ideia principal é manter a regra de negócio longe dos detalhes de infraestrutura, como HTTP, banco de dados e bibliotecas externas.
 
-## 🧱 Estrutura de Pastas e Camadas
-___
-├📁 src/
-│
-│── 📁 domain/             # 🧠 O Coração (Lógica Pura)
-│   ├── 📁 entities/       # Entidades (ex: Usuario, Transacao)
-│   ├── 📁 errors/         # Exceções exclusivas de negócio
-│   └── 📁 validators/     # Validações de domínio
-│
-│── 📁 application/        # ⚙️ Orquestração (Casos de Uso)
-│   ├── 📁 use-cases/      # Implementação dos requisitos funcionais
-│   ├── 📁 dto/            # Data Transfer Objects (Input/Output)
-│   └── 📁 errors/         # Erros de aplicação
-│
-│── 📁 ports/              # 🔌 Contratos (Interfaces)
-│   └── 📁 repositories/   # Interfaces que definem a persistência
-│
-│── 📁 adapters/           # 🛠️ Implementações Concretas
-│   ├── 📁 http/           # Borda de Entrada (Fastify Controllers)
-│   └── 📁 database/       # Borda de Saída (Prisma Repositories)
-│
-│── app.ts                 # Bootstrap de Plugins e Middlewares
-│── server.ts              # Inicialização do Servidor
+Na prática, o projeto ainda depende de alguns tipos externos em pontos específicos, mas a divisão geral já deixa claro onde cada responsabilidade deve ficar.
 
-## ⚙️ Fluxo de Execução Técnica
+## Visão geral das camadas
 
-Para garantir a integridade, os dados fluem através de uma cadeia de responsabilidades:
+```text
+src/
+├── domain/
+│   ├── entities/
+│   ├── erros/
+│   └── services/
+├── application/
+│   ├── dto/
+│   ├── errors/
+│   ├── mappers/
+│   ├── ports/
+│   ├── use-cases/
+│   └── validators/
+├── adapters/
+│   ├── database/
+│   └── http/
+└── shared/
+    ├── config/
+    ├── container/
+    └── utils/
+```
 
-1.  **Entrada:** O cliente envia uma requisição HTTP.
-2.  **Adapter (HTTP):** O Fastify recebe, valida o Schema (Swagger) e repassa ao **Controller**.
-3.  **Controller:** Traduz a requisição para um **DTO** e chama o **Use Case**.
-4.  **Application (Use Case):** Orquestra a lógica, chamando entidades do domínio.
-5.  **Port (Interface):** O Use Case solicita persistência através de uma interface abstrata.
-6.  **Adapter (Database):** O Prisma implementa a interface e salva no **MongoDB**.
-7.  **Resposta:** O resultado faz o caminho inverso, sendo convertido em resposta JSON no Controller.
+## Domain
 
-## 🛡️ Benefícios desta Abordagem
-- **Testabilidade:** Podemos testar os `use-cases` sem precisar de um banco de dados real (usando mocks das `ports`).
-- **Manutenibilidade:** Trocar o MongoDB por PostgreSQL afetaria apenas a camada de `adapters`, sem tocar na lógica de negócio.
-- **Clareza:** Cada arquivo tem uma única responsabilidade clara.
+A pasta `domain/` concentra os conceitos centrais da aplicação.
+
+Responsabilidades:
+
+- Representar entidades como usuário, transação, investimento e tipo de investimento.
+- Concentrar serviços de cálculo financeiro, como rendimento de investimento, CDI e resgate parcial.
+- Manter erros e regras que pertencem ao negócio, não ao transporte HTTP.
+
+Exemplos relevantes:
+
+- `domain/entities/User.ts`
+- `domain/entities/Transaction.ts`
+- `domain/entities/Investment.ts`
+- `domain/services/investment-calculator.ts`
+- `domain/services/calcResgateParcialService.ts`
+
+## Application
+
+A pasta `application/` orquestra os fluxos da API. Ela recebe dados já interpretados pela borda HTTP, aplica regras de validação e chama os repositórios através de contratos.
+
+Responsabilidades:
+
+- Implementar casos de uso.
+- Definir DTOs de entrada.
+- Declarar portas de repositório em `application/ports/repositories`.
+- Centralizar erros de aplicação.
+- Validar dados que fazem parte do fluxo de negócio.
+
+Principais casos de uso:
+
+- `userUseCases.ts`: cadastro, login, alteração de e-mail, alteração de senha e remoção de usuário.
+- `transactionUseCases.ts`: criação, atualização, remoção e extrato financeiro.
+- `investmentUseCases.ts`: aplicação, resgate, extrato e total investido.
+- `investmentTypeUseCases.ts`: cadastro, listagem, detalhe/simulação e atualização de tipos de investimento.
+- `apply-daily-yieldUsecases.ts`: aplicação de rendimento diário aos investimentos.
+
+## Adapters
+
+A pasta `adapters/` contém as implementações concretas de entrada e saída.
+
+### HTTP
+
+`adapters/http/` representa a borda de entrada da aplicação.
+
+Responsabilidades:
+
+- Registrar rotas Fastify.
+- Aplicar middlewares de autenticação e validação.
+- Converter requisições HTTP em chamadas para casos de uso.
+- Definir schemas usados pelo Swagger.
+- Padronizar tratamento de erros HTTP.
+
+Pastas importantes:
+
+- `controllers/`: handlers chamados pelas rotas.
+- `routes/`: definição dos endpoints.
+- `middlewares/`: autenticação, validação de transações e tratamento de erros.
+- `exceptions/`: erros HTTP específicos.
+
+### Database
+
+`adapters/database/` representa a borda de saída para persistência.
+
+Responsabilidades:
+
+- Implementar os contratos definidos em `application/ports/repositories`.
+- Usar Prisma para consultar e alterar dados no MongoDB.
+- Executar jobs relacionados a persistência, como rendimento diário.
+
+Pastas importantes:
+
+- `repositories/`: implementações concretas dos repositórios.
+- `jobs/`: agendamentos executados com `node-cron`.
+- `db.ts`: conexão ou instância de acesso ao banco.
+
+## Shared
+
+`shared/` guarda recursos usados por mais de uma camada.
+
+Responsabilidades:
+
+- Configurações de ambiente.
+- Instâncias compartilhadas, como Prisma.
+- Container simples de dependências.
+- Utilitários financeiros reutilizáveis.
+
+## Fluxo de uma requisição
+
+Fluxo comum em uma rota privada:
+
+1. O cliente envia uma requisição HTTP para uma rota em `/api`.
+2. O Fastify executa o middleware de autenticação quando a rota exige token.
+3. Middlewares de validação conferem formato, campos obrigatórios e regras básicas.
+4. O controller extrai `body`, `params`, `query` e `request.user`.
+5. O controller chama o caso de uso correspondente.
+6. O caso de uso aplica regras de negócio e usa uma porta de repositório.
+7. O adapter de banco executa a operação via Prisma.
+8. O controller retorna JSON com status HTTP adequado.
+9. Erros são tratados pelo `erroMiddleware`.
+
+## Banco de dados
+
+O Prisma está configurado para **MongoDB** em `prisma/schema.prisma`.
+
+Modelos principais:
+
+- `User`
+- `Transaction`
+- `Investment`
+- `InvestmentType`
+- `InvestmentApplication`
+- `InvestmentYieldHistory`
+
+Os índices definidos no schema favorecem consultas por usuário, tipo, categoria, status, data e relacionamento entre investimento e tipo de investimento.
+
+## Jobs e rendimento diário
+
+Ao iniciar o servidor, `server.ts` chama `startInvestmentYieldJob()`.
+
+O job roda em dias úteis à meia-noite:
+
+```text
+0 0 * * 1-5
+```
+
+Ele busca investimentos com rendimento pendente e cria entradas em `InvestmentYieldHistory`. O cálculo usa a variável `CDI_ANUAL`, com valor padrão `14.4` quando a variável não é informada.
+
+## Diretrizes para evolução
+
+- Novas regras de negócio devem entrar em `domain/` ou `application/`, não diretamente em controllers.
+- Novas rotas devem ter schema Fastify para manter o Swagger útil.
+- Repositórios devem continuar implementando contratos em `application/ports/repositories`.
+- Mudanças em autenticação devem ser documentadas também em [segurança](seguranca.md).
+- Novos filtros, formatos e validações devem ser documentados em [filtros e validações](filtros.md).
