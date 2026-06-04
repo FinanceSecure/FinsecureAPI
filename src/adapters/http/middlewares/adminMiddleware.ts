@@ -7,12 +7,7 @@ export async function requireAdminFastify(
 ) {
   if (request.user?.role !== UserRole.ADMIN) {
     return reply.status(403).send({
-      success: false,
-      message: "Acesso administrativo necessario.",
-      error: {
-        code: "ADMIN_ACCESS_REQUIRED",
-        details: [],
-      },
+      error: "Acesso administrativo necessário.",
     });
   }
 }

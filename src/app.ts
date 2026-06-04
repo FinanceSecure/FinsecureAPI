@@ -9,6 +9,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { env } from "@shared/config";
 
 const app = Fastify({
+  trustProxy: true,
   logger: {
     redact: [
       "req.headers.authorization",

@@ -27,7 +27,7 @@ export async function autenticarTokenFastify(
 
   if (!authHeader?.startsWith("Bearer ")) {
     return reply.status(401).send({
-      error: "Token não fornecido ou formato inválido",
+      error: "Token não fornecido ou formato inválido.",
     });
   }
 
@@ -48,12 +48,7 @@ export async function autenticarTokenFastify(
     };
   } catch {
     return reply.status(401).send({
-      success: false,
-      message: "Token invalido ou expirado.",
-      error: {
-        code: "INVALID_TOKEN",
-        details: [],
-      },
+      error: "Token inválido ou expirado.",
     });
   }
 }
