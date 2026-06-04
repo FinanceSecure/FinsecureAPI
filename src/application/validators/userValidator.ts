@@ -13,14 +13,11 @@ type UserRegistered = {
 };
 
 export function validatePassword(password: string) {
-  if (password.length < 8)
-    throw new ValidationError("A senha deve conter no mínimo 8 caracteres.");
+  if (password.length < 12)
+    throw new ValidationError("A senha deve conter no minimo 12 caracteres.");
 
-  if (!/(?=.*[A-Z])/.test(password))
-    throw new ValidationError("A senha deve conter uma letra maiúscula.");
-
-  if (!/(?=.*[\W_])/.test(password))
-    throw new ValidationError("A senha deve conter um caractere especial.");
+  if (password.length > 128)
+    throw new ValidationError("A senha deve conter no maximo 128 caracteres.");
 }
 
 export const checkRegistrationFields = ({

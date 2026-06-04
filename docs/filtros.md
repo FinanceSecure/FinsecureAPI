@@ -11,6 +11,7 @@ http://localhost:3333/documentation
 - Datas devem ser enviadas em formato aceito por `Date`, preferencialmente ISO.
 - IDs do MongoDB devem ter 24 caracteres hexadecimais quando a rota declara esse padrão.
 - Valores monetários devem ser numéricos e maiores que zero quando representam aplicação, resgate ou lançamento financeiro.
+- O contrato monetário da API usa reais em decimal, não centavos em inteiro. Exemplo: `5029.96` representa R$ 5.029,96. A API não espera nem retorna `502996` para representar esse valor.
 - Rotas privadas dependem de `request.user.userId`, preenchido pelo middleware de autenticação.
 - Erros de validação retornam JSON no formato `{ "error": "mensagem" }`.
 
@@ -30,13 +31,13 @@ Campos:
 | --- | --- |
 | `name` | obrigatório, string, mínimo de 3 caracteres no schema da rota |
 | `email` | obrigatório, formato de e-mail no schema da rota |
-| `password` | obrigatório, mínimo de 8 caracteres |
+| `password` | obrigatório, mínimo de 12 caracteres |
 
 Além do schema HTTP, o validador de aplicação exige:
 
-- senha com pelo menos 8 caracteres;
-- pelo menos uma letra maiúscula;
-- pelo menos um caractere especial.
+- senha com pelo menos 12 caracteres;
+- senha com no maximo 128 caracteres;
+- passphrases e espacos sao permitidos.
 
 ### Login
 
@@ -63,10 +64,9 @@ PUT /api/usuarios/alterar-email
 
 Campos obrigatórios:
 
-- `oldEmail`
 - `newEmail`
 
-Ambos devem estar em formato de e-mail.
+O e-mail deve estar em formato valido. A alteracao usa o `userId` autenticado, nao um e-mail enviado pelo cliente.
 
 ### Alteração de senha
 
@@ -78,11 +78,10 @@ PUT /api/usuarios/alterar-senha
 
 Campos obrigatórios:
 
-- `email`
 - `oldPassword`
 - `newPassword`
 
-O schema exige no mínimo 8 caracteres para as senhas.
+O schema exige no minimo 12 caracteres para a nova senha. A alteracao usa o `userId` autenticado.
 
 ## Transações
 
@@ -216,7 +215,7 @@ A API aceita nomes em inglês ou português para compatibilidade:
 | Inglês | Português | Regra |
 | --- | --- | --- |
 | `investmentTypeId` | `tipoInvestimentoId` | obrigatório |
-| `investedAmount` | `valorInvestido` | number maior que zero |
+| `investedAmount` | `valorInvestido` | number maior que zero em reais decimais, exemplo `5029.96` |
 | `purchaseDate` | `dataCompra` | data válida |
 
 Ao registrar uma aplicação, a API também executa o cálculo de rendimento pendente para o usuário.
@@ -236,7 +235,7 @@ Parâmetros:
 Corpo:
 
 - `amount` ou `investedAmount`;
-- valor deve ser numérico e maior que zero.
+- valor deve ser numérico, maior que zero e em reais decimais, exemplo `5029.96`.
 
 Regras:
 
@@ -274,6 +273,8 @@ Retorna:
 - `grossBalance`;
 - `netBalance`.
 
+Todos os valores monetários retornados são reais decimais. O cliente deve formatar `5029.96` diretamente como R$ 5.029,96 e não deve dividir ou multiplicar por 100.
+
 ## Tipos de investimento
 
 ### Listar tipos
@@ -286,7 +287,7 @@ GET /api/investimento/tipo
 
 Retorna os tipos cadastrados com nome, categoria, percentual de benchmark e indicador de imposto de renda.
 
-Observação: o schema Swagger declara autenticação para esta rota, mas a implementação atual não aplica `preHandler` de autenticação nela.
+Observação: a rota exige autenticação.
 
 ### Detalhar tipo com simulação
 

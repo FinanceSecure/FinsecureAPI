@@ -18,7 +18,7 @@ API para gestão financeira pessoal, controle de transações e acompanhamento d
 - **Prisma** como cliente de persistência.
 - **MongoDB** como banco de dados.
 - **JWT** para autenticação.
-- **Bcrypt** para hash de senhas.
+- **Argon2id** para novos hashes de senha, com compatibilidade para hashes bcrypt legados.
 - **node-cron** para processamento agendado de rendimentos.
 - **Swagger/OpenAPI** para documentação das rotas.
 
@@ -45,11 +45,15 @@ npm install
 Configure o arquivo `.env`:
 
 ```env
+NODE_ENV=development
 CDI_ANUAL=14.40
-CDI_DIARIO=0.000534
-DATABASE_URL=""
-JWT_SECRET=""
+DATABASE_URL="mongodb://localhost:27017/financesecure"
+JWT_SECRET="troque-por-um-segredo-com-pelo-menos-32-caracteres"
+CORS_ORIGINS="http://localhost:3000,http://localhost:8081"
+HOST=0.0.0.0
 PORT=3333
+ENABLE_SWAGGER=true
+RUN_INVESTMENT_YIELD_JOB=false
 ```
 
 Gere o cliente Prisma, se necessário:
@@ -83,6 +87,14 @@ npm run dev      # inicia o servidor com tsx em modo watch
 npm run build    # compila o TypeScript para dist/
 npm run start    # executa a versão compilada
 npm run seed     # executa o seed do Prisma
+npm run promote-admin -- --email=usuario@exemplo.com
+npm test         # executa os testes automatizados
+```
+
+Para iniciar API e MongoDB com Docker:
+
+```bash
+docker compose up --build
 ```
 
 ## Principais rotas
@@ -93,6 +105,12 @@ npm run seed     # executa o seed do Prisma
 | Transações | `/api/transacoes/adicionar`, `/api/transacoes/extrato`, `/api/transacoes/alterar/:id`, `/api/transacoes/cancelar-transacao/:id` |
 | Investimentos | `/api/investimento/adicionar`, `/api/investimento/resgatar/:id`, `/api/investimento/extrato`, `/api/investimento/total-investido` |
 | Tipos de investimento | `/api/investimento/tipo`, `/api/investimento/tipo/:id`, `/api/investimento/tipo/adicionar`, `/api/investimento/tipo/atualizar/:id` |
+
+## Contrato monetário
+
+A API trabalha com valores monetários em reais decimais, usando `number`/`Float` nos contratos HTTP e no Prisma. Exemplo: `5029.96` representa R$ 5.029,96.
+
+Não use centavos em inteiro para os campos monetários da API. O valor `502996` seria interpretado como R$ 502.996,00.
 
 As rotas privadas exigem o header:
 
@@ -105,9 +123,10 @@ Authorization: Bearer <token>
 - [Arquitetura](docs/arquitetura.md)
 - [Filtros e validações](docs/filtros.md)
 - [Autenticação e segurança](docs/seguranca.md)
+- [LGPD](docs/lgpd.md)
 
 #### Observações de manutenção
 
 - O Swagger mostra os contratos HTTP mais próximos da execução atual.
-- Os detalhes de arquitetura, filtros e segurança devem permanecer em `docs/`.
+- Os detalhes de arquitetura, filtros, segurança e LGPD devem permanecer em `docs/`.
 - Ao adicionar uma nova rota, atualize o schema da rota e revise esta visão geral quando a funcionalidade fizer parte do uso principal da API.

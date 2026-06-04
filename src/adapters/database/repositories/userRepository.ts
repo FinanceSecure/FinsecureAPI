@@ -12,7 +12,8 @@ export class UserRepository implements IUserRepository {
       user.id,
       user.name,
       user.email,
-      user.password
+      user.password,
+      user.role
     );
   }
 
@@ -24,7 +25,8 @@ export class UserRepository implements IUserRepository {
       user.id,
       user.name,
       user.email,
-      user.password
+      user.password,
+      user.role
     );
   }
 
@@ -34,6 +36,7 @@ export class UserRepository implements IUserRepository {
         name: user.name,
         email: user.email,
         password: user.password,
+        role: user.role,
       },
     });
 
@@ -41,20 +44,21 @@ export class UserRepository implements IUserRepository {
       newUser.id,
       newUser.name,
       newUser.email,
-      newUser.password
+      newUser.password,
+      newUser.role
     );
   }
 
-  async updateEmail(oldEmail: string, newEmail: string): Promise<void> {
+  async updateEmail(userId: string, newEmail: string): Promise<void> {
     await prisma.user.update({
-      where: { email: oldEmail },
+      where: { id: userId },
       data: { email: newEmail },
     });
   }
 
-  async updatePassword(email: string, passwordHash: string): Promise<void> {
+  async updatePassword(userId: string, passwordHash: string): Promise<void> {
     await prisma.user.update({
-      where: { email },
+      where: { id: userId },
       data: { password: passwordHash },
     });
   }

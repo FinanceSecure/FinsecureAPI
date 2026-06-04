@@ -19,6 +19,12 @@ export async function registerUserRoutes(app: FastifyInstance) {
   app.post<{ Body: RegisterUserRequestDto }>(
     "/api/usuarios/cadastrar",
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: "1 minute",
+        },
+      },
       schema: {
         summary: "Cadastrar novo usuário",
         tags: ["Usuários"],
@@ -29,7 +35,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           properties: {
             name: { type: "string", minLength: 3 },
             email: { type: "string", format: "email" },
-            password: { type: "string", minLength: 8 },
+            password: { type: "string", minLength: 12, maxLength: 128 },
           },
           required: ['name', 'email', 'password'],
         }
@@ -41,6 +47,12 @@ export async function registerUserRoutes(app: FastifyInstance) {
   app.post<{ Body: LoginUserRequestDto }>(
     "/api/usuarios/login",
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: "1 minute",
+        },
+      },
       schema: {
         summary: "Realizar login",
         tags: ["Usuários"],
@@ -50,7 +62,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           type: "object",
           properties: {
             email: { type: "string" },
-            password: { type: "string" },
+            password: { type: "string", maxLength: 128 },
           },
           required: ['email', 'password'],
         }
@@ -71,10 +83,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
         body: {
           type: "object",
           properties: {
-            oldEmail: { type: "string", format: "email" },
             newEmail: { type: "string", format: "email" },
+            oldEmail: { type: "string", format: "email" },
           },
-          required: ['oldEmail', 'newEmail'],
+          required: ['newEmail'],
         }
       },
     },
@@ -94,10 +106,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
           type: "object",
           properties: {
             email: { type: "string", format: "email" },
-            oldPassword: { type: "string", minLength: 8 },
-            newPassword: { type: "string", minLength: 8 },
+            oldPassword: { type: "string", maxLength: 128 },
+            newPassword: { type: "string", minLength: 12, maxLength: 128 },
           },
-          required: ['email', 'oldPassword', 'newPassword'],
+          required: ['oldPassword', 'newPassword'],
         }
       },
     },

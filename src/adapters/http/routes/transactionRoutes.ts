@@ -198,7 +198,7 @@ export async function registerTransactionRoutes(app: FastifyInstance) {
             description: { type: "string", description: "Nova descrição da transação.", maxLength: 255 },
             amount: { type: "number", description: "Novo valor da transação." },
             date: { type: "string", format: "date", description: "Nova data e hora da transação. (YYYY-MM-DD ou ISO)" },
-            type: { type: "string", enum: ["ENTRADA", "SAIDA"], description: "Novo tipo da transação." },
+            type: { type: "string", enum: ["INCOME", "EXPENSE"], description: "Novo tipo da transação." },
           },
         },
         response: {

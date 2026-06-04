@@ -35,7 +35,6 @@ export const InvestmentRepository: IInvestmentRepository = {
     const investments = await prisma.investment.findMany({
       where: {
         userId,
-        isRedeemed: false,
         ...notDeletedFilter,
       },
       select: {
@@ -67,7 +66,7 @@ export const InvestmentRepository: IInvestmentRepository = {
         id: investment.id,
         investedAmount,
       };
-    });
+    }).filter((investment) => investment.investedAmount > 0);
   },
 
   async createInvestmentApplication(
@@ -181,7 +180,7 @@ export const InvestmentRepository: IInvestmentRepository = {
     return prisma.investment.findMany({
       where: {
         ...(userId && { userId }),
-        isRedeemed: false,
+        currentBalance: { gt: 0 },
         ...notDeletedFilter,
       },
       include: {

@@ -50,7 +50,7 @@ function toInvestmentPosition(investment: InvestmentWithRelations) {
     name: investment.investmentType.name,
     benchmarkPercentage: investment.investmentType.benchmarkPercentage,
     hasIncomeTax: investment.investmentType.hasIncomeTax,
-    isRedeemed: investment.isRedeemed,
+    isRedeemed: position.grossBalance <= 0,
     createdAt: investment.createdAt,
     startedAt,
     purchaseDate: startedAt,
@@ -193,7 +193,6 @@ export function createInvestmentUseCases(deps: {
       }
 
       investments = investments
-        .filter((investment) => !investment.isRedeemed)
         .sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()

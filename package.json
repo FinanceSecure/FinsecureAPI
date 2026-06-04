@@ -4,15 +4,20 @@
   "type": "module",
   "scripts": {
     "dev": "node --import tsx --watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias --resolve-full-paths --resolve-full-extension .js",
     "start": "node dist/server.js",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "promote-admin": "tsx prisma/promote-admin.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/rate-limit": "^10.3.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.6",
     "@prisma/client": "6.19",
+    "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
     "bson": "^6.10.4",
     "date-fns": "^4.1.0",
@@ -31,5 +36,13 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true,
+    "argon2@0.44.0": true,
+    "bcrypt@6.0.0": true,
+    "esbuild@0.27.7": true
   }
 }

@@ -17,8 +17,6 @@ const cleanResponse = (data: any) =>
   JSON.parse(JSON.stringify(data));
 
 function sendFastifyError(reply: FastifyReply, error: unknown) {
-  console.error("DEBUG [InvestmentController]:", error);
-
   if (error instanceof ApplicationError) {
     return reply.status(error.statusCode).send({
       error: error.message,
@@ -27,7 +25,7 @@ function sendFastifyError(reply: FastifyReply, error: unknown) {
 
   if (error instanceof Error) {
     return reply.status(500).send({
-      error: error.message,
+      error: "Erro interno inesperado.",
     });
   }
 

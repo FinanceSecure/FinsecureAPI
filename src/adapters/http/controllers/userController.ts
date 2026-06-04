@@ -31,7 +31,7 @@ function sendHttpError(
 
   if (error instanceof Error)
     return response.status(500).json({
-      error: error.message
+      error: "Erro interno inesperado."
     });
 
   return response.status(500).json({
@@ -49,7 +49,7 @@ function sendFastifyError(
     });
 
   if (error instanceof Error)
-    return reply.status(500).send({ error: error.message });
+    return reply.status(500).send({ error: "Erro interno inesperado." });
 
   return reply.status(500).send({
     error: "Erro interno inesperado."
@@ -64,13 +64,19 @@ async function loginUser(body: LoginUserRequestDto) {
   return userUseCases.login(body.email, body.password);
 }
 
-async function changeUserEmail(body: UpdateUserEmailRequestDto) {
-  return userUseCases.changeEmail(body.oldEmail, body.newEmail);
+async function changeUserEmail(
+  user: AuthenticatedUser | undefined,
+  body: UpdateUserEmailRequestDto
+) {
+  return userUseCases.changeEmail(user?.userId || "", body.newEmail);
 }
 
-async function changeUserPassword(body: UpdateUserPasswordRequestDto) {
+async function changeUserPassword(
+  user: AuthenticatedUser | undefined,
+  body: UpdateUserPasswordRequestDto
+) {
   return userUseCases.changePassword(
-    body.email,
+    user?.userId || "",
     body.oldPassword,
     body.newPassword
   );
@@ -109,7 +115,7 @@ export async function updateUserEmailHandler(
   response: HttpJsonResponse
 ) {
   try {
-    const updatedEmail = await changeUserEmail(request.body);
+    const updatedEmail = await changeUserEmail(request.user, request.body);
     return response.status(200).json(updatedEmail);
   } catch (error) {
     return sendHttpError(response, error);
@@ -121,7 +127,7 @@ export async function updateUserPasswordHandler(
   response: HttpJsonResponse
 ) {
   try {
-    const updatedPassword = await changeUserPassword(request.body);
+    const updatedPassword = await changeUserPassword(request.user, request.body);
     return response.status(200).json(updatedPassword);
   } catch (error) {
     return sendHttpError(response, error);
@@ -169,7 +175,7 @@ export async function updateUserEmailFastify(
   reply: FastifyReply
 ) {
   try {
-    const updatedEmail = await changeUserEmail(request.body);
+    const updatedEmail = await changeUserEmail(request.user, request.body);
     return reply.status(200).send(updatedEmail);
   } catch (error) {
     return sendFastifyError(reply, error);
@@ -181,7 +187,7 @@ export async function updateUserPasswordFastify(
   reply: FastifyReply
 ) {
   try {
-    const updatedPassword = await changeUserPassword(request.body);
+    const updatedPassword = await changeUserPassword(request.user, request.body);
     return reply.status(200).send(updatedPassword);
   } catch (error) {
     return sendFastifyError(reply, error);

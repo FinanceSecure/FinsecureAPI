@@ -121,6 +121,8 @@ export function createTransactionUseCases({
       if (!userId) throw new ValidationError("Usuário não autenticado");
       if (amount !== undefined && typeof amount !== "number")
         throw new ValidationError("Valor inválido");
+      if (amount !== undefined && amount <= 0)
+        throw new ValidationError("O valor da transação deve ser maior que zero");
 
       const existingTransaction =
         await transactionRepository.findByIdAndUserId(

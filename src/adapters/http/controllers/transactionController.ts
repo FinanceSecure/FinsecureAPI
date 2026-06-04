@@ -40,7 +40,7 @@ function sendFastifyError(reply: FastifyReply, error: unknown) {
 
   if (error instanceof Error)
     return reply.status(500).send({
-      error: error.message
+      error: "Erro interno inesperado."
     });
 
   return reply.status(500).send({

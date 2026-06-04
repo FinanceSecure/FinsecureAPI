@@ -14,9 +14,6 @@ import type {
 declare module "fastify" {
   interface FastifyRequest {
     validatedTransaction?: ValidatedTransactionDto;
-    user?: {
-      userId: string;
-    };
   }
 }
 
@@ -150,6 +147,9 @@ export async function validarAtualizacaoTransacaoFastify(
 
     if (amount !== undefined && typeof amount !== "number")
       throw new HttpError("Valor inválido", 422);
+
+    if (amount !== undefined && amount <= 0)
+      throw new HttpError("O valor da transação deve ser maior que zero", 422);
 
     if (date !== undefined && isNaN(new Date(date).getTime()))
       throw new HttpError("Data inválida", 422);

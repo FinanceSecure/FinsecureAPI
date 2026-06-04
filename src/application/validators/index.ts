@@ -1,4 +1,5 @@
 export {
   checkRegistrationFields,
-  checkLoginFields
+  checkLoginFields,
+  validatePassword,
 } from "./userValidator";

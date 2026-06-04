@@ -4,12 +4,13 @@ import {
   startOfDay,
 } from "date-fns";
 import { InvestmentCalculatorService } from "@domain/services/investment-calculator";
+import { env } from "@shared/config";
 import {
   IInvestmentRepository,
   InvestmentWithRelations,
 } from "../ports/repositories";
 
-const ANNUAL_CDI = Number(process.env.CDI_ANUAL || 14.4);
+const ANNUAL_CDI = env.annualCdi;
 
 function getInvestmentStartedAt(investment: InvestmentWithRelations) {
   const firstApplication = investment.applications
@@ -34,8 +35,6 @@ export class ApplyDailyYieldUseCase {
     let createdEntries = 0;
 
     for (const investment of investments) {
-      if (investment.isRedeemed) continue;
-
       const principalBalance =
         InvestmentCalculatorService.calculatePrincipalBalance(
           investment.applications

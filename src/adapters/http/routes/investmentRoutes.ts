@@ -8,6 +8,7 @@ import type {
   UpdateInvestmentTypeRequestDto,
 } from "@application/dto/investment/";
 import { autenticarTokenFastify } from "../middlewares/authMiddleware.js";
+import { requireAdminFastify } from "../middlewares/adminMiddleware.js";
 import {
   addInvestmentFastify,
   getInvestedAmountFastify,
@@ -23,6 +24,9 @@ import {
 
 export async function registerInvestmentRoutes(app: FastifyInstance) {
   const auth = { preHandler: autenticarTokenFastify };
+  const adminAuth = {
+    preHandler: [autenticarTokenFastify, requireAdminFastify],
+  };
 
   app.get(
     "/api/investimento/extrato",
@@ -66,10 +70,16 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
           ],
           properties: {
             investmentTypeId: { type: "string" },
-            investedAmount: { type: "number" },
+            investedAmount: {
+              type: "number",
+              description: "Valor monetario em reais decimais. Exemplo: 5029.96.",
+            },
             purchaseDate: { type: "string", format: "date" },
             tipoInvestimentoId: { type: "string" },
-            valorInvestido: { type: "number" },
+            valorInvestido: {
+              type: "number",
+              description: "Valor monetario em reais decimais. Exemplo: 5029.96.",
+            },
             dataCompra: { type: "string", format: "date" },
             updatedAt: { type: "string", format: "date" },
           },
@@ -85,9 +95,9 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
                   id: { type: "string" },
                   userId: { type: "string" },
                   investmentTypeId: { type: "string" },
-                  totalApplied: { type: "number" },
-                  totalRedeemed: { type: "number" },
-                  currentBalance: { type: "number" },
+                  totalApplied: { type: "number", description: "Reais decimais, nao centavos." },
+                  totalRedeemed: { type: "number", description: "Reais decimais, nao centavos." },
+                  currentBalance: { type: "number", description: "Reais decimais, nao centavos." },
                   lastYieldAt: { type: "string", nullable: true },
                   isRedeemed: { type: "boolean" },
                   createdAt: { type: "string" },
@@ -100,7 +110,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
                   id: { type: "string" },
                   investmentId: { type: "string" },
                   type: { type: "string" },
-                  amount: { type: "number" },
+                  amount: { type: "number", description: "Reais decimais, nao centavos." },
                   date: { type: "string" },
                   transactionId: { type: "string" }
                 }
@@ -140,8 +150,14 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             { required: ["investedAmount"] },
           ],
           properties: {
-            amount: { type: "number" },
-            investedAmount: { type: "number" },
+            amount: {
+              type: "number",
+              description: "Valor monetario em reais decimais. Exemplo: 5029.96.",
+            },
+            investedAmount: {
+              type: "number",
+              description: "Valor monetario em reais decimais. Exemplo: 5029.96.",
+            },
           },
         },
         response: {
@@ -149,9 +165,9 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
             type: "object",
             properties: {
               message: { type: "string" },
-              requested: { type: "number" },
-              totalRedeemed: { type: "number" },
-              remainingBalance: { type: "number" },
+              requestedAmount: { type: "number", description: "Reais decimais, nao centavos." },
+              redeemedAmount: { type: "number", description: "Reais decimais, nao centavos." },
+              remainingBalance: { type: "number", description: "Reais decimais, nao centavos." },
               details: { type: "array" },
             },
           },
@@ -219,6 +235,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
   app.get(
     "/api/investimento/tipo",
     {
+      ...auth,
       schema: {
         summary: "Listar tipos de investimento",
         tags: ["Tipos de Investimento"],
@@ -247,7 +264,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
   app.post<{ Body: AddInvestmentTypeRequestDto }>(
     "/api/investimento/tipo/adicionar",
     {
-      ...auth,
+      ...adminAuth,
       schema: {
         security: [{ bearerAuth: [] }],
         summary: "Adicionar tipo de investimento",
@@ -299,7 +316,7 @@ export async function registerInvestmentRoutes(app: FastifyInstance) {
   }>(
     "/api/investimento/tipo/atualizar/:id",
     {
-      ...auth,
+      ...adminAuth,
       schema: {
         security: [{ bearerAuth: [] }],
         summary: "Atualizar tipo de investimento",

@@ -1,0 +1,27 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mongodb://mongodb:27017/financesecure
+      HOST: 0.0.0.0
+      PORT: 3333
+      ENABLE_SWAGGER: "true"
+      RUN_INVESTMENT_YIELD_JOB: "true"
+    ports:
+      - "3333:3333"
+
+volumes:
+  mongodb_data:
