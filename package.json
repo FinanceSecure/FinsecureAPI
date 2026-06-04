@@ -2,6 +2,9 @@
   "name": "finsecure-api",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "node --import tsx --watch src/server.ts",
     "build": "tsc && tsc-alias --resolve-full-paths --resolve-full-extension .js",
