@@ -1,132 +1,193 @@
-# Finsecure API
+# FinanceSecure API
 
-API para gestão financeira pessoal, controle de transações e acompanhamento de investimentos. O projeto foi construído com **Node.js**, **Fastify**, **TypeScript**, **Prisma** e **MongoDB**, seguindo uma organização próxima da Arquitetura Hexagonal.
+API de gestão financeira pessoal e investimentos construída com Node.js, Fastify, TypeScript, Prisma e MongoDB Atlas.
 
-### O que a API entrega
+O projeto está organizado para combinar:
+- Arquitetura Hexagonal de Alistair Cockburn
+- conceitos de Domain-Driven Design
+- separação clara entre domínio, aplicação e adapters
 
-- Cadastro, login, alteração de e-mail, alteração de senha e remoção de conta.
-- Lançamento, atualização, cancelamento e consulta de extrato de transações.
-- Cadastro e manutenção de tipos de investimento.
-- Aplicação, resgate, consulta de extrato e total investido.
-- Cálculo de rendimento diário para investimentos com base no CDI.
-- Documentação interativa via Swagger UI.
+## Stack
 
-### Tecnologias
+- Node.js
+- Fastify
+- TypeScript
+- Prisma
+- MongoDB Atlas
+- JWT
+- Argon2
+- Swagger OpenAPI
 
-- **Fastify** para a camada HTTP.
-- **TypeScript** como linguagem principal.
-- **Prisma** como cliente de persistência.
-- **MongoDB** como banco de dados.
-- **JWT** para autenticação.
-- **Argon2id** para novos hashes de senha, com compatibilidade para hashes bcrypt legados.
-- **node-cron** para processamento agendado de rendimentos.
-- **Swagger/OpenAPI** para documentação das rotas.
+## Estrutura
 
-## Estrutura do projeto
+### `src/domain`
 
-```text
-src/
-├── domain/        # Entidades e serviços de domínio
-├── application/   # Casos de uso, DTOs, validadores e portas
-├── adapters/      # HTTP, controllers, middlewares, rotas e repositórios
-├── shared/        # Configurações, container e utilitários compartilhados
-├── app.ts         # Configuração da aplicação Fastify
-└── server.ts      # Inicialização do servidor e jobs
-```
+Núcleo do domínio.
 
-## Como executar
+Contém:
+- entidades
+- regras de negócio puras
+- serviços de cálculo
+- mensagens de erro de domínio
 
-Instale as dependências:
+### `src/application`
+
+Camada de aplicação.
+
+Contém:
+- `use-cases`
+- `dto`
+- `ports`
+- `validators`
+- `errors`
+
+Aqui ficam os fluxos da aplicação e os contratos que os adapters precisam implementar.
+
+### `src/adapters`
+
+Borda do sistema.
+
+Contém:
+- `http`
+- `database`
+
+#### `src/adapters/http`
+
+- controllers Fastify
+- middlewares de autenticação, autorização e erro
+- rotas
+- integração com Swagger
+
+#### `src/adapters/database`
+
+- repositórios Prisma
+- jobs
+- integração concreta com banco
+
+### `src/shared`
+
+Infraestrutura transversal:
+- configuração de ambiente
+- singleton do Prisma
+- segurança de senha
+- container simples
+
+## Execução local
+
+### 1. Instalar dependências
 
 ```bash
 npm install
 ```
 
-Configure o arquivo `.env`:
+### 2. Configurar ambiente
+
+Use `.env.example` como base para criar seu `.env`.
+
+Variáveis principais:
 
 ```env
-NODE_ENV=development
-CDI_ANUAL=14.40
-DATABASE_URL="mongodb://localhost:27017/financesecure"
-JWT_SECRET="troque-por-um-segredo-com-pelo-menos-32-caracteres"
-CORS_ORIGINS="http://localhost:3000,http://localhost:8081"
-HOST=0.0.0.0
+DATABASE_URL=
+JWT_SECRET=
+CORS_ORIGINS=
 PORT=3333
+HOST=0.0.0.0
 ENABLE_SWAGGER=true
 RUN_INVESTMENT_YIELD_JOB=false
 ```
 
-Gere o cliente Prisma, se necessário:
+### 3. Gerar cliente Prisma
 
 ```bash
 npx prisma generate
 ```
 
-Execute em desenvolvimento:
+### 4. Rodar em desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-Servidor padrão:
+Servidor local:
 
 ```text
 http://localhost:3333
 ```
 
-Documentação Swagger:
+Healthcheck:
+
+```text
+GET /health
+```
+
+Swagger:
 
 ```text
 http://localhost:3333/documentation
 ```
 
-## Scripts disponíveis
+## Build e produção
+
+### Build
 
 ```bash
-npm run dev      # inicia o servidor com tsx em modo watch
-npm run build    # compila o TypeScript para dist/
-npm run start    # executa a versão compilada
-npm run seed     # executa o seed do Prisma
-npm run promote-admin -- --email=usuario@exemplo.com
-npm test         # executa os testes automatizados
+npm run build
 ```
 
-Para iniciar API e MongoDB com Docker:
+### Start
 
 ```bash
-docker compose up --build
+npm start
 ```
 
-## Principais rotas
+## Deploy no Render
 
-| Grupo | Rotas |
-| --- | --- |
-| Usuários | `/api/usuarios/cadastrar`, `/api/usuarios/login`, `/api/usuarios/alterar-email`, `/api/usuarios/alterar-senha`, `/api/usuarios/apagar-conta` |
-| Transações | `/api/transacoes/adicionar`, `/api/transacoes/extrato`, `/api/transacoes/alterar/:id`, `/api/transacoes/cancelar-transacao/:id` |
-| Investimentos | `/api/investimento/adicionar`, `/api/investimento/resgatar/:id`, `/api/investimento/extrato`, `/api/investimento/total-investido` |
-| Tipos de investimento | `/api/investimento/tipo`, `/api/investimento/tipo/:id`, `/api/investimento/tipo/adicionar`, `/api/investimento/tipo/atualizar/:id` |
+### Requisitos
 
-## Contrato monetário
+- `DATABASE_URL` do MongoDB Atlas
+- `JWT_SECRET` com pelo menos 32 caracteres
+- `CORS_ORIGINS` com as origens permitidas
+- `ENABLE_SWAGGER=true` se quiser documentação pública
 
-A API trabalha com valores monetários em reais decimais, usando `number`/`Float` nos contratos HTTP e no Prisma. Exemplo: `5029.96` representa R$ 5.029,96.
+### Observações importantes
 
-Não use centavos em inteiro para os campos monetários da API. O valor `502996` seria interpretado como R$ 502.996,00.
+- a aplicação usa `trustProxy: true`, importante para ambientes atrás de proxy como o Render
+- o Prisma usa singleton compartilhado para evitar múltiplas instâncias desnecessárias
+- `/health` pode responder mesmo se alguma rota de negócio falhar; por isso é importante validar login, cadastro e banco separadamente
 
-As rotas privadas exigem o header:
+## Rotas principais
 
-```http
-Authorization: Bearer <token>
+- `POST /api/usuarios/cadastrar`
+- `POST /api/usuarios/login`
+- `PUT /api/usuarios/alterar-email`
+- `PUT /api/usuarios/alterar-senha`
+- `DELETE /api/usuarios/apagar-conta`
+- `POST /api/transacoes/adicionar`
+- `GET /api/transacoes/extrato`
+- `POST /api/investimento/adicionar`
+- `POST /api/investimento/resgatar/:id`
+
+## Documentação Swagger
+
+A documentação usa Fastify Swagger + Swagger UI.
+
+Em produção, se `ENABLE_SWAGGER=true`:
+
+```text
+/documentation
 ```
 
-## Documentação complementar
+## Notas arquiteturais
 
-- [Arquitetura](docs/arquitetura.md)
-- [Filtros e validações](docs/filtros.md)
-- [Autenticação e segurança](docs/seguranca.md)
-- [LGPD](docs/lgpd.md)
+- controllers adaptam HTTP para casos de uso
+- DTOs definem o contrato de entrada da aplicação
+- use cases orquestram regras de negócio
+- repositories implementam portas da aplicação
+- o domínio não depende de Fastify, Prisma ou Render
 
-#### Observações de manutenção
+## Próximos passos recomendados
 
-- O Swagger mostra os contratos HTTP mais próximos da execução atual.
-- Os detalhes de arquitetura, filtros, segurança e LGPD devem permanecer em `docs/`.
-- Ao adicionar uma nova rota, atualize o schema da rota e revise esta visão geral quando a funcionalidade fizer parte do uso principal da API.
+- revisar todos os schemas Swagger para garantir alinhamento 100% com os DTOs
+- adicionar testes de integração para login, cadastro e healthcheck
+- documentar fluxo de autenticação JWT
+- padronizar completamente as mensagens de erro

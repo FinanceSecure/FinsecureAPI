@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { registerInvestmentRoutes } from "./investmentRoutes.js";
 import { registerTransactionRoutes } from "./transactionRoutes.js";
-import { registerUserRoutes } from "./userRoutes";
+import { registerUserRoutes } from "./userRoutes.js";
 
 export async function registerHttpRoutes(app: FastifyInstance) {
   app.get("/health", {
