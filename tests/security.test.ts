@@ -202,6 +202,32 @@ test("HTTP app exposes health check and protects private routes", async () => {
   await app.close();
 });
 
+test("production configuration keeps health available and disables request logging", async () => {
+  const { buildApp } = await import("../src/app.js");
+  const app = await buildApp({
+    corsOrigins: ["http://localhost:3000"],
+    disableRequestLogging: true,
+    enableSwagger: false,
+    logLevel: "error",
+  });
+
+  const appConfig = app as unknown as {
+    initialConfig: { disableRequestLogging: boolean };
+  };
+
+  assert.equal(appConfig.initialConfig.disableRequestLogging, true);
+  assert.equal(app.log.level, "error");
+
+  const health = await app.inject({ method: "GET", url: "/health" });
+  assert.equal(health.statusCode, 200);
+  assert.deepEqual(health.json(), {
+    status: "ok",
+    service: "financesecure-api",
+  });
+
+  await app.close();
+});
+
 test("login endpoint rate limits repeated invalid payloads", async () => {
   const { default: app } = await import("../src/app.js?rate-limit-test");
 

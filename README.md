@@ -154,6 +154,8 @@ npm start
 - a aplicação usa `trustProxy: true`, importante para ambientes atrás de proxy como o Render
 - o Prisma usa singleton compartilhado para evitar múltiplas instâncias desnecessárias
 - `/health` pode responder mesmo se alguma rota de negócio falhar; por isso é importante validar login, cadastro e banco separadamente
+- em produção, o Fastify fica com `disableRequestLogging: true` para não registrar cada rota consumida pelos clientes
+- o processo mantém apenas sinal operacional essencial no boot e em falhas críticas
 
 ## Rotas principais
 
@@ -184,6 +186,35 @@ Em produção, se `ENABLE_SWAGGER=true`:
 - use cases orquestram regras de negócio
 - repositories implementam portas da aplicação
 - o domínio não depende de Fastify, Prisma ou Render
+
+## Checklist de verificação
+
+Antes de publicar ou validar um deploy, use esta sequência:
+
+```bash
+npm test
+npx tsc --noEmit
+```
+
+Depois valide a disponibilidade:
+
+```text
+GET /health
+```
+
+Resposta esperada:
+
+```json
+{
+  "status": "ok",
+  "service": "financesecure-api"
+}
+```
+
+Em produção no Render:
+- o serviço deve emitir apenas o sinal de subida da API
+- falhas de inicialização continuam aparecendo nos logs
+- requisições dos clientes não devem mais aparecer individualmente no log padrão
 
 ## Próximos passos recomendados
 

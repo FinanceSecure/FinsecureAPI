@@ -12,12 +12,25 @@ const start = async () => {
   try {
     await app.listen({ port: PORT, host: HOST });
 
-    app.log.info({
-      host: HOST,
-      port: PORT,
-      swaggerEnabled: env.enableSwagger,
-    }, "FinanceSecureAPI started");
+    console.info(
+      JSON.stringify({
+        level: "info",
+        event: "service_online",
+        service: "financesecure-api",
+        host: HOST,
+        port: PORT,
+        swaggerEnabled: env.enableSwagger,
+      })
+    );
   } catch (err) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        event: "service_offline",
+        service: "financesecure-api",
+        error: err instanceof Error ? err.message : "Erro desconhecido ao subir a API.",
+      })
+    );
     app.log.error(err);
     process.exit(1);
   }
